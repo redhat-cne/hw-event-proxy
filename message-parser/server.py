@@ -36,20 +36,20 @@ class MessageParserServicer(MessageParserServicer):
         self.registries.registries        
     
     def Parse(self, request, context):
-        logging.info('request message_id: %s', request.message_id)
-        logging.info('request %d message_args', len(request.message_args))
+        logging.debug('request message_id: %s', request.message_id)
+        logging.debug('request %d message_args', len(request.message_args))
         for a in request.message_args:
-            logging.info('found message arg %s', a)
+            logging.debug('found message arg %s', a)
 
         m = base.MessageListField('Message')
         m.message_id = request.message_id
         m.message_args = request.message_args
+        m.severity = None
+        m.resolution = None
 
         message_registry.parse_message(self.registries, m)
         resp = ParserResponse(message=m.message, severity=m.severity, resolution=m.resolution)
-        logging.info('response message: %s', resp.message)
-        logging.info('response severity: %s', resp.severity)
-        logging.info('response resolution: %s', resp.resolution)
+        logging.debug('resp: %s', resp)
         return resp
 
 
