@@ -1,1 +1,1 @@
-# Redfish Tools
+# Hardwar Event Proxy
