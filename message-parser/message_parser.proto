@@ -1,0 +1,19 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "github.com/redhat-cne/cloud-event-proxy/plugins/hw_event/pb";
+
+message ParserRequest {
+    string message_id = 1;
+    repeated string message_args = 2;
+}
+
+message ParserResponse {
+    string message = 1;
+    string severity = 2;
+    string resolution = 3;
+}
+
+service MessageParser {
+    rpc Parse(ParserRequest) returns (ParserResponse) {}
+}
