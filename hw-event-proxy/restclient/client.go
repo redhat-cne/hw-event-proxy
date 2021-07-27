@@ -70,3 +70,30 @@ func (r *Rest) Post(url *types.URI, data []byte) int {
 	}
 	return response.StatusCode
 }
+
+// PostWithReturn post with data and return data
+func (r *Rest) PostWithReturn(url *types.URI, data []byte) (int, []byte) {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	request, err := http.NewRequestWithContext(ctx, "POST", url.String(), bytes.NewBuffer(data))
+	if err != nil {
+		log.Errorf("error creating post request %v", err)
+		return http.StatusBadRequest, nil
+	}
+	request.Header.Set("content-type", "application/json")
+	res, err := r.client.Do(request)
+	if err != nil {
+		log.Errorf("error in post response %v to %s ", err, url)
+		return http.StatusBadRequest, nil
+	}
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		return http.StatusBadRequest, nil
+	}
+	return res.StatusCode, body
+}

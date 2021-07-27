@@ -20,17 +20,17 @@ deps-update:
 build:test
 	go fmt ./...
 	make lint
-	go build -o ./build/hw-event-proxy
+	go build -o ./build/hw-event-proxy cmd/main.go
 
 build-only:
-	go build -o ./build/hw-event-proxy
+	go build -o ./build/hw-event-proxy cmd/main.go
 
 lint:
 	golint -set_exit_status `go list ./... | grep -v vendor`
 	golangci-lint run
 
 run:
-	go run main.go
+	go run cmd/main.go
 
 test:
 	go test ./...  -coverprofile=cover.out

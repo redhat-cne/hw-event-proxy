@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package util
 
 import (
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // GetIntEnv get int value from env
@@ -27,4 +29,21 @@ func GetIntEnv(key string) int {
 		}
 	}
 	return 0
+}
+
+// InitLogger initilaize logger
+func InitLogger() {
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "debug"
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.DebugLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	log.SetLevel(log.DebugLevel)
 }

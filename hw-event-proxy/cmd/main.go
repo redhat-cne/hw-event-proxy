@@ -12,78 +12,106 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package main
 
 import (
 	"context"
-	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
+
 	hwevent "github.com/redhat-cne/sdk-go/pkg/hwevent"
 
-	"github.com/redhat-cne/sdk-go/pkg/channel"
 	"github.com/redhat-cne/sdk-go/pkg/pubsub"
 	"github.com/redhat-cne/sdk-go/pkg/types"
 
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/pb"
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/restclient"
+	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/util"
 	"google.golang.org/grpc"
 
-	v1amqp "github.com/redhat-cne/sdk-go/v1/amqp"
 	v1hwevent "github.com/redhat-cne/sdk-go/v1/hwevent"
 	v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
 	log "github.com/sirupsen/logrus"
 )
 
-// SCConfiguration simple configuration to initialize variables
-type SCConfiguration struct {
-	EventInCh chan *channel.DataChan
-	PubSubAPI *v1pubsub.API
-	BaseURL   *types.URI
-}
-
-var (
-	resourceAddress string = "/hw-event"
-	// used by the webhook handlers
-	scConfig  *SCConfiguration
-	pub       pubsub.PubSub
-	eventType string = "HW_EVENT"
+const (
+	hwEventVersion string = "v1"
+	eventType      string = "HW_EVENT"
 )
 
-// Start hw event plugin to process events,metrics and status, expects rest api available to create publisher and subscriptions
-func Start(wg *sync.WaitGroup, config *SCConfiguration, fn func(e interface{}) error) error { //nolint:deadcode,unused
-	scConfig = config
+var (
+	apiPath         = "/api/cloudNotifications/v1/"
+	apiPort         int
+	json            = jsoniter.ConfigCompatibleWithStandardLibrary
+	pub             pubsub.PubSub
+	resourceAddress string
+)
 
-	// create publisher
+func main() {
+	flag.IntVar(&apiPort, "api-port", 8080, "The address the rest api endpoint binds to.")
+	flag.Parse()
+	util.InitLogger()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	nodeName := os.Getenv("NODE_NAME")
+	if nodeName == "" {
+		log.Error("cannot find NODE_NAME environment variable,setting to default `mock` node")
+		nodeName = "mock"
+	}
+
+	resourceAddress = fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
+
 	var err error
-
-	returnURL := fmt.Sprintf("%s%s", config.BaseURL, "dummy")
-	//	pub, err = scConfig.PubSubAPI.CreatePublisher(v1pubsub.NewPubSub(scConfig.BaseURL, resourceAddress))
-	pub, err = scConfig.PubSubAPI.CreatePublisher(v1pubsub.NewPubSub(types.ParseURI(returnURL), resourceAddress))
+	pub, err = createPublisher()
 	if err != nil {
-		log.Errorf("failed to create a publisher %v", err)
-		return err
+		return
 	}
 	log.Infof("Created publisher %v", pub)
-
-	// once the publisher response is received, create a transport sender object to send events.
-	v1amqp.CreateSender(scConfig.EventInCh, pub.GetResource())
-	log.Infof("Created sender %v", pub.GetResource())
-
 	startWebhook()
+	log.Info("waiting for events")
+	wg.Wait()
+}
 
-	return nil
+func createPublisher() (pub pubsub.PubSub, err error) {
+	baseURL := types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
+	publisherURL := types.ParseURI(fmt.Sprintf("%s%s", baseURL, "publishers"))
+	returnURL := types.ParseURI(fmt.Sprintf("%s%s", baseURL, "dummy"))
+	publisher := v1pubsub.NewPubSub(returnURL, resourceAddress)
+
+	var pubB []byte
+	var status int
+	if pubB, err = json.Marshal(&publisher); err == nil {
+		rc := restclient.New()
+		if status, pubB = rc.PostWithReturn(publisherURL, pubB); status != http.StatusCreated {
+			err = fmt.Errorf("failed to create publisher creation api at %s, returned status %d", publisherURL, status)
+			return pub, err
+		}
+	} else {
+		log.Errorf("failed to marshal publisher: %v", err)
+		return pub, err
+	}
+	if err = json.Unmarshal(pubB, &pub); err != nil {
+		log.Errorf("failed to unmarshal publisher: %v", err)
+		return pub, err
+	}
+	return pub, nil
 }
 
 func startWebhook() {
 	http.HandleFunc("/ack/event", ackEvent)
-	http.HandleFunc("/webhook", publishEvent)
+	http.HandleFunc("/webhook", handleHwEvent)
+	// TODO: retry on fail
 	go func() {
-		err := http.ListenAndServe(fmt.Sprintf(":%d", GetIntEnv("HW_EVENT_PORT")), nil)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
 		if err != nil {
 			log.Errorf("error with webhook server %s\n", err.Error())
 		}
@@ -104,9 +132,9 @@ func ackEvent(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// publishEvent gets redfish HW events and converts it to cloud native event
+// handleHwEvent gets redfish HW events and converts it to cloud native event
 // and publishes to the event framework publisher
-func publishEvent(w http.ResponseWriter, r *http.Request) {
+func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -134,14 +162,18 @@ func publishEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := v1hwevent.CloudNativeData()
-	data.SetVersion("v1") //nolint:errcheck
+	data.SetVersion(hwEventVersion) //nolint:errcheck
 	data.SetData(&redfishEvent)
 	event.SetData(data)
-	_ = publish(scConfig, event)
+	err = publishHwEvent(event)
+	if err != nil {
+		log.Errorf("failed to publish hw event: %v", err)
+	}
 }
 
 func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
-	addr := "localhost:9999"
+	addr := fmt.Sprintf("localhost:%d", util.GetIntEnv("MSG_PARSER_PORT"))
+
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return hwevent.EventRecord{}, err
@@ -174,14 +206,14 @@ func createHwEvent() hwevent.Event {
 	return event
 }
 
-func publish(scConfig *SCConfiguration, e hwevent.Event) error {
+func publishHwEvent(e hwevent.Event) error {
 	//create publisher
-	url := fmt.Sprintf("%s%s", scConfig.BaseURL.String(), "create/hwevent")
+	baseURL := types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
+	url := fmt.Sprintf("%s%s", baseURL, "create/hwevent")
 	rc := restclient.New()
 	b, err := json.Marshal(e)
 	if err != nil {
-		log.Errorf("error marshalling event %v", e)
-		return err
+		return fmt.Errorf("error marshalling event %v", e)
 	}
 	if status := rc.Post(types.ParseURI(url), b); status == http.StatusBadRequest {
 		return fmt.Errorf("post returned status %d", status)

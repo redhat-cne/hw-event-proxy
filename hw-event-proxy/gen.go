@@ -1,4 +1,4 @@
-package proxy
+package main
 
 // This is a tool for generating message parser client located under `pb` directory
 

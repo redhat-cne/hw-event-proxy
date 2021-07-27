@@ -6,7 +6,7 @@ import grpc
 from message_parser_pb2 import ParserResponse
 from message_parser_pb2_grpc import MessageParserServicer, add_MessageParserServicer_to_server
 
-
+import os
 import sushy
 import json
 from sushy import auth
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     )
     server = grpc.server(ThreadPoolExecutor())
     add_MessageParserServicer_to_server(MessageParserServicer(), server)
-    port = 9999
+    port = os.environ['MSG_PARSER_PORT']
     server.add_insecure_port(f'[::]:{port}')
     server.start()
     logging.info('server ready on port %r', port)
