@@ -41,15 +41,9 @@ import (
 
 // SCConfiguration simple configuration to initialize variables
 type SCConfiguration struct {
-	EventInCh  chan *channel.DataChan
-	EventOutCh chan *channel.DataChan
-	CloseCh    chan struct{}
-	APIPort    int
-	APIPath    string
-	PubSubAPI  *v1pubsub.API
-	StorePath  string
-	AMQPHost   string
-	BaseURL    *types.URI
+	EventInCh chan *channel.DataChan
+	PubSubAPI *v1pubsub.API
+	BaseURL   *types.URI
 }
 
 var (
