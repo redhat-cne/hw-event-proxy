@@ -3,6 +3,7 @@ module github.com/redhat-cne/hw-event-proxy
 go 1.15
 
 require (
+	github.com/json-iterator/go v1.1.11
 	github.com/redhat-cne/sdk-go v0.1.1-0.20210723134838-a808941830c9
 	github.com/sirupsen/logrus v1.8.1
 	go.uber.org/zap v1.13.0 // indirect
