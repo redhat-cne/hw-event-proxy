@@ -1,6 +1,6 @@
 module github.com/redhat-cne/hw-event-proxy
 
-go 1.16
+go 1.15
 
 require (
 	github.com/redhat-cne/sdk-go v0.1.1-0.20210723134838-a808941830c9
