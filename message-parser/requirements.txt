@@ -1,2 +1,2 @@
 grpcio-tools==1.29.0
-numpy==1.18.4
+sushy>=3.8.0
