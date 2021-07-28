@@ -15,9 +15,13 @@
 package util
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/redhat-cne/sdk-go/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,4 +50,32 @@ func InitLogger() {
 	// set global log level
 	log.SetLevel(ll)
 	log.SetLevel(log.DebugLevel)
+}
+
+// APIHealthCheck .. rest api should be ready before starting to consume api
+func APIHealthCheck(uri *types.URI, delay time.Duration) (ok bool, err error) {
+	log.Printf("checking for rest service health\n")
+	for i := 0; i <= 5; i++ {
+		log.Infof("health check %s ", uri.String())
+		response, errResp := http.Get(uri.String())
+		if errResp != nil {
+			log.Warnf("try %d, return health check of the rest service for error  %v", i, errResp)
+			time.Sleep(delay)
+			err = errResp
+			continue
+		}
+		if response != nil && response.StatusCode == http.StatusOK {
+			response.Body.Close()
+			log.Info("rest service returned healthy status")
+			time.Sleep(delay)
+			err = nil
+			ok = true
+			return
+		}
+		response.Body.Close()
+	}
+	if err != nil {
+		err = fmt.Errorf("error connecting to rest api %s", err.Error())
+	}
+	return
 }

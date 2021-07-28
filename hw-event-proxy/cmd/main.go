@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"sync"
 	"time"
@@ -52,6 +53,8 @@ var (
 	json            = jsoniter.ConfigCompatibleWithStandardLibrary
 	pub             pubsub.PubSub
 	resourceAddress string
+	baseURL         *types.URI
+	msgParserPort   = util.GetIntEnv("MSG_PARSER_PORT")
 )
 
 func main() {
@@ -66,6 +69,16 @@ func main() {
 	}
 
 	resourceAddress = fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
+	baseURL = types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
+
+	// check sidecar api health
+	healthURL := &types.URI{URL: url.URL{Scheme: "http",
+		Host: fmt.Sprintf("localhost:%d", apiPort),
+		Path: fmt.Sprintf("%s%s", apiPath, "health")}}
+RETRY:
+	if ok, _ := util.APIHealthCheck(healthURL, 2*time.Second); !ok {
+		goto RETRY
+	}
 
 	var err error
 	pub, err = createPublisher()
@@ -81,7 +94,6 @@ func main() {
 }
 
 func createPublisher() (pub pubsub.PubSub, err error) {
-	baseURL := types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
 	publisherURL := types.ParseURI(fmt.Sprintf("%s%s", baseURL, "publishers"))
 	returnURL := types.ParseURI(fmt.Sprintf("%s%s", baseURL, "dummy"))
 	publisher := v1pubsub.NewPubSub(returnURL, resourceAddress)
@@ -173,7 +185,7 @@ func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 
 // TODO: add timeout or check server ready
 func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
-	addr := fmt.Sprintf("localhost:%d", util.GetIntEnv("MSG_PARSER_PORT"))
+	addr := fmt.Sprintf("localhost:%d", msgParserPort)
 
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -208,8 +220,6 @@ func createHwEvent() hwevent.Event {
 }
 
 func publishHwEvent(e hwevent.Event) error {
-	//create publisher
-	baseURL := types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
 	url := fmt.Sprintf("%s%s", baseURL, "create/hwevent")
 	rc := restclient.New()
 	b, err := json.Marshal(e)
