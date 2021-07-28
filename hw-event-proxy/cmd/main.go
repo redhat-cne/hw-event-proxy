@@ -31,6 +31,7 @@ import (
 
 	"github.com/redhat-cne/sdk-go/pkg/pubsub"
 	"github.com/redhat-cne/sdk-go/pkg/types"
+	"github.com/redhat-cne/sdk-go/pkg/util/wait"
 
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/pb"
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/restclient"
@@ -46,6 +47,8 @@ const (
 	hwEventVersion   string = "v1"
 	eventType        string = "HW_EVENT"
 	msgParserTimeout        = 20 * time.Millisecond
+	// in seconds
+	webhookRetryInterval = 5
 )
 
 var (
@@ -121,13 +124,13 @@ func createPublisher() (pub pubsub.PubSub, err error) {
 func startWebhook(wg *sync.WaitGroup) {
 	http.HandleFunc("/ack/event", ackEvent)
 	http.HandleFunc("/webhook", handleHwEvent)
-	go func() {
+	go wait.Until(func() {
 		defer wg.Done()
 		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
 		if err != nil {
-			log.Errorf("error with webhook server %s\n", err.Error())
+			log.Errorf("error starting webhook %s\n, will retry to establish", err.Error())
 		}
-	}()
+	}, webhookRetryInterval*time.Second, wait.NeverStop)
 }
 
 func ackEvent(w http.ResponseWriter, req *http.Request) {

@@ -37,6 +37,8 @@ github.com/redhat-cne/sdk-go/pkg/hwevent
 github.com/redhat-cne/sdk-go/pkg/pubsub
 github.com/redhat-cne/sdk-go/pkg/store
 github.com/redhat-cne/sdk-go/pkg/types
+github.com/redhat-cne/sdk-go/pkg/util/clock
+github.com/redhat-cne/sdk-go/pkg/util/wait
 github.com/redhat-cne/sdk-go/v1/hwevent
 github.com/redhat-cne/sdk-go/v1/pubsub
 # github.com/sirupsen/logrus v1.8.1
