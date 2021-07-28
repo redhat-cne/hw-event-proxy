@@ -59,9 +59,6 @@ func main() {
 	flag.Parse()
 	util.InitLogger()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
 	nodeName := os.Getenv("NODE_NAME")
 	if nodeName == "" {
 		log.Error("cannot find NODE_NAME environment variable,setting to default `mock` node")
@@ -76,7 +73,9 @@ func main() {
 		return
 	}
 	log.Infof("Created publisher %v", pub)
-	startWebhook()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	startWebhook(&wg)
 	log.Info("waiting for events")
 	wg.Wait()
 }
@@ -106,11 +105,12 @@ func createPublisher() (pub pubsub.PubSub, err error) {
 	return pub, nil
 }
 
-func startWebhook() {
+func startWebhook(wg *sync.WaitGroup) {
 	http.HandleFunc("/ack/event", ackEvent)
 	http.HandleFunc("/webhook", handleHwEvent)
 	// TODO: retry on fail
 	go func() {
+		defer wg.Done()
 		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
 		if err != nil {
 			log.Errorf("error with webhook server %s\n", err.Error())
@@ -136,6 +136,7 @@ func ackEvent(w http.ResponseWriter, req *http.Request) {
 // and publishes to the event framework publisher
 func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Errorf("error reading hw event: %v", err)
@@ -157,7 +158,6 @@ func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 				// ignore error
 				log.Debugf("error parsing message: %v", err)
 			}
-
 		}
 	}
 
@@ -171,6 +171,7 @@ func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO: add timeout or check server ready
 func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
 	addr := fmt.Sprintf("localhost:%d", util.GetIntEnv("MSG_PARSER_PORT"))
 

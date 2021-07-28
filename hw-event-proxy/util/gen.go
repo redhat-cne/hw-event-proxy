@@ -1,4 +1,4 @@
-package main
+package util
 
 // This is a tool for generating message parser client located under `pb` directory
 
