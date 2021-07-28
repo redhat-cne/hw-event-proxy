@@ -48,7 +48,8 @@ const (
 	eventType        string = "HW_EVENT"
 	msgParserTimeout        = 20 * time.Millisecond
 	// in seconds
-	webhookRetryInterval = 5
+	publisherRetryInterval = 5
+	webhookRetryInterval   = 5
 )
 
 var (
@@ -79,16 +80,22 @@ func main() {
 	healthURL := &types.URI{URL: url.URL{Scheme: "http",
 		Host: fmt.Sprintf("localhost:%d", apiPort),
 		Path: fmt.Sprintf("%s%s", apiPath, "health")}}
-RETRY:
-	if ok, _ := util.APIHealthCheck(healthURL, 2*time.Second); !ok {
-		goto RETRY
+	for {
+		if ok, _ := util.APIHealthCheck(healthURL, 2*time.Second); ok {
+			break
+		}
+	}
+	var err error
+	for {
+		pub, err = createPublisher()
+		if err != nil {
+			log.Errorf("error creating publisher: %s\n, will retry in %d seconds", err.Error(), publisherRetryInterval)
+		} else {
+			break
+		}
+		time.Sleep(publisherRetryInterval * time.Second)
 	}
 
-	var err error
-	pub, err = createPublisher()
-	if err != nil {
-		return
-	}
 	log.Infof("Created publisher %v", pub)
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -128,7 +135,7 @@ func startWebhook(wg *sync.WaitGroup) {
 		defer wg.Done()
 		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
 		if err != nil {
-			log.Errorf("error starting webhook %s\n, will retry to establish", err.Error())
+			log.Errorf("error starting webhook: %s\n, will retry in %d seconds", err.Error(), webhookRetryInterval)
 		}
 	}, webhookRetryInterval*time.Second, wait.NeverStop)
 }
