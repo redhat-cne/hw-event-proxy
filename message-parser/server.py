@@ -6,7 +6,7 @@ import grpc
 from message_parser_pb2 import ParserResponse
 from message_parser_pb2_grpc import MessageParserServicer, add_MessageParserServicer_to_server
 
-
+import os
 import sushy
 import json
 from sushy import auth
@@ -29,8 +29,7 @@ class MessageParserServicer(MessageParserServicer):
         basic_auth = auth.BasicAuth(username='root', password='calvin')
         self.sushy_root = sushy.Sushy('https://10.46.61.142/redfish/v1',
                 auth=basic_auth, verify=False)
-        # Get the Redfish version
-        print(self.sushy_root.redfish_version)
+        logging.debug('Redfish version: %s', self.sushy_root.redfish_version)
         self.registries = self.sushy_root.lazy_registries
         # preload the registries
         self.registries.registries        
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     )
     server = grpc.server(ThreadPoolExecutor())
     add_MessageParserServicer_to_server(MessageParserServicer(), server)
-    port = 9999
+    port = os.environ['MSG_PARSER_PORT']
     server.add_insecure_port(f'[::]:{port}')
     server.start()
     logging.info('server ready on port %r', port)
