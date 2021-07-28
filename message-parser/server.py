@@ -29,8 +29,7 @@ class MessageParserServicer(MessageParserServicer):
         basic_auth = auth.BasicAuth(username='root', password='calvin')
         self.sushy_root = sushy.Sushy('https://10.46.61.142/redfish/v1',
                 auth=basic_auth, verify=False)
-        # Get the Redfish version
-        print(self.sushy_root.redfish_version)
+        logging.debug('Redfish version: %s', self.sushy_root.redfish_version)
         self.registries = self.sushy_root.lazy_registries
         # preload the registries
         self.registries.registries        

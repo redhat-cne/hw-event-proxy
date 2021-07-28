@@ -43,8 +43,9 @@ import (
 )
 
 const (
-	hwEventVersion string = "v1"
-	eventType      string = "HW_EVENT"
+	hwEventVersion   string = "v1"
+	eventType        string = "HW_EVENT"
+	msgParserTimeout        = 20 * time.Millisecond
 )
 
 var (
@@ -183,11 +184,12 @@ func handleHwEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO: add timeout or check server ready
 func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
 	addr := fmt.Sprintf("localhost:%d", msgParserPort)
+	ctx, cancel := context.WithTimeout(context.Background(), msgParserTimeout)
+	defer cancel()
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithBlock(), grpc.WithInsecure())
 
-	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return hwevent.EventRecord{}, err
 	}
