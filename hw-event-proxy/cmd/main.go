@@ -121,7 +121,6 @@ func createPublisher() (pub pubsub.PubSub, err error) {
 func startWebhook(wg *sync.WaitGroup) {
 	http.HandleFunc("/ack/event", ackEvent)
 	http.HandleFunc("/webhook", handleHwEvent)
-	// TODO: retry on fail
 	go func() {
 		defer wg.Done()
 		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
