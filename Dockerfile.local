@@ -1,0 +1,19 @@
+FROM openshift/origin-release:golang-1.15 AS builder
+WORKDIR /go/src/github.com/redhat-cne/cloud-event-proxy
+COPY . .
+
+
+FROM openshift/origin-base AS bin
+COPY --from=builder  /go/src/github.com/redhat-cne/cloud-event-proxy/build/libdl.so.2 /lib64/
+COPY --from=builder  /go/src/github.com/redhat-cne/cloud-event-proxy/build/libpthread.so.0 /lib64/
+COPY --from=builder  /go/src/github.com/redhat-cne/cloud-event-proxy/build/libc.so.6 /lib64/
+COPY --from=builder  /go/src/github.com/redhat-cne/cloud-event-proxy/build/ld-linux-x86-64.so.2 /lib64/
+COPY --from=builder  /go/src/github.com/redhat-cne/cloud-event-proxy/build/librt.so.1 /lib64/
+
+
+COPY --from=builder /go/src/github.com/redhat-cne/cloud-event-proxy/build/cloud-event-proxy /
+COPY --from=builder go/src/github.com/redhat-cne/cloud-event-proxy/plugins/*.so /plugins/
+ENTRYPOINT ["./cloud-event-proxy"]
+
+
+

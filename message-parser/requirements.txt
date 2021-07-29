@@ -1,2 +1,3 @@
-grpcio-tools==1.29.0
+grpcio>=1.29.0
+protobuf>=3.17.3
 sushy>=3.8.0
