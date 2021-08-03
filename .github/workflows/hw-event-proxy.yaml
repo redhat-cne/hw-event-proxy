@@ -20,8 +20,8 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           # Caching conflicts happen in GHA, so just disable for now
-          skip-pkg-cache: true
-          skip-build-cache: true
+          skip-pkg-cache: false
+          skip-build-cache: false
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.41
   unit-tests:
