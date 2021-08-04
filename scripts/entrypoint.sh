@@ -14,7 +14,7 @@ export VIRTUAL_ENV=/message-parser/venv
 export PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Start the message-parser
-source /message-parser/venv/bin/activate
+source ${VIRTUAL_ENV}/bin/activate
 python3 /message-parser/server.py &
 status=$?
 if [ $status -ne 0 ]; then
