@@ -8,8 +8,8 @@ ENV GOOS=linux
 ENV GOPATH=/go
 
 COPY ./scripts /scripts
-WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy/hw-event-proxy
-COPY ./hw-event-proxy .
+WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy
+COPY ./hw-event-proxy ./hw-event-proxy
 RUN /scripts/build-go.sh
 
 # Build message-parser and install virtual environment
