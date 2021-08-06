@@ -11,7 +11,7 @@ function exitonsigterm() {
 trap exitonsigterm SIGTERM
 
 # Start the message-parser
-python3 /message-parser/server.py 
+python3 /message-parser/server.py &
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start message-parser: $status"
