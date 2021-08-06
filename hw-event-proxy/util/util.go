@@ -26,13 +26,13 @@ import (
 )
 
 // GetIntEnv get int value from env
-func GetIntEnv(key string) int {
+func GetIntEnv(key string, fallback int) int {
 	if val, ok := os.LookupEnv(key); ok && val != "" {
 		if ret, err := strconv.Atoi(val); err == nil {
 			return ret
 		}
 	}
-	return 0
+	return fallback
 }
 
 // InitLogger initilaize logger

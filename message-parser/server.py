@@ -27,8 +27,13 @@ MSG_PARSER_PORT = 9097
 class MessageParserServicer(MessageParserServicer):
 
     def __init__(self):
-        basic_auth = auth.BasicAuth(username='root', password='calvin')
-        self.sushy_root = sushy.Sushy('https://10.46.61.142/redfish/v1',
+
+        redfish_username = os.environ.get('REDFISH_USERNAME')
+        redfish_password = os.environ.get('REDFISH_PASSWORD')
+        redfish_hostaddr = os.environ.get('REDFISH_HOSTADDR')
+
+        basic_auth = auth.BasicAuth(username=redfish_username, password=redfish_password)
+        self.sushy_root = sushy.Sushy('https://' + redfish_hostaddr + '/redfish/v1',
                 auth=basic_auth, verify=False)
         logging.debug('Redfish version: %s', self.sushy_root.redfish_version)
         self.registries = self.sushy_root.lazy_registries

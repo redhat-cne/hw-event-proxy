@@ -44,22 +44,23 @@ import (
 )
 
 const (
-	hwEventVersion   string = "v1"
-	eventType        string = "HW_EVENT"
-	msgParserTimeout        = 20 * time.Millisecond
+	hwEventVersion string = "v1"
+	eventType      string = "HW_EVENT"
 	// in seconds
 	publisherRetryInterval = 5
 	webhookRetryInterval   = 5
 )
 
 var (
-	apiPath         = "/api/cloudNotifications/v1/"
-	apiPort         int
-	json            = jsoniter.ConfigCompatibleWithStandardLibrary
-	pub             pubsub.PubSub
-	resourceAddress string
-	baseURL         *types.URI
-	msgParserPort   = util.GetIntEnv("MSG_PARSER_PORT")
+	apiPath          = "/api/cloudNotifications/v1/"
+	apiPort          int
+	json             = jsoniter.ConfigCompatibleWithStandardLibrary
+	pub              pubsub.PubSub
+	resourceAddress  string
+	baseURL          *types.URI
+	msgParserPort    = util.GetIntEnv("MSG_PARSER_PORT", 9097)
+	hwEventPort      = util.GetIntEnv("HW_EVENT_PROXY_SERVICE_SERVICE_PORT", 9087)
+	msgParserTimeout = time.Duration(util.GetIntEnv("MSG_PARSER_TIMEOUT", 10)) * time.Millisecond
 )
 
 func main() {
@@ -135,7 +136,7 @@ func startWebhook(wg *sync.WaitGroup) {
 	http.HandleFunc("/webhook", handleHwEvent)
 	go wait.Until(func() {
 		defer wg.Done()
-		err := http.ListenAndServe(fmt.Sprintf(":%d", util.GetIntEnv("HW_EVENT_PORT")), nil)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", hwEventPort), nil)
 		if err != nil {
 			log.Errorf("error starting webhook: %s\n, will retry in %d seconds", err.Error(), webhookRetryInterval)
 		}

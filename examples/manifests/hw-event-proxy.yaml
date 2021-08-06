@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hw-event-proxy
+  namespace: cloud-native-events
+  labels:
+    app: hw-event-proxy
+  annotations:
+    release.openshift.io/version: "{{.ReleaseVersion}}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hw-event-proxy
+  template:
+    metadata:
+      labels:
+        app: hw-event-proxy
+    spec:
+      serviceAccountName: hw-event-proxy-sa
+      containers:
+        - name: hw-event-proxy
+          image: quay.io/redhat_emp1/hw-event-proxy:latest
+          args:
+            - "--api-port=8080"
+          ports:
+            - name: hw-event-port
+              containerPort: 9087
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MSG_PARSER_PORT
+              value: "9097"
+            - name: MSG_PARSER_TIMEOUT
+              value: "10"
+            - name: REDFISH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: redfish-basic-auth
+                  key: username
+            - name: REDFISH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redfish-basic-auth
+                  key: password
+            - name: REDFISH_HOSTADDR
+              valueFrom:
+                secretKeyRef:
+                  name: redfish-basic-auth
+                  key: hostaddr
+        - name: cloud-native-event-sidecar
+          image: quay.io/redhat_emp1/cloud-event-proxy:latest
+          args:
+            - "--metrics-addr=127.0.0.1:9091"
+            - "--store-path=/store"
+            - "--transport-host=amqp://amq-interconnect.$(AMQP_NAMESPACE).svc.cluster.local"
+            - "--api-port=8080"
+          volumeMounts:
+            - name: pubsubstore
+              mountPath: /store
+          ports:
+            - name: metrics-port
+              containerPort: 9091
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: AMQP_NAMESPACE
+              value: "amqp-interconnect"
+        - name: kube-rbac-proxy
+          image: quay.io/coreos/kube-rbac-proxy:v0.5.0
+          imagePullPolicy: Always
+          args:
+            - --logtostderr
+            - --secure-listen-address=:8443
+            - --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+            - --upstream=http://127.0.0.1:9091/
+            - --tls-private-key-file=/etc/metrics/tls.key
+            - --tls-cert-file=/etc/metrics/tls.crt
+          ports:
+            - containerPort: 8443
+              name: https
+          resources:
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          terminationMessagePolicy: FallbackToLogsOnError
+          volumeMounts:
+            - name: hw-event-proxy-certs
+              mountPath: /etc/metrics
+              readOnly: True
+      volumes:
+        - name: pubsubstore
+          emptyDir: {}
+        - name: hw-event-proxy-certs
+          secret:
+            secretName: hw-event-proxy-secret
