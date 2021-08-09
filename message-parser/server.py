@@ -22,6 +22,7 @@ LOG = logging.getLogger('sushy')
 LOG.setLevel(logging.DEBUG)
 LOG.addHandler(logging.StreamHandler())
 
+MSG_PARSER_PORT = 9097
 
 class MessageParserServicer(MessageParserServicer):
 
@@ -59,7 +60,9 @@ if __name__ == '__main__':
     )
     server = grpc.server(ThreadPoolExecutor())
     add_MessageParserServicer_to_server(MessageParserServicer(), server)
-    port = os.environ['MSG_PARSER_PORT']
+
+    msg_parser_port = os.environ.get('MSG_PARSER_PORT')
+    port = msg_parser_port if msg_parser_port else MSG_PARSER_PORT
     server.add_insecure_port(f'[::]:{port}')
     server.start()
     logging.info('server ready on port %r', port)

@@ -85,6 +85,8 @@ func main() {
 			break
 		}
 	}
+
+	// TODO: if publisher fails it should be os.Exit(1)
 	var err error
 	for {
 		pub, err = createPublisher()
