@@ -1,0 +1,11 @@
+apiVersion: route.openshift.io/v1
+
+kind: Route
+metadata:
+  name: hw-event-proxy
+spec:
+  to:
+    kind: Service
+    name: hw-event-proxy-service
+  tls:
+    termination: edge
