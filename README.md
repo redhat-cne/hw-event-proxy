@@ -1,1 +1,1 @@
-# Hardwar Event Proxy
+# Hardware Event Proxy
