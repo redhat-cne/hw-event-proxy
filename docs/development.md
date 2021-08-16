@@ -13,9 +13,10 @@ export LOG_LEVEL=debug
 ```
 
 ### Install and run Apache Qpid Dispach Router
+```
 sudo dnf install qpid-dispatch-router
 qdrouterd &
-
+```
 ### Run side car
 ```shell
 cd <cloud-event-proxy repo>
