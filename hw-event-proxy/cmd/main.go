@@ -132,7 +132,6 @@ func createPublisher() (pub pubsub.PubSub, err error) {
 }
 
 func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
-	fmt.Fprintf(ctx, "Hi there! RequestURI is %q", ctx.RequestURI())
 	switch string(ctx.Path()) {
 	case "/ack/event":
 		ackEvent(ctx)
