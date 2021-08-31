@@ -49,7 +49,6 @@ func InitLogger() {
 	}
 	// set global log level
 	log.SetLevel(ll)
-	log.SetLevel(log.DebugLevel)
 }
 
 // APIHealthCheck .. rest api should be ready before starting to consume api

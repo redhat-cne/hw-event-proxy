@@ -39,6 +39,8 @@ spec:
                   fieldPath: spec.nodeName
             - name: CONSUMER_TYPE
               value: "HW"
+            - name: LOG_LEVEL
+              value: "info"
         - name: cloud-native-event-sidecar
           image: quay.io/redhat_emp1/cloud-event-proxy
           args:
@@ -53,6 +55,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: LOG_LEVEL
+              value: "info"
           volumeMounts:
             - name: pubsubstore
               mountPath: /store
