@@ -46,7 +46,7 @@ spec:
           args:
             - "--metrics-addr=127.0.0.1:9091"
             - "--store-path=/store"
-            - "--transport-host=amqp://amq-interconnect.$(AMQP_NAMESPACE).svc.cluster.local"
+            - "--transport-host=amqp://router.$(AMQP_NAMESPACE).svc.cluster.local"
             - "--api-port=8080"
           env:
             - name: AMQP_NAMESPACE
