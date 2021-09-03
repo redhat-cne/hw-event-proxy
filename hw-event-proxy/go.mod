@@ -4,10 +4,12 @@ go 1.15
 
 require (
 	github.com/json-iterator/go v1.1.11
-	github.com/redhat-cne/sdk-go v0.1.1-0.20210723134838-a808941830c9
+	github.com/redhat-cne/sdk-go v0.1.1-0.20210903133956-db900ea5e2cf
 	github.com/sirupsen/logrus v1.8.1
 	github.com/valyala/fasthttp v1.29.0
-	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
-	google.golang.org/grpc v1.39.0
+	go.uber.org/zap v1.13.0 // indirect
+	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
+	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114 // indirect
+	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 )
