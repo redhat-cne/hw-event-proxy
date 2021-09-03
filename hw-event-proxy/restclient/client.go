@@ -67,6 +67,9 @@ func (r *Rest) Post(url *types.URI, data []byte) int {
 		if readErr == nil && len(body) > 0 {
 			log.Debugf("%s return response %s\n", url.String(), string(body))
 		}
+		if response.StatusCode == http.StatusBadRequest {
+			log.Errorf("%v\n", string(body))
+		}
 	}
 	return response.StatusCode
 }
