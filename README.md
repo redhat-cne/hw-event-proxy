@@ -98,14 +98,7 @@ export CONSUMER_IMG=quay.io/redhat_emp1/cloud-native-event-consumer:${VERSION}
 
 ### Setup AMQ Interconnect
 
-Install the `Red Hat Integration - AMQ Interconnect` operator in a new namespace `<AMQP_NAMESPAVCE>` namespace from the OpenShift Web Console.
-
-Open the `Red Hat Integration - AMQ Interconnect` operator, click `Create Interconnect` from the `Red Hat Integration - AMQ Interconnect` tab. Use default values and make sure the name is `amq-interconnect`.
-
-Make sure amq-interconnect pods are running before the next step.
-```shell
-oc get pods -n `<AMQP_NAMESPAVCE>`
-```
+Install AMQ router following https://github.com/redhat-cne/amq-installer.
 
 In consumer.yaml, change the `transport-host` args for `cloud-native-event-sidecar` container from
 ```
@@ -113,7 +106,7 @@ In consumer.yaml, change the `transport-host` args for `cloud-native-event-sidec
 ```
 to
 ```
-- "--transport-host=amqp://amq-interconnect.<AMQP_NAMESPAVCE>.svc.cluster.local"
+- "--transport-host=amqp://router.router.svc.cluster.local"
 ```
 
 ### Set node affinity
