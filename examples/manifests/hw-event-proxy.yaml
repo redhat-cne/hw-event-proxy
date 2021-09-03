@@ -63,7 +63,7 @@ spec:
             - "--metrics-addr=127.0.0.1:9091"
             - "--store-path=/store"
             - "--transport-host=amqp://router.$(AMQP_NAMESPACE).svc.cluster.local"
-            - "--api-port=8080"
+            - "--api-port=8089"
           volumeMounts:
             - name: pubsubstore
               mountPath: /store
