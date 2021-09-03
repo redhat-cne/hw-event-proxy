@@ -30,7 +30,7 @@ spec:
             requests:
               cpu: "10m"
             limits:
-              cpu: "50m"
+              cpu: "20m"
           env:
             - name: NODE_NAME
               valueFrom:
@@ -56,7 +56,7 @@ spec:
                   name: redfish-basic-auth
                   key: hostaddr
             - name: LOG_LEVEL
-              value: "info"
+              value: "debug"
         - name: cloud-native-event-sidecar
           image: quay.io/redhat_emp1/cloud-event-proxy:latest
           args:
@@ -78,7 +78,7 @@ spec:
             - name: AMQP_NAMESPACE
               value: "amqp-interconnect"
             - name: LOG_LEVEL
-              value: "info"
+              value: "debug"
         - name: kube-rbac-proxy
           image: quay.io/coreos/kube-rbac-proxy:v0.5.0
           imagePullPolicy: Always
