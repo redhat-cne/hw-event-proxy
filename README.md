@@ -22,10 +22,8 @@ export LOG_LEVEL=debug
 ```
 
 ### Install and run Apache Qpid Dispach Router
-```
-sudo dnf install qpid-dispatch-router
-qdrouterd &
-```
+Install AMQ router locally following https://github.com/redhat-cne/amq-installer.
+
 ### Run side car
 ```shell
 cd <cloud-event-proxy repo>
