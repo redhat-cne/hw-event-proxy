@@ -22,7 +22,7 @@ spec:
         - name: hw-event-proxy
           image: quay.io/redhat_emp1/hw-event-proxy:latest
           args:
-            - "--api-port=8080"
+            - "--api-port=8089"
           ports:
             - name: hw-event-port
               containerPort: 9087
@@ -36,6 +36,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: HW_EVENT_PROXY_SERVICE_SERVICE_PORT
+              value: "9087"
             - name: MSG_PARSER_PORT
               value: "9097"
             - name: MSG_PARSER_TIMEOUT
