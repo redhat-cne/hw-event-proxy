@@ -166,6 +166,7 @@ func ackEvent(ctx *fasthttp.RequestCtx) {
 // handleHwEvent gets redfish HW events and converts it to cloud native event
 // and publishes to the event framework publisher
 func handleHwEvent(ctx *fasthttp.RequestCtx) {
+	log.Tracef("webhook received event %s", string(ctx.PostBody()))
 	event := createHwEvent()
 	redfishEvent := hwevent.RedfishEvent{}
 	err := json.Unmarshal(ctx.PostBody(), &redfishEvent)
@@ -237,7 +238,7 @@ func publishHwEvent(e hwevent.Event) error {
 	rc := restclient.New()
 	b, err := json.Marshal(e)
 	if err != nil {
-		return fmt.Errorf("error marshalling event %v", e)
+		return fmt.Errorf("error marshalling event %v", err)
 	}
 	if status := rc.Post(types.ParseURI(url), b); status == http.StatusBadRequest {
 		return fmt.Errorf("post returned status %d", status)
