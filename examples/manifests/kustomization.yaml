@@ -5,13 +5,13 @@ resources:
 - service-account.yaml
 - roles.yaml
 - service.yaml
-- consumer.yaml
 - route.yaml
 - secret.yaml
 - hw-event-proxy.yaml
+- consumer.yaml
 replicas:
 - count: 1
-  name: cloud-native-consumer-deployment
+  name: consumer
 - count: 1
   name: hw-event-proxy
 images:
