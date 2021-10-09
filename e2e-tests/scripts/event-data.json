@@ -1,0 +1,21 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/c8a5433e-de17-11eb-8d4b-f40270e4f7f4",
+  "@odata.type": "#Event.v1_3_0.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "2162",
+      "EventTimestamp": "2021-07-06T01:17:12-0400",
+      "EventType": "Alert",
+      "MemberId": "79694",
+      "Message": "The system inlet temperature is greater than the upper warning threshold.",
+      "MessageId": "TMP0120",
+      "OriginOfCondition": {"@odata.id":"/redfish/v1/Systems/System.Embedded.1"},
+      "Severity": "Warning"
+    }
+  ],
+  "Id": "c8a5433e-de17-11eb-8d4b-f40270e4f7f4",
+  "Name": "Event Array"
+}

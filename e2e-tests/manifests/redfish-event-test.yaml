@@ -27,9 +27,9 @@ spec:
             - name: MSG_PER_SEC
               value: "10"
             - name: TEST_DURATION_SEC
-              value: "600"
-            - name: INITIAL_DELAY_SEC
               value: "60"
+            - name: INITIAL_DELAY_SEC
+              value: "20"
             - name: CHECK_RESP
               value: "YES"
             - name: WITH_MESSAGE_FIELD
