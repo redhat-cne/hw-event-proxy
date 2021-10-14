@@ -10,13 +10,17 @@ import shutil
 import sys
 import glob
 
-LOG_DIR = '/home/jacding/logs'
-LOG_FILE = '/_latency.log'
-REPORT_FILE = '/_report.csv'
+LOG_DIR = './logs'
+CONSUMER_POD_NAME = 'consumer'
+REPORT_FILE = '_report.csv'
 
 LATENCY_RANGES = [ 1, 2, 3, 4, 5, 10, 15, 20, 30, 40, 50, 100, 200, 500, 1000]
 # indicate the latency is larger than the maximum range
 LATENCY_MAX = 99999
+
+# pattern to search in the consumer logs:
+# example line: time="2021-08-19T18:26:19Z" level=info msg="Latency for hardware event: 2 ms\n"
+LATENCY_PATTERN = 'time="([^"]+)" level=info msg="Latency for hardware event: (\d+) ms'
 
 class Report:
     def __init__(self):
@@ -60,16 +64,12 @@ class Report:
                     tmp_file.write("{}\t{}\n".format(k, self.latency[k]))
                 else:
                     tmp_file.write("{}+\t{}\n".format(LATENCY_RANGES[-1], self.latency[k]))
-        #shutil.copystat(report_filename, tmp_file.name)
         os.chmod(tmp_file.name, 0o644)
         shutil.move(tmp_file.name, report_file)
-        print("output to: {}\n".format(report_file))
+        print("output to: {}".format(report_file))
 
-    # example line:
-    # time="2021-08-19T18:26:19Z" level=info msg="Latency for hardware event: 2 ms\n"
     def parseline(self, line):
-        # m = re.search('Latency for hardware event: (\d+) ms', line)
-        m = re.search('time="([^"]+)" level=info msg="Latency for hardware event: (\d+) ms', line)
+        m = re.search(LATENCY_PATTERN, line)
         if m:
             l = int(m.group(2))
             t = m.group(1)
@@ -124,23 +124,28 @@ def report_each_file(log_dir, log_files):
             return
         report_file = log_dir + '/_report' + file_tag + '.csv'
         report.parse_file(log_file)
+        if report.timestamp_first is None:
+            print("Error: log {} does not contain any latency info".format(log_file))
+            sys.exit(1)
         report.generate_report(report_file)
 
 
 def report_all(log_dir, log_files):
     report = Report()
-    report_file = log_dir + '/_report_all.csv'
+    report_file = log_dir + '/' + REPORT_FILE
     for log_file in log_files:
         report.users += 1   
         report.parse_file(log_file)
-
+    if report.timestamp_first is None:
+        print("Error: logs does not contain any latency info")
+        sys.exit(1)
     report.generate_report(report_file)
 
 def main():
     log_dir = sys.argv[1] if len(sys.argv) > 1 else LOG_DIR
-    log_files = glob.glob(log_dir + '/_latency*.log')
+    log_files = glob.glob(log_dir + '/' + CONSUMER_POD_NAME + '*.log')
 
-    report_each_file(log_dir, log_files)
+    # report_each_file(log_dir, log_files)
     report_all(log_dir, log_files)
 
 

@@ -25,7 +25,7 @@ lint:
 	golangci-lint run
 
 test:
-	kubectl apply -f ./manifests/redfish-event-test.yaml
+	./scripts/test.sh
 
 cleanup:
 	kubectl delete -f ./manifests/redfish-event-test.yaml
