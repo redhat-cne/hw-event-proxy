@@ -167,25 +167,22 @@ run_test() {
     num_events_received=$(grep -rIn "Total Events" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -eq $num_events_received ]; then
         head -10 ${LOG_DIR}/_report.csv
+        if [[ $perf -eq 1 ]]; then
+            percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+            if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
+                echo -e "***$RED TEST FAILED $COLOR_RESET***"
+                echo "Performance target: 95% of the massages have latency <= 10ms."
+                echo "Performance actual: ${percent_10ms}% of the massages have latency <= 10ms."
+                cleanup_log_streaming
+                exit 1
+            fi
+        fi
         echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
     else
         echo -e "***$RED TEST FAILED $COLOR_RESET***: Events sent: $num_events_send, Events received: $num_events_received"
         # do not delete the test pod in case it's needed for debug
         cleanup_log_streaming
         exit 1
-    fi
-    if [[ $perf -eq 1 ]]; then
-        percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
-        if [ $percent_10ms -ge $PERF_TARGET_PERCENT_10MS ]; then
-            head -10 ${LOG_DIR}/_report.csv
-            echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
-        else
-            echo -e "***$RED TEST FAILED $COLOR_RESET***"
-            echo "Performance target: 95% of the massages have latency <= 10ms."
-            echo "Performance actual: ${percent_10ms}% of the massages have latency <= 10ms."
-            cleanup_log_streaming
-            exit 1
-        fi
     fi
 }
 
