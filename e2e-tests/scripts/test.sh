@@ -57,12 +57,22 @@ wait_for_resource(){
     done
 }
 
+apply_test_options(){
+    cat e2e-tests/manifests/redfish-event-test.yaml \
+    | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
+    | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
+    | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" \
+    | sed "/CHECK_RESP/{n;s/YES/$CHECK_RESP/}" \
+    | sed "/WITH_MESSAGE_FIELD/{n;s/YES/$WITH_MESSAGE_FIELD/}" > ${LOG_DIR}/redfish-event-test.yaml
+}
+
 test_with_message(){
     MSG_PER_SEC=1
     TEST_DURATION_SEC=10
     INITIAL_DELAY_SEC=10
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=YES  
+    apply_test_options
 }
 
 test_without_message(){
@@ -71,6 +81,7 @@ test_without_message(){
     INITIAL_DELAY_SEC=10
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=NO  
+    apply_test_options
 }
 
 test_performance(){
@@ -79,15 +90,7 @@ test_performance(){
     INITIAL_DELAY_SEC=60
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=YES
-}
-
-apply_test_options(){
-    cat e2e-tests/manifests/redfish-event-test.yaml \
-    | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
-    | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
-    | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" \
-    | sed "/CHECK_RESP/{n;s/YES/$CHECK_RESP/}" \
-    | sed "/WITH_MESSAGE_FIELD/{n;s/YES/$WITH_MESSAGE_FIELD/}"
+    apply_test_options
 }
 
 reset_logs(){
@@ -100,6 +103,7 @@ cleanup_logs(){
     rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
     rm -f ${LOG_DIR}/redfish-event-test.log 2>/dev/null
     rm -f ${LOG_DIR}/_report.csv 2>/dev/null
+    rm -f ${LOG_DIR}/redfish-event-test.yaml 2>/dev/null
 }
 
 cleanup_log_streaming(){
@@ -138,7 +142,7 @@ run_test() {
 
     # start the test
     debug_log "--- Start testing ---"
-    kubectl apply -f e2e-tests/manifests/redfish-event-test.yaml >/dev/null
+    kubectl apply -f ${LOG_DIR}/redfish-event-test.yaml >/dev/null
 
     # streaming logs for the test tool
     kubectl wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s >/dev/null
@@ -172,7 +176,7 @@ run_test() {
     fi
     if [[ $perf -eq 1 ]]; then
         percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
-        if [ $percent_10ms -le $PERF_TARGET_PERCENT_10MS ]; then
+        if [ $percent_10ms -ge $PERF_TARGET_PERCENT_10MS ]; then
             head -10 ${LOG_DIR}/_report.csv
             echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
         else
@@ -230,4 +234,3 @@ else
 fi
 
 cleanup_log_streaming
-cleanup_test_pod

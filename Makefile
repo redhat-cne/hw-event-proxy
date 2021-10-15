@@ -57,7 +57,7 @@ test:kustomize
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-	e2e-tests/scripts/test.sh -v
+	e2e-tests/scripts/test.sh
 
 test-only:kustomize
 	e2e-tests/scripts/test.sh
