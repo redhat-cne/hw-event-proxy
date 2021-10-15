@@ -8,7 +8,7 @@ perf=0
 # Performance target for Intra-Node:
 # At a rate of 10 msgs/sec, 95% of the massages should have latency <= 10ms.
 # Should support this performance with multiple (10~20) recipients.
-PERF_TARGET_10MS = 95
+PERF_TARGET_10MS=95
 
 Help()
 {
@@ -67,7 +67,7 @@ test_without_message(){
 test_performance(){
     MSG_PER_SEC=10
     TEST_DURATION_SEC=600
-    INITIAL_DELAY_SEC=30
+    INITIAL_DELAY_SEC=60
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=YES
 }
@@ -81,20 +81,47 @@ apply_test_options(){
     | sed "/WITH_MESSAGE_FIELD/{n;s/YES/$WITH_MESSAGE_FIELD/}"
 }
 
+reset_logs(){
+    # empty log files without breaking the streaming
+    truncate -s 0 ${LOG_DIR}/consumer*.log 2>/dev/null
+    truncate -s 0 ${LOG_DIR}/redfish-event-test.log 2>/dev/null
+}
+
+cleanup_logs(){
+    rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
+    rm -f ${LOG_DIR}/redfish-event-test.log 2>/dev/null
+}
+
+cleanup_log_streaming(){
+    for pidFile in ${LOG_DIR}/*.pid; do
+        cat $pidFile | kill -9 2>/dev/null
+    done
+}
+
 run_test() {
+    echo "--- Cleanup previous test pod and logs---"
+    kubectl delete -f e2e-tests/manifests/redfish-event-test.yaml 2>/dev/null || true
+    kubectl wait --for=delete job/redfish-event-test --timeout=60s
+    reset_logs
+
     # start the test
     echo "--- Start testing ---"
     kubectl apply -f e2e-tests/manifests/redfish-event-test.yaml
 
+    # streaming logs for the test tool
+    kubectl wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s
+    kubectl -n ${NAMESPACE} logs -f `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "` >> ${LOG_DIR}/redfish-event-test.log &
+    echo "$!" > ${LOG_DIR}/log-redfish-event-test.pid
+
     wait_for_resource job/redfish-event-test complete 0
     if [[ $job_result -eq 1 ]]; then
         echo "redfish-event-test job is not complete"
+        cleanup_log_streaming
         exit 1
     fi
 
-    echo "--- Test completed. Collecting test tool logs ---"
-    # streaming logs for the test tool
-    kubectl -n ${NAMESPACE} logs -f `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "` >> ${LOG_DIR}/redfish-event-test.log &
+    # wait for logs to complete streaming
+    sleep 10
 
     echo "--- Generate test report ---"
     e2e-tests/scripts/parse-multi-logs.py
@@ -102,27 +129,23 @@ run_test() {
     echo "--- Check test result ---"
     num_events_send=$(grep 'Total Msg sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Total Events" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
-    if [ $num_events_send -eq $num_events_received ]
-        then
-            head -10 ${LOG_DIR}/_report.csv
-            echo "*** TEST PASSED ***"
-            echo "--- Delete test pod ---"
-            kubectl delete -f e2e-tests/manifests/redfish-event-test.yaml 2>/dev/null || true
-        else
-            echo "*** TEST FAILED ***: Events sent: $num_events_send, Events received: num_events_received"
-            # do not delete the test pod in case it's needed for debug
-            exit 1
+    if [ $num_events_send -eq $num_events_received ]; then
+        head -10 ${LOG_DIR}/_report.csv
+        echo "*** TEST PASSED ***"
+    else
+        echo "*** TEST FAILED ***: Events sent: $num_events_send, Events received: $num_events_received"
+        # do not delete the test pod in case it's needed for debug
+        cleanup_log_streaming
+        exit 1
     fi
-    if [[ $perf -eq 0 ]]; then
-
+    if [[ $perf -eq 1 ]]; then
+        echo "verify performance target"
     fi
 }
 
-# clean up logs
-echo "--- Remove previous logs ---"
 mkdir -p -- "$LOG_DIR"
-rm -f $LOG_DIR/*.log
-rm -f $LOG_DIR/*.csv
+cleanup_logs
+cleanup_log_streaming
 
 echo "--- Check if consumer pod is available ---"
 wait_for_resource deployment/consumer available 60s
@@ -142,6 +165,7 @@ fi
 echo "--- Start streaming consumer logs ---"
 for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
     kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $podname >> ${LOG_DIR}/$podname.log &
+    echo "$!" > ${LOG_DIR}/log-$podname.pid
 done
 
 if [[ $perf -eq 0 ]]; then
@@ -160,3 +184,6 @@ else
     test_performance
     run_test
 fi
+
+cleanup_log_streaming
+

@@ -60,6 +60,9 @@ test:kustomize
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
 	e2e-tests/scripts/test.sh
 
+test-only:kustomize
+	e2e-tests/scripts/test.sh
+
 perf-test:kustomize
 	@echo "--- Clean up existing resources ---"
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
