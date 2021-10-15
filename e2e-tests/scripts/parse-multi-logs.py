@@ -13,6 +13,7 @@ import glob
 LOG_DIR = './logs'
 CONSUMER_POD_NAME = 'consumer'
 REPORT_FILE = '_report.csv'
+VERBOSE = False
 
 LATENCY_RANGES = [ 1, 2, 3, 4, 5, 10, 15, 20, 30, 40, 50, 100, 200, 500, 1000]
 # indicate the latency is larger than the maximum range
@@ -21,6 +22,10 @@ LATENCY_MAX = 99999
 # pattern to search in the consumer logs:
 # example line: time="2021-08-19T18:26:19Z" level=info msg="Latency for hardware event: 2 ms\n"
 LATENCY_PATTERN = 'time="([^"]+)" level=info msg="Latency for hardware event: (\d+) ms'
+
+def log_debug(log):
+    if VERBOSE:
+        print(log)
 
 class Report:
     def __init__(self):
@@ -66,7 +71,7 @@ class Report:
                     tmp_file.write("{}+\t{}\n".format(LATENCY_RANGES[-1], self.latency[k]))
         os.chmod(tmp_file.name, 0o644)
         shutil.move(tmp_file.name, report_file)
-        print("output to: {}".format(report_file))
+        log_debug("output to: {}".format(report_file))
 
     def parseline(self, line):
         m = re.search(LATENCY_PATTERN, line)

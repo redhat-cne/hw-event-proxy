@@ -58,7 +58,7 @@ test:kustomize
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-	e2e-tests/scripts/test.sh
+	e2e-tests/scripts/test.sh -v
 
 test-only:kustomize
 	e2e-tests/scripts/test.sh
@@ -76,4 +76,4 @@ perf-test:kustomize
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 		&& $(KUSTOMIZE) edit set replicas consumer=20
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-	e2e-tests/scripts/test.sh -perf
+	e2e-tests/scripts/test.sh -p

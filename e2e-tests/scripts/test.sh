@@ -1,9 +1,14 @@
 #!/bin/bash
 
+COLOR_RESET='\033[0m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+
 NAMESPACE=cloud-native-events
 LOG_DIR=./logs
 job_result=0
 perf=0
+verbose=0
 
 # Performance target for Intra-Node:
 # At a rate of 10 msgs/sec, 95% of the massages should have latency <= 10ms.
@@ -12,18 +17,20 @@ PERF_TARGET_10MS=95
 
 Help()
 {
-   echo "$0 [-p|-h]"
+   echo "$0 [-p|-h|-v]"
    echo "options:"
    echo "-p  Performance tests."
+   echo "-v  Verbose mode."
    echo "-h  Print this Help."
    echo
 }
 
-while getopts ":hp:" option; do
+while getopts ":hpv" option; do
    case $option in
       h) Help
          exit;;
       p) perf=1;;
+      v) verbose=1;;
      \?) echo "Error: Invalid option"
          exit;;
    esac
@@ -90,50 +97,72 @@ reset_logs(){
 cleanup_logs(){
     rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
     rm -f ${LOG_DIR}/redfish-event-test.log 2>/dev/null
+    rm -f ${LOG_DIR}/_report.csv 2>/dev/null
 }
 
 cleanup_log_streaming(){
     for pidFile in ${LOG_DIR}/*.pid; do
-        cat $pidFile | kill -9 2>/dev/null
+        if test -f "$pidFile"; then
+            pkill -F $pidFile 2>/dev/null
+            rm -f $pidFile 2>/dev/null
+        fi
     done
 }
 
+cleanup_log_streaming_test(){
+    pidFile=${LOG_DIR}/log-redfish-event-test.pid
+    if test -f "$pidFile"; then
+        pkill -F $pidFile 2>/dev/null
+        rm -f $pidFile 2>/dev/null
+    fi
+}
+
+debug_log(){
+    if [[ $verbose -eq 1 ]]; then
+        echo $1
+    fi
+}
+
+cleanup_test_pod(){
+    kubectl delete job/redfish-event-test --ignore-not-found=true --grace-period=0 >/dev/null 2>&1 || true
+    kubectl wait --for=delete job/redfish-event-test --timeout=60s 2>/dev/null || true
+    cleanup_log_streaming_test
+}
+
 run_test() {
-    echo "--- Cleanup previous test pod and logs---"
-    kubectl delete -f e2e-tests/manifests/redfish-event-test.yaml 2>/dev/null || true
-    kubectl wait --for=delete job/redfish-event-test --timeout=60s
+    debug_log "--- Cleanup previous test pod and logs---"
+    cleanup_test_pod
     reset_logs
 
     # start the test
-    echo "--- Start testing ---"
-    kubectl apply -f e2e-tests/manifests/redfish-event-test.yaml
+    debug_log "--- Start testing ---"
+    kubectl apply -f e2e-tests/manifests/redfish-event-test.yaml >/dev/null
 
     # streaming logs for the test tool
-    kubectl wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s
+    kubectl wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s >/dev/null
     kubectl -n ${NAMESPACE} logs -f `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "` >> ${LOG_DIR}/redfish-event-test.log &
     echo "$!" > ${LOG_DIR}/log-redfish-event-test.pid
 
-    wait_for_resource job/redfish-event-test complete 0
+    wait_for_resource job/redfish-event-test complete 0 >/dev/null
     if [[ $job_result -eq 1 ]]; then
         echo "redfish-event-test job is not complete"
         cleanup_log_streaming
         exit 1
     fi
 
-    # wait for logs to complete streaming
+    debug_log "Sleep for 10 seconds: wait for logs to complete streaming"
     sleep 10
-
-    echo "--- Generate test report ---"
+    debug_log "--- Generate test report ---"
     e2e-tests/scripts/parse-multi-logs.py
 
-    echo "--- Check test result ---"
+    debug_log "--- Check test result ---"
     num_events_send=$(grep 'Total Msg sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Total Events" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -eq $num_events_received ]; then
         head -10 ${LOG_DIR}/_report.csv
-        echo "*** TEST PASSED ***"
+        echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
     else
-        echo "*** TEST FAILED ***: Events sent: $num_events_send, Events received: $num_events_received"
+        echo -e "***$RED TEST FAILED $COLOR_RESET***: Events sent: $num_events_send, Events received: $num_events_received"
         # do not delete the test pod in case it's needed for debug
         cleanup_log_streaming
         exit 1
@@ -144,25 +173,26 @@ run_test() {
 }
 
 mkdir -p -- "$LOG_DIR"
+debug_log "--- Clean up logs ---"
 cleanup_logs
 cleanup_log_streaming
 
-echo "--- Check if consumer pod is available ---"
-wait_for_resource deployment/consumer available 60s
+debug_log "--- Check if consumer pod is available ---"
+wait_for_resource deployment/consumer available 60s >/dev/null
 if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
 
-echo "--- Check if hw-event-proxy pod is available ---"
-wait_for_resource deployment/hw-event-proxy available 60s
+debug_log "--- Check if hw-event-proxy pod is available ---"
+wait_for_resource deployment/hw-event-proxy available 60s >/dev/null
 if [[ $job_result -eq 1 ]]; then
     echo "hw-event-proxy pod is not available"
     exit 1
 fi
 
 # streaming logs for multiple consumers.
-echo "--- Start streaming consumer logs ---"
+debug_log "--- Start streaming consumer logs ---"
 for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
     kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $podname >> ${LOG_DIR}/$podname.log &
     echo "$!" > ${LOG_DIR}/log-$podname.pid
@@ -186,4 +216,4 @@ else
 fi
 
 cleanup_log_streaming
-
+cleanup_test_pod
