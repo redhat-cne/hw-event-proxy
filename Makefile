@@ -52,7 +52,6 @@ test:kustomize
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f - 2>/dev/null || true
-	kubectl delete -f e2e-tests/manifests/redfish-event-test.yaml 2>/dev/null || true
 	@echo "--- Set up resources for testing ---"
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
@@ -69,11 +68,10 @@ perf-test:kustomize
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f - 2>/dev/null || true
-	kubectl delete -f e2e-tests/manifests/redfish-event-test.yaml 2>/dev/null || true
 	@echo "--- Set up resources for testing ---"
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
-		&& $(KUSTOMIZE) edit set replicas consumer=20
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
+		&& $(KUSTOMIZE) edit set replicas consumer=3
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
 	e2e-tests/scripts/test.sh -p

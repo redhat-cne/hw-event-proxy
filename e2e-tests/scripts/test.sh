@@ -3,17 +3,19 @@
 COLOR_RESET='\033[0m'
 GREEN='\033[1;32m'
 RED='\033[1;31m'
+BOLD='\033[1m'
 
 NAMESPACE=cloud-native-events
 LOG_DIR=./logs
 job_result=0
 perf=0
 verbose=0
+num_of_consumer=0
 
 # Performance target for Intra-Node:
 # At a rate of 10 msgs/sec, 95% of the massages should have latency <= 10ms.
 # Should support this performance with multiple (10~20) recipients.
-PERF_TARGET_10MS=95
+PERF_TARGET_PERCENT_10MS=95
 
 Help()
 {
@@ -157,6 +159,7 @@ run_test() {
 
     debug_log "--- Check test result ---"
     num_events_send=$(grep 'Total Msg sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
+    num_events_send=$(( $num_events_send*$num_of_consumer ))
     num_events_received=$(grep -rIn "Total Events" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -eq $num_events_received ]; then
         head -10 ${LOG_DIR}/_report.csv
@@ -168,7 +171,17 @@ run_test() {
         exit 1
     fi
     if [[ $perf -eq 1 ]]; then
-        echo "verify performance target"
+        percent_10ms=$('Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+        if [ $percent_10ms -le $PERF_TARGET_PERCENT_10MS ]; then
+            head -10 ${LOG_DIR}/_report.csv
+            echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
+        else
+            echo -e "***$RED TEST FAILED $COLOR_RESET***"
+            echo "Performance target: 95% of the massages have latency <= 10ms."
+            echo "Performance actual: ${percent_10ms}% of the massages have latency <= 10ms."
+            cleanup_log_streaming
+            exit 1
+        fi
     fi
 }
 
@@ -196,21 +209,22 @@ debug_log "--- Start streaming consumer logs ---"
 for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
     kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $podname >> ${LOG_DIR}/$podname.log &
     echo "$!" > ${LOG_DIR}/log-$podname.pid
+    num_of_consumer=$(( num_of_consumer + 1 ))
 done
 
 if [[ $perf -eq 0 ]]; then
     # test with message field
-    echo "--- TEST 1:  WITH MESSAGE FIELD ---"
+    echo -e "---$BOLD TEST 1:  WITH MESSAGE FIELD $COLOR_RESET---"
     test_with_message
     run_test
 
     # test without message field
-    echo "--- TEST 2:  WITHOUT MESSAGE FIELD ---"
+    echo -e "---$BOLD TEST 2:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
     test_without_message
     run_test
 else
     # performance test
-    echo "--- PERFORMANCE TEST ---"
+    echo "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
     test_performance
     run_test
 fi
