@@ -171,7 +171,7 @@ run_test() {
         exit 1
     fi
     if [[ $perf -eq 1 ]]; then
-        percent_10ms=$('Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+        percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
         if [ $percent_10ms -le $PERF_TARGET_PERCENT_10MS ]; then
             head -10 ${LOG_DIR}/_report.csv
             echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
@@ -224,7 +224,7 @@ if [[ $perf -eq 0 ]]; then
     run_test
 else
     # performance test
-    echo "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
+    echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
     test_performance
     run_test
 fi
