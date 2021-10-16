@@ -1,4 +1,4 @@
-.PHONY: build
+.PHONY: test
 
 # Current  version
 VERSION ?=latest
@@ -62,7 +62,7 @@ test-only-debug:
 	e2e-tests/scripts/test.sh -v
 
 test-perf-only:
-	e2e-tests/scripts/test.sh
+	e2e-tests/scripts/test.sh -p
 
 test: | deploy-example test-only undeploy-example
 

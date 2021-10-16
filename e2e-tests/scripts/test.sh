@@ -162,9 +162,9 @@ run_test() {
     e2e-tests/scripts/parse-multi-logs.py
 
     debug_log "--- Check test result ---"
-    num_events_send=$(grep 'Total Msg sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
+    num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_send=$(( $num_events_send*$num_of_consumer ))
-    num_events_received=$(grep -rIn "Total Events" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
+    num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -eq $num_events_received ]; then
         head -10 ${LOG_DIR}/_report.csv
         if [[ $perf -eq 1 ]]; then

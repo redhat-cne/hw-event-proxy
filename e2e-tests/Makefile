@@ -1,4 +1,4 @@
-.PHONY: build-docker
+.PHONY: build
 
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 export GO111MODULE=on

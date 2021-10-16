@@ -106,7 +106,7 @@ func main() {
 				totalSeconds--
 				log.Info("******** Test completed ********")
 				log.Infof("Total Seconds : %d", totalSeconds)
-				log.Infof("Total Msg sent: %d", totalMsg)
+				log.Infof("Total Msg Sent: %d", totalMsg)
 				log.Infof("Ave Msg/Second: %2.2f", float64(totalMsg/totalSeconds))
 				os.Exit(0)
 			}
@@ -136,7 +136,7 @@ func main() {
 		} else if checkResp == "NO" {
 			fasthttp.Do(req, res) //nolint: errcheck
 			totalMsg++
-		} else if checkResp == "GO" {
+		} else if checkResp == "MULTI_THREAD" {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
