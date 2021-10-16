@@ -106,6 +106,10 @@ cleanup_logs(){
     rm -f ${LOG_DIR}/redfish-event-test.yaml 2>/dev/null
 }
 
+cleanup_consumer_logs(){
+    rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
+}
+
 cleanup_log_streaming(){
     for pidFile in ${LOG_DIR}/*.pid; do
         if test -f "$pidFile"; then
@@ -230,3 +234,4 @@ else
 fi
 
 cleanup_log_streaming
+cleanup_consumer_logs
