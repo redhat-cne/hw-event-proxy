@@ -46,32 +46,24 @@ undeploy-example:kustomize
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} && $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} && $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f -
 
-test:kustomize
-	@echo "--- Clean up existing resources ---"
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f - 2>/dev/null || true
-	@echo "--- Set up resources for testing ---"
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-	e2e-tests/scripts/test.sh
 
-test-only:kustomize
-	e2e-tests/scripts/test.sh
-
-perf-test:kustomize
-	@echo "--- Clean up existing resources ---"
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f - 2>/dev/null || true
-	@echo "--- Set up resources for testing ---"
+# Deploy with 20 consumers for performance testing
+deploy-perf:kustomize
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
 		&& $(KUSTOMIZE) edit set replicas consumer=20
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-	e2e-tests/scripts/test.sh -p
+
+test-only:
+	e2e-tests/scripts/test.sh
+
+test-only-debug:
+	e2e-tests/scripts/test.sh -v
+
+test-perf-only:
+	e2e-tests/scripts/test.sh
+
+test: | deploy-example test-only undeploy-example
+
+test-perf: | deploy-perf test-perf-only undeploy-example

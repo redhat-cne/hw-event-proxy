@@ -42,19 +42,17 @@ class Report:
         self.within10ms = 0
         self.within20ms = 0
         self.within100ms = 0
-        self.users = 0
+        self.consumers = 0
 
     def generate_report(self, report_file):
         time_elapsed = self.timestamp_last - self.timestamp_first
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
-            tmp_file.write("Total Events\t{}\n".format(self.total_msgs))
+            tmp_file.write("Number of Consumers\t{}\n".format(self.consumers))
+            tmp_file.write("Events per Consumer\t{:.0f}\n".format(self.total_msgs/self.consumers))
 
-            if self.users == 0:
-                tmp_file.write("Events per Second\t{:.2f}\n".format(self.total_msgs/time_elapsed.total_seconds()))
-            else:
-                # for multiple users report Events/Second per user
-                tmp_file.write("Events per Second\t{:.2f}\n".format(self.total_msgs/self.users/time_elapsed.total_seconds()))
+            # for multiple consumers report Events/Second per user
+            tmp_file.write("Events per Second\t{:.2f}\n".format(self.total_msgs/self.consumers/time_elapsed.total_seconds()))
             tmp_file.write("Shortest Latency\t{}ms\n".format(self.shortest))
             tmp_file.write("Longest Latency\t{}ms\n".format(self.longest))
             tmp_file.write("Percentage within 10ms\t{:.2%}\n".format(self.within10ms/self.total_msgs))
@@ -139,7 +137,7 @@ def report_all(log_dir, log_files):
     report = Report()
     report_file = log_dir + '/' + REPORT_FILE
     for log_file in log_files:
-        report.users += 1   
+        report.consumers += 1   
         report.parse_file(log_file)
     if report.timestamp_first is None:
         print("Error: logs does not contain any latency info")

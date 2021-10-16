@@ -10,7 +10,7 @@ resources:
 - hw-event-proxy.yaml
 - consumer.yaml
 replicas:
-- count: 3
+- count: 20
   name: consumer
 - count: 1
   name: hw-event-proxy
