@@ -1,4 +1,4 @@
-# Performance Tests for Redfish Events
+# End to End Tests for Redfish Events
 
 
 ## Build Image
@@ -12,8 +12,7 @@ podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-even
 
 ## Run Tests
 ```
-oc apply -f manifests/redfish-event-test.yaml
-oc logs -f cloud-native-consumer-deployment-cdb95bfd8-h68xs cloud-native-event-consumer | grep "Latency for hardware event" >> ~/logs/_latency.log
+
 ```
 
 ## Undeply
