@@ -97,7 +97,7 @@ class Report:
                 if l < i:
                     self.latency[i] += 1
                     return
-            # last 
+            # last
             self.latency[LATENCY_MAX] += 1
 
     def parse_file(self, log_file):
@@ -137,7 +137,7 @@ def report_all(log_dir, log_files):
     report = Report()
     report_file = log_dir + '/' + REPORT_FILE
     for log_file in log_files:
-        report.consumers += 1   
+        report.consumers += 1
         report.parse_file(log_file)
     if report.timestamp_first is None:
         print("Error: logs does not contain any latency info")

@@ -137,21 +137,21 @@ podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-even
 ```
 
 ### Basic Test
-The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec for 10 seconds. 
+The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec for 10 seconds.
 
 ```shell
 make test
 ```
 This invokes 2 test cases:
 * TEST 1:  WITH MESSAGE FIELD
-* TEST 2:  WITHOUT MESSAGE FIELD 
+* TEST 2:  WITHOUT MESSAGE FIELD
 
 NOTE: When message field is not included in the Redfish Event, hw-event-proxy needs to query Message Parser to retrieve the message field and relative information.
 
 The tests are marked PASSED if all the events are received by the consumer. There is no verification of performance targets.
 
 ### Performance Test
-The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes. 
+The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes.
 
 ```shell
 make test-perf
