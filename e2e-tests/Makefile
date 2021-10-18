@@ -24,8 +24,3 @@ lint:
 	golint `go list ./... | grep -v vendor`
 	golangci-lint run
 
-test:
-	./scripts/test.sh
-
-cleanup:
-	kubectl delete -f ./manifests/redfish-event-test.yaml
