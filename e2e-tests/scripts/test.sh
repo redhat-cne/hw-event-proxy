@@ -69,7 +69,7 @@ apply_test_options(){
 test_with_message(){
     MSG_PER_SEC=1
     TEST_DURATION_SEC=10
-    INITIAL_DELAY_SEC=10
+    INITIAL_DELAY_SEC=2
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=YES  
     apply_test_options
@@ -78,7 +78,8 @@ test_with_message(){
 test_without_message(){
     MSG_PER_SEC=1
     TEST_DURATION_SEC=10
-    INITIAL_DELAY_SEC=10
+    # wait a random duration between 1 to 60 seconds for preloading Redfish Registries
+    INITIAL_DELAY_SEC=$(( $RANDOM % 60 + 1 ))
     CHECK_RESP=YES
     WITH_MESSAGE_FIELD=NO  
     apply_test_options
@@ -225,6 +226,7 @@ if [[ $perf -eq 0 ]]; then
     # test without message field
     echo -e "---$BOLD TEST 2:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
     test_without_message
+    echo "Wait $INITIAL_DELAY_SEC seconds for preloading Redfish Registries..."
     run_test
 else
     # performance test

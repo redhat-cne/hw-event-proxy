@@ -100,7 +100,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		for range time.Tick(time.Second) {
-			if totalSeconds > testDuration {
+			if totalSeconds >= testDuration {
 				tck.Stop()
 				fasthttp.ReleaseRequest(req)
 				totalSeconds--
@@ -128,22 +128,22 @@ func main() {
 	tck = time.NewTicker(time.Duration(1000*avgMsgPeriodInMs) * time.Microsecond)
 	for range tck.C {
 		if checkResp == "YES" {
+			totalMsg++
 			if err := fasthttp.Do(req, res); err != nil {
+				totalMsg--
 				log.Errorf("Sending error: %v", err)
-			} else {
-				totalMsg++
 			}
 		} else if checkResp == "NO" {
-			fasthttp.Do(req, res) //nolint: errcheck
 			totalMsg++
+			fasthttp.Do(req, res) //nolint: errcheck
 		} else if checkResp == "MULTI_THREAD" {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
+				totalMsg++
 				if err := fasthttp.Do(req, res); err != nil {
 					log.Errorf("Sending error: %v", err)
-				} else {
-					totalMsg++
+					totalMsg--
 				}
 			}()
 		} else {
