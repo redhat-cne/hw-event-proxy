@@ -147,7 +147,7 @@ This invokes 2 test cases:
 * TEST 1:  WITH MESSAGE FIELD
 * TEST 2:  WITHOUT MESSAGE FIELD
 
-NOTE: When message field is not included in the Redfish Event, hw-event-proxy needs to query Message Parser to retrieve the message field and relative information. TEST 2 wait for a random duration between 1 to 60 seconds for preloading Redfish Registries. By making the waittime random the test is able to test different scenarios when the Message Parser is not, partly or fully ready to process event messages.
+NOTE: TEST 2 waits for a random duration between 1 to 60 seconds for preloading Redfish Registries. By making the wait time random the test is able to test different scenarios when the Message Parser is not, partly or fully ready to process event messages.
 
 The tests are marked PASSED if all the events are received by the consumer. There is no verification of performance targets.
 
