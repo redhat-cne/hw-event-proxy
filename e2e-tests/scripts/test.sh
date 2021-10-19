@@ -153,8 +153,10 @@ run_test() {
     kubectl -n ${NAMESPACE} wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s  >/dev/null 2>&1
     kubectl -n ${NAMESPACE} logs -f `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "` >> ${LOG_DIR}/redfish-event-test.log &
     echo "$!" > ${LOG_DIR}/log-redfish-event-test.pid
-    
-    echo "Test will run for $(( ($TEST_DURATION_SEC + $INITIAL_DELAY_SEC)/60 )) minutes."
+
+    if [[ $perf -eq 1 ]]; then
+        echo "Test will run for $(( ($TEST_DURATION_SEC + $INITIAL_DELAY_SEC)/60 )) minutes."
+    fi
     wait_for_resource job/redfish-event-test complete 0 >/dev/null
     if [[ $job_result -eq 1 ]]; then
         echo "redfish-event-test job is not complete"
@@ -183,7 +185,6 @@ run_test() {
             fi
         fi
         echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
-        echo "Full test report is available at ${LOG_DIR}/_report.csv"
         echo
     else
         echo -e "***$RED TEST FAILED $COLOR_RESET***: Events sent: $num_events_send, Events received: $num_events_received"
@@ -240,3 +241,4 @@ fi
 
 cleanup_log_streaming
 cleanup_consumer_logs
+echo "Full test report is available at ${LOG_DIR}/_report.csv"
