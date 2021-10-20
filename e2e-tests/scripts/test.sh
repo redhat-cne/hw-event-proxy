@@ -193,9 +193,23 @@ run_test() {
 
     echo "Sleep for 5 seconds: wait for logs to complete streaming"
     sleep 5
-    echo "--- Generate test report ---"
+
+    debug_log "--- Verify event message contents ---"
+    grep "received event" ${LOG_DIR}/consumer*.log | head -1 | sed 's/\\\"//g' | sed 's/  */ /g' > ${LOG_DIR}/event-received.log
+    e2e-tests/scripts/parse-events.py
+    if [[ $? -eq 1 ]]; then
+        echo -e "***$RED TEST FAILED $COLOR_RESET***"
+        # do not delete the test pod in case it's needed for debug
+        cleanup_log_streaming
+        exit 1
+    fi
+
+    debug_log "--- Generate test report ---"
     e2e-tests/scripts/parse-logs.py
-    if [[ $? -ne 0 ]]; then
+    if [[ $? -eq 1 ]]; then
+        echo -e "***$RED TEST FAILED $COLOR_RESET***"
+        # do not delete the test pod in case it's needed for debug
+        cleanup_log_streaming
         show_last_logs
         exit 1
     fi
@@ -261,9 +275,9 @@ if [[ $perf -eq 0 ]]; then
 
     # test without message field
     echo -e "---$BOLD TEST 2:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
-    test_without_message
+    ##test_without_message
     echo "Wait $INITIAL_DELAY_SEC seconds for preloading Redfish Registries..."
-    run_test
+    ##run_test
 else
     # performance test
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
@@ -272,5 +286,5 @@ else
 fi
 
 cleanup_log_streaming
-cleanup_consumer_logs
+#cleanup_consumer_logs
 echo "Full test report is available at ${LOG_DIR}/_report.csv"

@@ -1,0 +1,24 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "@odata.type": "#Event.v1_3_0.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "2153",
+      "EventTimestamp": "2021-07-13T15:09:55+0300",
+      "EventType": "Alert",
+      "MemberId": "615711",
+      "Message": "Fan 1 RPM is less than the lower critical threshold.",
+      "MessageArgs": [
+        "1"
+      ],
+      "MessageArgs@odata.count": 1,
+      "MessageId": "FAN0001",
+      "Severity": "Critical"
+    }
+  ],
+  "Id": "5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "Name": "Event Array"
+}

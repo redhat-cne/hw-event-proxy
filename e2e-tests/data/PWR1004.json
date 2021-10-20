@@ -1,0 +1,20 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "@odata.type": "#Event.v1_3_0.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "2274",
+      "EventTimestamp": "2021-07-13T15:24:06+0300",
+      "EventType": "Alert",
+      "MemberId": "615754",
+      "Message": "The system performance degraded because power capacity has changed.",
+      "MessageId": "PWR1004",
+      "Severity": "Warning"
+    }
+  ],
+  "Id": "5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "Name": "Event Array"
+}

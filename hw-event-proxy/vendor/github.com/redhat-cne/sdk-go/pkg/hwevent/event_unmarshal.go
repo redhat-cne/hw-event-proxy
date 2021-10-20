@@ -2,11 +2,9 @@ package hwevent
 
 import (
 	"io"
-
 	"sync"
 
 	jsoniter "github.com/json-iterator/go"
-
 	"github.com/redhat-cne/sdk-go/pkg/types"
 )
 
@@ -75,7 +73,7 @@ func readEventRecord(iter *jsoniter.Iterator) ([]EventRecord, error) {
 			case "Oem":
 				e.Oem = iter.SkipAndReturnBytes()
 			case "OriginOfCondition":
-				e.OriginOfCondition = iter.ReadString()
+				e.OriginOfCondition = iter.SkipAndReturnBytes()
 			case "Severity":
 				e.Severity = iter.ReadString()
 			case "Resolution":
@@ -91,7 +89,7 @@ func readEventRecord(iter *jsoniter.Iterator) ([]EventRecord, error) {
 }
 
 func readRedfishEvent(iter *jsoniter.Iterator) (RedfishEvent, error) {
-	var result RedfishEvent
+	result := RedfishEvent{}
 	var err error
 
 	for key := iter.ReadObject(); key != ""; key = iter.ReadObject() {
@@ -130,7 +128,17 @@ func readRedfishEvent(iter *jsoniter.Iterator) (RedfishEvent, error) {
 	return result, err
 }
 
-// readJSONFromIterator allows you to read the bytes reader as an event
+// readRedfishEventJSONFromIterator allows you to read the bytes reader as an RedfishEvent
+func readRedfishEventJSONFromIterator(out *RedfishEvent, iter *jsoniter.Iterator) error {
+	e, err := readRedfishEvent(iter)
+	if err != nil {
+		return err
+	}
+	*out = e
+	return nil
+}
+
+// readDataJSONFromIterator allows you to read the bytes reader as a Data
 func readDataJSONFromIterator(out *Data, iter *jsoniter.Iterator) error {
 	var (
 		// Universally parseable fields.
@@ -263,4 +271,12 @@ func (d *Data) UnmarshalJSON(b []byte) error {
 	iterator := jsoniter.ConfigFastest.BorrowIterator(b)
 	defer jsoniter.ConfigFastest.ReturnIterator(iterator)
 	return readDataJSONFromIterator(d, iterator)
+}
+
+// UnmarshalJSON implements the json unmarshal method used when this type is
+// unmarshaled using json.Unmarshal.
+func (d *RedfishEvent) UnmarshalJSON(b []byte) error {
+	iterator := jsoniter.ConfigFastest.BorrowIterator(b)
+	defer jsoniter.ConfigFastest.ReturnIterator(iterator)
+	return readRedfishEventJSONFromIterator(d, iterator)
 }
