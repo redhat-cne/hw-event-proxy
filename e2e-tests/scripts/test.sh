@@ -10,6 +10,7 @@ LOG_DIR=./logs
 job_result=0
 perf=0
 verbose=0
+message_parser=0
 num_of_consumer=0
 
 # Performance target for Intra-Node:
@@ -19,10 +20,11 @@ PERF_TARGET_PERCENT_10MS=95
 
 Help()
 {
-   echo "$0 [-p|-h|-v]"
+   echo "$0 [-p|-h|-v|-m]"
    echo "options:"
    echo "-p  Performance tests."
    echo "-v  Verbose mode."
+   echo "-m  Test message parser."
    echo "-h  Print this Help."
    echo
 }
@@ -33,6 +35,7 @@ while getopts ":hpv" option; do
          exit;;
       p) perf=1;;
       v) verbose=1;;
+      v) message_parser=1;;
      \?) echo "Error: Invalid option"
          exit;;
    esac
@@ -223,15 +226,17 @@ done
 
 if [[ $perf -eq 0 ]]; then
     # test with message field
-    echo -e "---$BOLD TEST 1:  WITH MESSAGE FIELD $COLOR_RESET---"
+    echo -e "---$BOLD TEST:  BASIC TEST $COLOR_RESET---"
     test_with_message
     run_test
 
-    # test without message field
-    echo -e "---$BOLD TEST 2:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
-    test_without_message
-    echo "Wait $INITIAL_DELAY_SEC seconds for preloading Redfish Registries..."
-    run_test
+    if [[ $message_parser -eq 1 ]]; then
+        # test without message field
+        echo -e "---$BOLD TEST:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
+        test_without_message
+        echo "Wait $INITIAL_DELAY_SEC seconds for preloading Redfish Registries..."
+        run_test
+    fi
 else
     # performance test
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
