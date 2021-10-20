@@ -126,7 +126,7 @@ make undeploy-example
 
 ## End to End Tests
 
-Prerequisite: a working Kubernetes cluster.
+Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBECONFIG` set pointing to your cluster.
 
 ### Build Test Tool Image
 ```

@@ -32,8 +32,8 @@ def get_log_level(level):
     elif level == "TRACE":
         return logging.DEBUG
     else:
-        logging.warning('Log level %s is not supported. Set level to INFO.', level)
-        return logging.INFO
+        logging.warning('Log level %s is not supported. Set level to DEBUG.', level)
+        return logging.DEBUG
 
 class MessageParserServicer(MessageParserServicer):
 
@@ -71,7 +71,7 @@ class MessageParserServicer(MessageParserServicer):
 
 
 if __name__ == '__main__':
-    l = os.environ.get('LOG_LEVEL')
+    l = os.environ.get('LOG_LEVEL', 'DEBUG')
     log_level= get_log_level(l)
     logging.basicConfig(
         level=log_level,
