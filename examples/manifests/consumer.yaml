@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloud-native-consumer-deployment
+  name: consumer
   namespace: cloud-native-events
   labels:
     app: consumer
@@ -50,7 +50,7 @@ spec:
             - "--api-port=8089"
           env:
             - name: AMQP_NAMESPACE
-              value: "amqp-interconnect"
+              value: "router"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

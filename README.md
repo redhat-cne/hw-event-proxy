@@ -22,7 +22,8 @@ export LOG_LEVEL=debug
 ```
 
 ### Install and run Apache Qpid Dispach Router
-Install AMQ router locally following https://github.com/redhat-cne/amq-installer.
+sudo dnf install qpid-dispatch-router
+qdrouterd &
 
 ### Run side car
 ```shell
@@ -122,3 +123,46 @@ make deploy-example
 ```shell
 make undeploy-example
 ```
+
+## End to End Tests
+
+Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBECONFIG` set pointing to your cluster.
+
+### Build Test Tool Image
+```
+cd e2e-tests
+make build
+scripts/build-image.sh
+podman images
+TAG=xxx
+podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-event-test:latest
+```
+
+### Basic Test
+The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec for 10 seconds.
+
+```shell
+make test
+```
+This invokes 2 test cases:
+* TEST 1:  WITH MESSAGE FIELD
+* TEST 2:  WITHOUT MESSAGE FIELD
+
+NOTE: TEST 2 waits for a random duration between 1 to 60 seconds for preloading Redfish Registries. By making the wait time random the test is able to test different scenarios when the Message Parser is not, partly or fully ready to process event messages.
+
+The tests are marked PASSED if all the events are received by the consumer. There is no verification of performance targets.
+
+### Performance Test
+The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes.
+
+```shell
+make test-perf
+```
+The tests are marked PASSED if all the events are received by the consumer and the performance targets are met.
+
+Performance Target:
+
+**95%** of the massages should have latency <= **10ms**.
+
+### Test Report
+Test Report is available at logs/_report.csv at end of the test run.

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: router
+  name: router
+  namespace: router
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: router
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - env:
+            - name: QDROUTERD_CONF
+              value: /opt/router/qdrouterd.conf
+          image: quay.io/interconnectedcloud/qdrouterd:latest
+          imagePullPolicy: Always
+          name: router
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /opt/router
+              name: router-config
+              readOnly: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: router
+          name: router-config

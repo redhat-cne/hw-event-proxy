@@ -1,4 +1,4 @@
-.PHONY: build
+.PHONY: test
 
 # Current  version
 VERSION ?=latest
@@ -38,10 +38,44 @@ endif
 
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
 deploy-example:kustomize
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} && $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} && $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
+	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
+		&& $(KUSTOMIZE) edit set replicas consumer=1
 	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
 
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
 undeploy-example:kustomize
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} && $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} && $(KUSTOMIZE) edit set image cloud-native-event-consumer=${CONSUMER_IMG}
+	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f -
+
+# Deploy with 20 consumers for performance testing
+deploy-perf:kustomize
+	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
+		&& $(KUSTOMIZE) edit set replicas consumer=20
+	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
+
+# Deploy all in the configured Kubernetes cluster in ~/.kube/config
+deploy-amq:kustomize
+	$(KUSTOMIZE) build ./examples/manifests/amq-installer | kubectl apply -f -
+
+# Deploy all in the configured Kubernetes cluster in ~/.kube/config
+undeploy-amq:kustomize
+	$(KUSTOMIZE) build ./examples/manifests/amq-installer | kubectl delete -f -
+
+test-only:
+	e2e-tests/scripts/test.sh
+
+test-only-debug:
+	e2e-tests/scripts/test.sh -v
+
+test-perf-only:
+	e2e-tests/scripts/test.sh -p
+
+test: | deploy-amq deploy-example test-only undeploy-example undeploy-amq
+
+test-perf: | deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
