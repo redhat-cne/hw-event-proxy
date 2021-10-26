@@ -27,6 +27,8 @@ ifeq (, $(shell which kustomize))
 		set -e ;\
 		KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
 		cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+		# remove -mod=vendor flag to allow install\
+		export GOFLAGS=;\
 		go mod init tmp ;\
 		go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
 		rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
@@ -77,5 +79,7 @@ test-perf-only:
 	e2e-tests/scripts/test.sh -p
 
 test: | deploy-amq deploy-example test-only undeploy-example undeploy-amq
+
+test-debug: | deploy-amq deploy-example test-only-debug undeploy-example undeploy-amq
 
 test-perf: | deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
