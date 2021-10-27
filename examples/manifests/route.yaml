@@ -3,6 +3,7 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: hw-event-proxy
+  namespace: cloud-native-events
 spec:
   to:
     kind: Service
