@@ -167,6 +167,11 @@ run_test() {
     debug_log "Sleep for 5 seconds: wait for logs to complete streaming"
     sleep 5
     debug_log "--- Generate test report ---"
+    ## <-- DZK temp
+    NAMESPACE=cloud-native-events
+    kubectl -n ${NAMESPACE} logs -f -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
+    ## DZK temp -->
+
     e2e-tests/scripts/parse-logs.py
 
     debug_log "--- Check test result ---"
