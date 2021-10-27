@@ -147,7 +147,7 @@ run_test() {
 
     # start the test
     debug_log "--- Start testing ---"
-    kubectl -n ${NAMESPACE} apply -f ${LOG_DIR}/redfish-event-test.yaml >/dev/null
+    kubectl -n ${NAMESPACE} apply -f ${LOG_DIR}/redfish-event-test.yaml
 
     # streaming logs for the test tool
     kubectl -n ${NAMESPACE} wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s  >/dev/null 2>&1
