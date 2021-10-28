@@ -140,6 +140,18 @@ cleanup_test_pod(){
     cleanup_log_streaming_test
 }
 
+show_last_logs(){
+    if [[ $verbose -eq 1 ]]; then
+        echo "--- hw-event-proxy logs ---"
+        kubectl -n ${NAMESPACE} logs -t 50 -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
+        for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
+            echo "--- consumer $podname logs ---"
+            kubectl -n ${NAMESPACE} logs -t 50 -c cloud-native-event-consumer $podname
+            num_of_consumer=$(( num_of_consumer + 1 ))
+        done
+    fi
+}
+
 run_test() {
     debug_log "--- Cleanup previous test pod and logs---"
     cleanup_test_pod
@@ -167,12 +179,11 @@ run_test() {
     debug_log "Sleep for 5 seconds: wait for logs to complete streaming"
     sleep 5
     debug_log "--- Generate test report ---"
-    ## <-- DZK temp
-    NAMESPACE=cloud-native-events
-    kubectl -n ${NAMESPACE} logs -f -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
-    ## DZK temp -->
-
     e2e-tests/scripts/parse-logs.py
+    if [[ $? -ne 0 ]]; then
+        show_last_logs
+        exit 1
+    fi
 
     debug_log "--- Check test result ---"
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
@@ -195,6 +206,7 @@ run_test() {
         echo -e "***$RED TEST FAILED $COLOR_RESET***: Events sent: $num_events_send, Events received: $num_events_received"
         # do not delete the test pod in case it's needed for debug
         cleanup_log_streaming
+        show_last_logs
         exit 1
     fi
 }
