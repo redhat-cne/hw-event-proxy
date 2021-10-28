@@ -158,6 +158,20 @@ show_last_logs(){
                 cat $file
             fi
         done
+
+        echo "--- get nodes ---"
+        kubectl get nodes
+        echo "--- get nodes --show-labels ---"
+        kubectl get nodes --show-labels
+        echo "--- node for pod hw-event-proxy ---"
+        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq '.spec.nodeName'
+        for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
+            echo "--- node for pod $podname ---"
+            kubectl -n ${NAMESPACE} get pod $podname -o json | jq '.spec.nodeName'
+            num_of_consumer=$(( num_of_consumer + 1 ))
+        done
+        echo "--- node for pod amq router ---"
+        kubectl -n router get pod `kubectl -n router get pods | grep router | cut -f1 -d" "` -o json | jq '.spec.nodeName'
     fi
 }
 
