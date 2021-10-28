@@ -143,11 +143,20 @@ cleanup_test_pod(){
 show_last_logs(){
     if [[ $verbose -eq 1 ]]; then
         echo "--- hw-event-proxy logs ---"
-        kubectl -n ${NAMESPACE} logs -t 50 -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
+        kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
         for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
             echo "--- consumer $podname logs ---"
-            kubectl -n ${NAMESPACE} logs -t 50 -c cloud-native-event-consumer $podname
+            kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-native-event-consumer $podname
             num_of_consumer=$(( num_of_consumer + 1 ))
+        done
+        echo "--- redfish-event-test logs ---"
+        kubectl -n ${NAMESPACE} logs --tail=50 `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "`
+
+        for file in ${LOG_DIR}/*; do
+            if test -f "$file"; then
+                echo "--- file ${LOG_DIR}/$file ---"
+                cat $file
+            fi
         done
     fi
 }
