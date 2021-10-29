@@ -15,15 +15,15 @@ spec:
       labels:
         app: consumer
     spec:
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #         - matchExpressions:
-      #             - key: app
-      #               operator: In
-      #               values:
-      #                 - local
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - local
       serviceAccountName: sidecar-consumer-sa
       containers:
         - name: cloud-native-event-consumer

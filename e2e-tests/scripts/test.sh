@@ -19,10 +19,9 @@ PERF_TARGET_PERCENT_10MS=95
 
 Help()
 {
-   echo "$0 [-p|-h|-v]"
+   echo "$0 [-p|-h]"
    echo "options:"
    echo "-p  Performance tests."
-   echo "-v  Verbose mode."
    echo "-h  Print this Help."
    echo
 }
@@ -32,7 +31,6 @@ while getopts ":hpv" option; do
       h) Help
          exit;;
       p) perf=1;;
-      v) verbose=1;;
      \?) echo "Error: Invalid option"
          exit;;
    esac
@@ -128,12 +126,6 @@ cleanup_log_streaming_test(){
     fi
 }
 
-debug_log(){
-    if [[ $verbose -eq 1 ]]; then
-        echo $1
-    fi
-}
-
 cleanup_test_pod(){
     kubectl -n ${NAMESPACE} delete job/redfish-event-test --ignore-not-found=true --grace-period=0 >/dev/null 2>&1 || true
     kubectl -n ${NAMESPACE} wait --for=delete job/redfish-event-test --timeout=60s 2>/dev/null || true
@@ -176,12 +168,12 @@ show_last_logs(){
 }
 
 run_test() {
-    debug_log "--- Cleanup previous test pod and logs---"
+    echo "--- Cleanup previous test pod and logs---"
     cleanup_test_pod
     reset_logs
 
     # start the test
-    debug_log "--- Start testing ---"
+    echo "--- Start testing ---"
     kubectl -n ${NAMESPACE} apply -f ${LOG_DIR}/redfish-event-test.yaml
 
     # streaming logs for the test tool
@@ -199,16 +191,16 @@ run_test() {
         exit 1
     fi
 
-    debug_log "Sleep for 5 seconds: wait for logs to complete streaming"
+    echo "Sleep for 5 seconds: wait for logs to complete streaming"
     sleep 5
-    debug_log "--- Generate test report ---"
+    echo "--- Generate test report ---"
     e2e-tests/scripts/parse-logs.py
     if [[ $? -ne 0 ]]; then
         show_last_logs
         exit 1
     fi
 
-    debug_log "--- Check test result ---"
+    echo "--- Check test result ---"
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -eq $num_events_received ]; then
@@ -235,18 +227,18 @@ run_test() {
 }
 
 mkdir -p -- "$LOG_DIR"
-debug_log "--- Clean up logs ---"
+echo "--- Clean up logs ---"
 cleanup_logs
 cleanup_log_streaming
 
-debug_log "--- Check if consumer pod is available ---"
+echo "--- Check if consumer pod is available ---"
 wait_for_resource deployment/consumer available 60s >/dev/null
 if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
 
-debug_log "--- Check if hw-event-proxy pod is available ---"
+echo "--- Check if hw-event-proxy pod is available ---"
 wait_for_resource deployment/hw-event-proxy available 60s >/dev/null
 if [[ $job_result -eq 1 ]]; then
     echo "hw-event-proxy pod is not available"
@@ -254,7 +246,7 @@ if [[ $job_result -eq 1 ]]; then
 fi
 
 # streaming logs for multiple consumers.
-debug_log "--- Start streaming consumer logs ---"
+echo "--- Start streaming consumer logs ---"
 for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
     kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $podname >> ${LOG_DIR}/$podname.log &
     echo "$!" > ${LOG_DIR}/log-$podname.pid

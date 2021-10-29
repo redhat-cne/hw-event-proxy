@@ -38,6 +38,10 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
+# label a worker node as local
+label-node:
+	kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
+
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
 deploy-example:kustomize
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
@@ -72,14 +76,9 @@ undeploy-amq:kustomize
 test-only:
 	e2e-tests/scripts/test.sh
 
-test-only-debug:
-	e2e-tests/scripts/test.sh -v
-
 test-perf-only:
 	e2e-tests/scripts/test.sh -p
 
-test: | deploy-amq deploy-example test-only undeploy-example undeploy-amq
+test: | label-node deploy-amq deploy-example test-only undeploy-example undeploy-amq
 
-test-debug: | deploy-amq deploy-example test-only-debug undeploy-example undeploy-amq
-
-test-perf: | deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
+test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
