@@ -81,4 +81,7 @@ test-perf-only:
 
 test: | label-node deploy-amq deploy-example test-only undeploy-example undeploy-amq
 
+# Used by openshift/release
+test-ci: test
+
 test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
