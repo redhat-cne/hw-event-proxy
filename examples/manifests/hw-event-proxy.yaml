@@ -17,6 +17,15 @@ spec:
       labels:
         app: hw-event-proxy
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - local
       serviceAccountName: hw-event-proxy-sa
       containers:
         - name: hw-event-proxy
