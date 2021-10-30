@@ -38,12 +38,16 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
+check-env:
+	@test $${REDFISH_USERNAME?Please set environment variable REDFISH_USERNAME}
+	@test $${REDFISH_PASSWORD?Please set environment variable REDFISH_PASSWORD}
+	@test $${REDFISH_HOSTADDR?Please set environment variable REDFISH_HOSTADDR}
+
 # Configure redfish credentials and BMC ip from environment variables
 redfish-config:
-	@[[ -z "${REDFISH_USERNAME}" ]] && echo "WARNING: Redfish environment variables are not set." || true
-	@sed -i -e "s/redfish-user/${REDFISH_USERNAME}/" ./manifests/basic/kustomization.yaml
-	@sed -i -e "s/redfish-pass/${REDFISH_PASSWORD}/" ./manifests/basic/kustomization.yaml
-	@sed -i -e "s/127.0.0.1/${REDFISH_HOSTADDR}/" ./manifests/basic/kustomization.yaml
+	@sed -i -e "s/username=.*/username=${REDFISH_USERNAME}/" ./manifests/basic/kustomization.yaml
+	@sed -i -e "s/password=.*/password=${REDFISH_PASSWORD}/" ./manifests/basic/kustomization.yaml
+	@sed -i -e "s/hostaddr=.*/hostaddr=${REDFISH_HOSTADDR}/" ./manifests/basic/kustomization.yaml
 
 # label the first Ready worker node as local
 label-node:
@@ -86,9 +90,9 @@ test-only:
 test-perf-only:
 	e2e-tests/scripts/test.sh -p
 
-test: | deploy-basic test-only undeploy-basic
+test: | check-env deploy-basic test-only undeploy-basic
 
-test-perf: | deploy-perf test-perf-only undeploy-perf
+test-perf: | check-env deploy-perf test-perf-only undeploy-perf
 
-# Used by openshift/release
-test-ci: test
+# Used by openshift/release. Do not check-env here since redfish hardware is not available
+test-ci: | deploy-basic test-only undeploy-basic

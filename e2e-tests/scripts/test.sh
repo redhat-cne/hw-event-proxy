@@ -135,6 +135,7 @@ test_perf() {
     INITIAL_DELAY_SEC=60
 
     cat e2e-tests/manifests/redfish-event-test.yaml \
+    | sed "/PERF/{n;s/NO/YES/}" \
     | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
     | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
     | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" > ${LOG_DIR}/redfish-event-test.yaml
