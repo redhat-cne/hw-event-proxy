@@ -66,7 +66,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/net v0.0.0-20211029224645-99673261e6eb
+# golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
