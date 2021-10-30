@@ -111,16 +111,18 @@ make test
 ```
 The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
 
-The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are descriptions can be found at [here](e2e-tests/data/README.md).
+The contents of the received events are verified in the test. The list of fields to check are defined the file [`e2e-tests/data/EVENT_FIELDS_TO_VERIFY`](e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
 
-The contents of the received events are verified. The list of fields to check are defined the file [e2e-tests/data/EVENT_FIELDS_TO_VERIFY](e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
+The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are described [here](e2e-tests/data/README.md).
+
+> 📝 New tests can be added by simply adding JSON files in `e2e-tests/data`.
 
 
 ### Performance Test
 ```shell
 make test-perf
 ```
-The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes.
+The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the `hw-event-proxy` at a rate of 10 msgs/sec for 10 minutes.
 
 The tests are marked PASSED if all the events are received by the consumer and the performance targets are met.
 
