@@ -6,7 +6,6 @@ resources:
 - roles.yaml
 - service.yaml
 - route.yaml
-- secret.yaml
 - hw-event-proxy.yaml
 - consumer.yaml
 replicas:
@@ -24,3 +23,9 @@ images:
 - name: hw-event-proxy
   newName: quay.io/redhat_emp1/hw-event-proxy
   newTag: latest
+secretGenerator:
+- envs:
+  - .env
+  name: redfish-basic-auth
+  namespace: cloud-native-events
+  type: Opaque

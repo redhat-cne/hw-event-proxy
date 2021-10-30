@@ -22,9 +22,10 @@ export LOG_LEVEL=debug
 ```
 
 ### Install and run Apache Qpid Dispach Router
+```
 sudo dnf install qpid-dispatch-router
 qdrouterd &
-
+```
 ### Run side car
 ```shell
 cd <cloud-event-proxy repo>
@@ -79,14 +80,6 @@ Make sure you update the image path.
 
 ## Deploying examples using kustomize
 
-### Install Kustomize
-```shell
-curl -s "https://raw.githubusercontent.com/\
-kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
-
-mv kustomize /usr/local/bin/
-
-```
 ### Set Env variables
 ```shell
 export VERSION=latest

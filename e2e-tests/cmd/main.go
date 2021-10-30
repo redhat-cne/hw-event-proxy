@@ -19,7 +19,7 @@ var (
 	testDuration = 10
 	// initial delay in seconds when pod starts
 	initialDelay        = 10
-	checkResp    string = "NO"
+	checkResp    string = "YES"
 	withMsgField string = "YES"
 
 	totalPerSecMsgCount uint64 = 0
@@ -95,14 +95,27 @@ func basicTest() {
 		log.Fatal(err)
 	}
 
+	req := fasthttp.AcquireRequest()
+	req.Header.SetContentType("application/json")
+	req.Header.SetMethod("POST")
+	req.SetRequestURI(webhookURL)
+	res := fasthttp.AcquireResponse()
+
 	for _, file := range files {
 		event, err := os.ReadFile(fmt.Sprintf("%s%s", dataDir, file.Name()))
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Infof(string(event))
+		req.SetBody(event)
+		if err := fasthttp.Do(req, res); err != nil {
+			log.Errorf("Sending error: %v", err)
+		}
+		time.Sleep(time.Second)
 	}
+	fasthttp.ReleaseRequest(req)
 }
+
 func perfTest() {
 
 	eventTMP0100, err := os.ReadFile("data/TMP0100.json")

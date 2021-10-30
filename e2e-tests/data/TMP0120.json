@@ -1,5 +1,3 @@
-# this is a message received from real hardware
-# PowerEdge R640 BIOS=2.8.1, iDRAC Firmware=5.00.00.00
 {
   "@odata.context": "/redfish/v1/$metadata#Event.Event",
   "@odata.id": "/redfish/v1/EventService/Events/eef31690-f615-11eb-95ea-3448edf18a38",

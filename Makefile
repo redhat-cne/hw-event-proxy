@@ -30,7 +30,7 @@ ifeq (, $(shell which kustomize))
 		# remove -mod=vendor flag to allow install\
 		export GOFLAGS=;\
 		go mod init tmp ;\
-		go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+		go get sigs.k8s.io/kustomize/kustomize/v4@v4.4.0 ;\
 		rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
 		}
 KUSTOMIZE=$(GOBIN)/kustomize
@@ -42,8 +42,22 @@ endif
 label-node:
 	kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
 
+export REDFISH_ENV_FILE=./examples/manifests/.env
+
+# Make a dummy .env for ci test
+dummy-env:
+	echo username=foo > $$REDFISH_ENV_FILE \
+	echo password=bar >> $$REDFISH_ENV_FILE \
+	echo hostaddr=127.0.0.1 >> $$REDFISH_ENV_FILE
+
+check-env:
+	if [ ! -f $$REDFISH_ENV_FILE ]; then \
+   		echo "File $$REDFISH_ENV_FILE does not exist."; \
+		exit 1; \
+	fi
+
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
-deploy-example:kustomize
+deploy-example:kustomize check-env
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
@@ -58,7 +72,7 @@ undeploy-example:kustomize
 	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f -
 
 # Deploy with 20 consumers for performance testing
-deploy-perf:kustomize
+deploy-perf:kustomize check-env
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
@@ -81,7 +95,7 @@ test-perf-only:
 
 test: | label-node deploy-amq deploy-example test-only undeploy-example undeploy-amq
 
-# Used by openshift/release
-test-ci: test
-
 test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
+
+# Used by openshift/release
+test-ci:  | label-node dummy-env deploy-amq deploy-example test-only undeploy-example undeploy-amq
