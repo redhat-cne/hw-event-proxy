@@ -21,7 +21,7 @@ import (
 )
 
 // Event represents the canonical representation of a Hardware Event.
-// Event Json  payload is as follows,
+// Example payload:
 //{
 //  "id": "5ce55d17-9234-4fee-a589-d0f10cb32b8e",
 //  "type": "event.synchronization-state-chang",
@@ -43,7 +43,7 @@ import (
 // 		      "Cached"
 // 		    ],
 // 		    "MessageId": "iLOEvents.2.1.ServerPoweredOff",
-// 		    "OriginOfCondition": "/redfish/v1/Systems/1/",
+// 		    "OriginOfCondition": {"@odata.id":"/redfish/v1/Systems/System.Embedded.1"},
 // 		    "Severity": "OK"
 // 	      }
 // 	    ],

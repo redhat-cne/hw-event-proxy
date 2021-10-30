@@ -79,12 +79,7 @@ func WriteJSON(in *Event, writer io.Writer) error {
 	stream.WriteObjectEnd()
 	// Let's do a check on the error
 	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event Data: %w", stream.Error)
-	}
-
-	// Let's do a check on the error
-	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event extensions: %w", stream.Error)
+		return fmt.Errorf("error while writing the Event data: %w", stream.Error)
 	}
 	return stream.Flush()
 }
@@ -119,13 +114,9 @@ func writeJSONData(in *Data, writer io.Writer, stream *jsoniter.Stream) error {
 
 	// Let's do a check on the error
 	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event Data: %w", stream.Error)
+		return fmt.Errorf("error while writing the Data data: %w", stream.Error)
 	}
 
-	// Let's do a check on the error
-	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event extensions: %w", stream.Error)
-	}
 	return nil
 }
 
@@ -207,12 +198,7 @@ func writeJSONRedfishEvent(in *RedfishEvent, writer io.Writer, stream *jsoniter.
 
 	// Let's do a check on the error
 	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event Data: %w", stream.Error)
-	}
-
-	// Let's do a check on the error
-	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event extensions: %w", stream.Error)
+		return fmt.Errorf("error while writing the RedfishEvent data: %w", stream.Error)
 	}
 	return nil
 }
@@ -228,7 +214,7 @@ func writeJSONEventRecord(in *EventRecord, writer io.Writer, stream *jsoniter.St
 			stream.WriteObjectField("Actions")
 			_, err = stream.Write(data.Actions)
 			if err != nil {
-				return fmt.Errorf("error writing Oem: %w", err)
+				return fmt.Errorf("error writing Actions: %w", err)
 			}
 			stream.WriteMore()
 		}
@@ -277,9 +263,12 @@ func writeJSONEventRecord(in *EventRecord, writer io.Writer, stream *jsoniter.St
 			}
 			stream.WriteMore()
 		}
-		if data.OriginOfCondition != "" {
+		if data.OriginOfCondition != nil {
 			stream.WriteObjectField("OriginOfCondition")
-			stream.WriteString(data.OriginOfCondition)
+			_, err = stream.Write(data.OriginOfCondition)
+			if err != nil {
+				return fmt.Errorf("error writing OriginOfCondition: %w", err)
+			}
 			stream.WriteMore()
 		}
 		if data.Severity != "" {
@@ -320,12 +309,7 @@ func writeJSONEventRecord(in *EventRecord, writer io.Writer, stream *jsoniter.St
 
 	// Let's do a check on the error
 	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event Data: %w", stream.Error)
-	}
-
-	// Let's do a check on the error
-	if stream.Error != nil {
-		return fmt.Errorf("error while writing the event extensions: %w", stream.Error)
+		return fmt.Errorf("error while writing the EventRecord data: %w", stream.Error)
 	}
 	return nil
 }

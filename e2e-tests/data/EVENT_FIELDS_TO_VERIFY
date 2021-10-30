@@ -1,0 +1,12 @@
+{
+  "keys": [
+    "EventId",
+    "EventTimestamp",
+    "EventType",
+    "MemberId",
+    "Message",
+    "MessageArgs",
+    "MessageId",
+    "Severity"
+  ]
+}

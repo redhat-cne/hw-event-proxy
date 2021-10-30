@@ -8,7 +8,7 @@ from message_parser_pb2_grpc import MessageParserServicer, add_MessageParserServ
 
 import os
 import sushy
-import json
+import sys
 from sushy import auth
 from sushy.resources import base
 from sushy.resources.registry import message_registry
@@ -43,13 +43,24 @@ class MessageParserServicer(MessageParserServicer):
         redfish_hostaddr = os.environ.get('REDFISH_HOSTADDR')
 
         basic_auth = auth.BasicAuth(username=redfish_username, password=redfish_password)
-        self.sushy_root = sushy.Sushy('https://' + redfish_hostaddr + '/redfish/v1',
-                auth=basic_auth, verify=False)
+        try:
+            self.sushy_root = sushy.Sushy('https://' + redfish_hostaddr + '/redfish/v1',
+                    auth=basic_auth, verify=False)
+        except sushy.exceptions.ConnectionError:
+            logging.error('Timeout connecting to %s', redfish_hostaddr)
+            sys.exit(1)
+
         logging.info('Redfish version: %s', self.sushy_root.redfish_version)
         self.registries = self.sushy_root.lazy_registries
+
         # preload the registries
         logging.info('Preloading Redfish Registries...')
-        self.registries.registries        
+        try:
+            self.registries.registries
+        except sushy.exceptions.AccessError as e:
+            logging.error(e)
+            sys.exit(1)
+
         logging.info('Preloading Redfish Registries DONE')
     
     def Parse(self, request, context):

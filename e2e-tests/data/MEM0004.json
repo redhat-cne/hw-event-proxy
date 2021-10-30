@@ -1,0 +1,24 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "@odata.type": "#Event.v1_3_0.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "2265",
+      "EventTimestamp": "2021-07-13T14:56:58+0300",
+      "EventType": "Alert",
+      "MemberId": "615676",
+      "Message": "Memory device at location DIMM1 is disabled.",
+      "MessageArgs": [
+        "DIMM1"
+      ],
+      "MessageArgs@odata.count": 1,
+      "MessageId": "MEM0004",
+      "Severity": "Critical"
+    }
+  ],
+  "Id": "5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
+  "Name": "Event Array"
+}

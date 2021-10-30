@@ -14,8 +14,7 @@ trap exitonsigterm SIGTERM
 python3 /message-parser/server.py &
 status=$?
 if [ $status -ne 0 ]; then
-  echo "Failed to start message-parser: $status"
-  exit $status
+  echo "WARNING: Failed to start message-parser. Events missing message field will not be parsed."
 fi
 
 # Start the hw-event-proxy

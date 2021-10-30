@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -18,21 +19,19 @@ var (
 	testDuration = 10
 	// initial delay in seconds when pod starts
 	initialDelay        = 10
-	checkResp    string = "NO"
+	checkResp    string = "YES"
 	withMsgField string = "YES"
 
 	totalPerSecMsgCount uint64 = 0
 
-	eventTMP0100           = []byte(`{"@odata.context":"/redfish/v1/$metadata#Event.Event","@odata.id":"/redfish/v1/EventService/Events/5e004f5a-e3d1-11eb-ae9c-3448edf18a38","@odata.type":"#Event.v1_3_0.Event","Context":"any string is valid","Events":[{"Context":"any string is valid","EventId":"2162","EventTimestamp":"2021-07-13T15:07:59+0300","EventType":"Alert","MemberId":"615703","Message":"The system board Inlet temperature is less than the lower warning threshold.","MessageArgs":["Inlet"],"MessageArgs@odata.count":1,"MessageId":"TMP0100","Severity":"Warning"}],"Id":"5e004f5a-e3d1-11eb-ae9c-3448edf18a38","Name":"Event Array"}`)
-	eventTMP0100NoMsgField = []byte(`{"@odata.context":"/redfish/v1/$metadata#Event.Event","@odata.id":"/redfish/v1/EventService/Events/5e004f5a-e3d1-11eb-ae9c-3448edf18a38","@odata.type":"#Event.v1_3_0.Event","Context":"any string is valid","Events":[{"Context":"any string is valid","EventId":"2162","EventTimestamp":"2021-07-13T15:07:59+0300","EventType":"Alert","MemberId":"615703","MessageArgs":["Inlet"],"MessageArgs@odata.count":1,"MessageId":"TMP0100","Severity":"Warning"}],"Id":"5e004f5a-e3d1-11eb-ae9c-3448edf18a38","Name":"Event Array"}`)
-
-	wg  sync.WaitGroup
-	tck *time.Ticker
+	perf    string = "NO"
+	dataDir        = "data/"
+	wg      sync.WaitGroup
+	tck     *time.Ticker
 )
 
 func main() {
 	initLogger()
-
 	envWebhookURL := os.Getenv("TEST_DEST_URL")
 	if envWebhookURL != "" {
 		webhookURL = envWebhookURL
@@ -61,6 +60,72 @@ func main() {
 	envWithMsgField := os.Getenv("WITH_MESSAGE_FIELD")
 	if envWithMsgField != "" {
 		withMsgField = envWithMsgField
+	}
+
+	envPerf := os.Getenv("PERF")
+	if envPerf != "" {
+		perf = envPerf
+	}
+
+	if perf == "YES" {
+		perfTest()
+	} else {
+		basicTest()
+	}
+}
+
+func initLogger() {
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "debug"
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.DebugLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+}
+
+func basicTest() {
+	files, err := os.ReadDir(dataDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req := fasthttp.AcquireRequest()
+	req.Header.SetContentType("application/json")
+	req.Header.SetMethod("POST")
+	req.SetRequestURI(webhookURL)
+	res := fasthttp.AcquireResponse()
+
+	for _, file := range files {
+		event, err := os.ReadFile(fmt.Sprintf("%s%s", dataDir, file.Name()))
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Infof(string(event))
+		req.SetBody(event)
+		if err := fasthttp.Do(req, res); err != nil {
+			log.Errorf("Sending error: %v", err)
+		}
+		time.Sleep(time.Second)
+	}
+	fasthttp.ReleaseRequest(req)
+}
+
+func perfTest() {
+
+	eventTMP0100, err := os.ReadFile("data/TMP0100.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	eventTMP0100NoMsgField, err := os.ReadFile("data/TMP0100-no-msg-field.json")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Infof("Webhook URL: %v", webhookURL)
@@ -152,19 +217,4 @@ func main() {
 		}
 		totalPerSecMsgCount++
 	}
-}
-
-func initLogger() {
-	lvl, ok := os.LookupEnv("LOG_LEVEL")
-	// LOG_LEVEL not set, let's default to debug
-	if !ok {
-		lvl = "debug"
-	}
-	// parse string, this is built-in feature of logrus
-	ll, err := log.ParseLevel(lvl)
-	if err != nil {
-		ll = log.DebugLevel
-	}
-	// set global log level
-	log.SetLevel(ll)
 }

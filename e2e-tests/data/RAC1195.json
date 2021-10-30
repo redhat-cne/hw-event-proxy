@@ -1,0 +1,27 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/41e2587e-3901-11ec-af81-3448edf18a38",
+  "@odata.type": "#Event.v1_3_0.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "8675",
+      "EventTimestamp": "2021-10-30T01:19:52+0300",
+      "EventType": "Alert",
+      "MemberId": "265",
+      "Message": "User root via IP 10.22.16.120 requested state / configuration change to Alert Configuration using GUI.",
+      "MessageArgs": [
+        "root",
+        "10.22.16.120",
+        "Alert Configuration",
+        "GUI"
+      ],
+      "MessageArgs@odata.count": 4,
+      "MessageId": "RAC1195",
+      "Severity": "Informational"
+    }
+  ],
+  "Id": "41e2587e-3901-11ec-af81-3448edf18a38",
+  "Name": "Event Array"
+}

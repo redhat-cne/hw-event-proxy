@@ -75,7 +75,7 @@ type EventRecord struct {
 	// This indicates the resource that originated the condition that
 	// caused the event to be generated.
 	// +optional
-	OriginOfCondition string `json:"OriginOfCondition,omitempty"`
+	OriginOfCondition []byte `json:"OriginOfCondition,omitempty"`
 	//  This is the severity of the event.
 	// +optional
 	Severity string `json:"Severity,omitempty"`
@@ -120,8 +120,8 @@ func (e EventRecord) String() string {
 	if e.Oem != nil {
 		b.WriteString("      Oem: " + string(e.Oem) + "\n")
 	}
-	if e.OriginOfCondition != "" {
-		b.WriteString("      OriginOfCondition: " + e.OriginOfCondition + "\n")
+	if e.OriginOfCondition != nil {
+		b.WriteString("      OriginOfCondition: " + string(e.OriginOfCondition) + "\n")
 	}
 	if e.Severity != "" {
 		b.WriteString("      Severity: " + e.Severity + "\n")

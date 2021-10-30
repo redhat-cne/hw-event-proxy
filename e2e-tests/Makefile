@@ -12,6 +12,10 @@ endif
 
 export COMMON_GO_ARGS=-race
 
+deps-update:
+	go mod tidy && \
+	go mod vendor
+
 build:
 	go fmt ./...
 	make lint

@@ -27,6 +27,8 @@ spec:
               value: "YES"
             - name: TEST_DEST_URL
               value: "http://hw-event-proxy-service:9087/webhook"
+            - name: PERF
+              value: "NO"
             - name: MY_NODE_NAME
               valueFrom:
                 fieldRef:

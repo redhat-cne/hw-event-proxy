@@ -1,16 +1,17 @@
 #!/bin/bash
 
 COLOR_RESET='\033[0m'
-GREEN='\033[1;32m'
 RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW="\033[1;33m"
 BOLD='\033[1m'
 
 NAMESPACE=cloud-native-events
 LOG_DIR=./logs
+DATA_DIR=e2e-tests/data
 job_result=0
 perf=0
 verbose=0
-num_of_consumer=0
 
 # Performance target for Intra-Node:
 # At a rate of 10 msgs/sec, 95% of the massages should have latency <= 10ms.
@@ -44,72 +45,20 @@ wait_for_resource(){
         if kubectl -n ${NAMESPACE} wait --for=condition=$condition --timeout=$timeout $resoure_name 2>/dev/null; then
             job_result=0
             break
-    fi
-
-    if kubectl -n ${NAMESPACE} wait --for=condition=failed --timeout=$timeout $resoure_name 2>/dev/null; then
-        job_result=1
-        break
-    fi
-
-    sleep 3
+        fi
+        if kubectl -n ${NAMESPACE} wait --for=condition=failed --timeout=$timeout $resoure_name 2>/dev/null; then
+            job_result=1
+            break
+        fi
+        sleep 3
     done
 }
 
-apply_test_options(){
-    cat e2e-tests/manifests/redfish-event-test.yaml \
-    | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
-    | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
-    | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" \
-    | sed "/CHECK_RESP/{n;s/YES/$CHECK_RESP/}" \
-    | sed "/WITH_MESSAGE_FIELD/{n;s/YES/$WITH_MESSAGE_FIELD/}" > ${LOG_DIR}/redfish-event-test.yaml
-}
-
-test_with_message(){
-    MSG_PER_SEC=1
-    TEST_DURATION_SEC=10
-    INITIAL_DELAY_SEC=2
-    CHECK_RESP=YES
-    WITH_MESSAGE_FIELD=YES  
-    apply_test_options
-}
-
-test_without_message(){
-    MSG_PER_SEC=1
-    TEST_DURATION_SEC=10
-    # wait a random duration between 1 to 60 seconds for preloading Redfish Registries
-    INITIAL_DELAY_SEC=$(( $RANDOM % 60 + 1 ))
-    CHECK_RESP=YES
-    WITH_MESSAGE_FIELD=NO  
-    apply_test_options
-}
-
-test_performance(){
-    MSG_PER_SEC=10
-    TEST_DURATION_SEC=600
-    INITIAL_DELAY_SEC=60
-    CHECK_RESP=YES
-    WITH_MESSAGE_FIELD=YES
-    apply_test_options
-}
-
-reset_logs(){
-    # empty log files without breaking the streaming
-    truncate -s 0 ${LOG_DIR}/consumer*.log 2>/dev/null
-    truncate -s 0 ${LOG_DIR}/redfish-event-test.log 2>/dev/null
-}
-
 cleanup_logs(){
-    rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
-    rm -f ${LOG_DIR}/redfish-event-test.log 2>/dev/null
-    rm -f ${LOG_DIR}/_report.csv 2>/dev/null
-    rm -f ${LOG_DIR}/redfish-event-test.yaml 2>/dev/null
+    rm -f ${LOG_DIR}/* 2>/dev/null
 }
 
-cleanup_consumer_logs(){
-    rm -f ${LOG_DIR}/consumer*.log 2>/dev/null
-}
-
-cleanup_log_streaming(){
+cleanup_logs_pid(){
     for pidFile in ${LOG_DIR}/*.pid; do
         if test -f "$pidFile"; then
             pkill -F $pidFile 2>/dev/null
@@ -118,59 +67,79 @@ cleanup_log_streaming(){
     done
 }
 
-cleanup_log_streaming_test(){
-    pidFile=${LOG_DIR}/log-redfish-event-test.pid
-    if test -f "$pidFile"; then
-        pkill -F $pidFile 2>/dev/null
-        rm -f $pidFile 2>/dev/null
-    fi
-}
-
 cleanup_test_pod(){
     kubectl -n ${NAMESPACE} delete job/redfish-event-test --ignore-not-found=true --grace-period=0 >/dev/null 2>&1 || true
     kubectl -n ${NAMESPACE} wait --for=delete job/redfish-event-test --timeout=60s 2>/dev/null || true
-    cleanup_log_streaming_test
 }
 
-show_last_logs(){
-    if [[ $verbose -eq 1 ]]; then
-        echo "--- hw-event-proxy logs ---"
-        kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
-        for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
-            echo "--- consumer $podname logs ---"
-            kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-native-event-consumer $podname
-            num_of_consumer=$(( num_of_consumer + 1 ))
-        done
-        echo "--- redfish-event-test logs ---"
-        kubectl -n ${NAMESPACE} logs --tail=50 `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "`
+fail_test(){
+    cleanup_logs_pid
+    echo "--- hw-event-proxy logs ---"
+    hw_event_proxy_pod=`kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
+    kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy $hw_event_proxy_pod >> ${LOG_DIR}/last_log_$hw_event_proxy_pod.log &
+    for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
+         echo "--- consumer $consumer_pod logs ---"
+         kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/last_log_$consumer_pod.log &
+    done
 
-        for file in ${LOG_DIR}/*; do
-            if test -f "$file"; then
-                echo "--- file ${LOG_DIR}/$file ---"
-                cat $file
-            fi
-        done
+    echo "Check directory ${LOG_DIR} for more logs."
+    echo -e "***$RED TEST FAILED $COLOR_RESET***"
+    exit 1
+}
 
-        echo "--- get nodes ---"
-        kubectl get nodes
-        echo "--- get nodes --show-labels ---"
-        kubectl get nodes --show-labels
-        echo "--- node for pod hw-event-proxy ---"
-        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq '.spec.nodeName'
-        for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
-            echo "--- node for pod $podname ---"
-            kubectl -n ${NAMESPACE} get pod $podname -o json | jq '.spec.nodeName'
-            num_of_consumer=$(( num_of_consumer + 1 ))
-        done
-        echo "--- node for pod amq router ---"
-        kubectl -n router get pod `kubectl -n router get pods | grep router | cut -f1 -d" "` -o json | jq '.spec.nodeName'
+
+test_basic() {
+    # streaming logs for multiple consumers.
+    echo "--- Start streaming consumer logs ---"
+    consumer_pod=`kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`
+    kubectl -n ${NAMESPACE} logs -f --tail=1 -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/$consumer_pod.log &
+    echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
+
+    # start the test
+    echo "--- Start testing ---"
+    kubectl -n ${NAMESPACE} apply -f e2e-tests/manifests/redfish-event-test.yaml
+
+    # streaming logs for the test tool
+    kubectl -n ${NAMESPACE} wait --for=condition=ready pod -l app=redfish-event-test --timeout=60s  >/dev/null 2>&1
+    kubectl -n ${NAMESPACE} logs -f `kubectl -n ${NAMESPACE} get pods | grep redfish-event-test | cut -f1 -d" "` >> ${LOG_DIR}/redfish-event-test.log &
+    echo "$!" > ${LOG_DIR}/log-redfish-event-test.pid
+
+    wait_for_resource job/redfish-event-test complete 0 >/dev/null
+    if [[ $job_result -eq 1 ]]; then
+        fail_test
     fi
+
+    echo "--- Check test result ---"
+    grep "received event" ${LOG_DIR}/$consumer_pod.log | sed 's/\\\"//g' >> ${LOG_DIR}/event-received.log
+
+    for eventFile in ${DATA_DIR}/*.json; do
+        e2e-tests/scripts/verify-basic.py $eventFile ${LOG_DIR}/event-received.log
+        if [[ $? -eq 1 ]]; then
+            fail_test
+        fi
+    done
+
+    echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
 }
 
-run_test() {
-    echo "--- Cleanup previous test pod and logs---"
-    cleanup_test_pod
-    reset_logs
+test_perf() {
+
+    # streaming logs for multiple consumers.
+    echo "--- Start streaming consumer logs ---"
+    for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
+        kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $consumer_pod | grep "Latency for hardware event" >> ${LOG_DIR}/$consumer_pod.log &
+        echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
+    done
+
+    MSG_PER_SEC=10
+    TEST_DURATION_SEC=600
+    INITIAL_DELAY_SEC=60
+
+    cat e2e-tests/manifests/redfish-event-test.yaml \
+    | sed "/PERF/{n;s/NO/YES/}" \
+    | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
+    | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
+    | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" > ${LOG_DIR}/redfish-event-test.yaml
 
     # start the test
     echo "--- Start testing ---"
@@ -184,93 +153,64 @@ run_test() {
     if [[ $perf -eq 1 ]]; then
         echo "Test will run for $(( ($TEST_DURATION_SEC + $INITIAL_DELAY_SEC)/60 )) minutes."
     fi
+
     wait_for_resource job/redfish-event-test complete 0 >/dev/null
     if [[ $job_result -eq 1 ]]; then
-        echo "redfish-event-test job is not complete"
-        cleanup_log_streaming
-        exit 1
+        fail_test
     fi
 
     echo "Sleep for 5 seconds: wait for logs to complete streaming"
     sleep 5
-    echo "--- Generate test report ---"
-    e2e-tests/scripts/parse-logs.py
-    if [[ $? -ne 0 ]]; then
-        show_last_logs
-        exit 1
-    fi
 
     echo "--- Check test result ---"
+    e2e-tests/scripts/verify-perf.py
+    if [[ $? -eq 1 ]]; then
+        fail_test
+    fi
+
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
-    if [ $num_events_send -eq $num_events_received ]; then
-        head -10 ${LOG_DIR}/_report.csv
-        if [[ $perf -eq 1 ]]; then
-            percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
-            if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
-                echo -e "***$RED TEST FAILED $COLOR_RESET***"
-                echo "Performance target: 95% of the massages have latency <= 10ms."
-                echo "Performance actual: ${percent_10ms}% of the massages have latency <= 10ms."
-                cleanup_log_streaming
-                exit 1
-            fi
-        fi
-        echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
-        echo
-    else
-        echo -e "***$RED TEST FAILED $COLOR_RESET***: Events sent: $num_events_send, Events received: $num_events_received"
-        # do not delete the test pod in case it's needed for debug
-        cleanup_log_streaming
-        show_last_logs
-        exit 1
+    if [ $num_events_send -ne $num_events_received ]; then
+        echo -e "${YELLOW}Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
     fi
+    head -10 ${LOG_DIR}/_report.csv
+    percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+    if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
+        echo -e "$RED Error: Performance actual: ${percent_10ms}% of the massages have latency <= 10ms. $COLOR_RESET"
+        echo "Performance target: 95% of the massages have latency <= 10ms."
+        fail_test
+    fi
+    echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
+    echo
+    echo "Full test report is available at ${LOG_DIR}/_report.csv"
 }
 
 mkdir -p -- "$LOG_DIR"
-echo "--- Clean up logs ---"
+echo "--- Cleanup previous test pod and logs---"
+cleanup_test_pod
+cleanup_logs_pid
 cleanup_logs
-cleanup_log_streaming
 
 echo "--- Check if consumer pod is available ---"
-wait_for_resource deployment/consumer available 60s >/dev/null
+wait_for_resource deployment/consumer available 60s >/dev/null 2>&1
 if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
 
 echo "--- Check if hw-event-proxy pod is available ---"
-wait_for_resource deployment/hw-event-proxy available 60s >/dev/null
+wait_for_resource deployment/hw-event-proxy available 60s >/dev/null 2>&1
 if [[ $job_result -eq 1 ]]; then
     echo "hw-event-proxy pod is not available"
     exit 1
 fi
 
-# streaming logs for multiple consumers.
-echo "--- Start streaming consumer logs ---"
-for podname in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
-    kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $podname >> ${LOG_DIR}/$podname.log &
-    echo "$!" > ${LOG_DIR}/log-$podname.pid
-    num_of_consumer=$(( num_of_consumer + 1 ))
-done
-
-if [[ $perf -eq 0 ]]; then
-    # test with message field
-    echo -e "---$BOLD TEST 1:  WITH MESSAGE FIELD $COLOR_RESET---"
-    test_with_message
-    run_test
-
-    # test without message field
-    echo -e "---$BOLD TEST 2:  WITHOUT MESSAGE FIELD $COLOR_RESET---"
-    test_without_message
-    echo "Wait $INITIAL_DELAY_SEC seconds for preloading Redfish Registries..."
-    run_test
-else
-    # performance test
+if [[ $perf -eq 1 ]]; then
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
-    test_performance
-    run_test
+    test_perf
+else
+    echo -e "---$BOLD BASIC TEST $COLOR_RESET---"
+    test_basic
 fi
 
-cleanup_log_streaming
-cleanup_consumer_logs
-echo "Full test report is available at ${LOG_DIR}/_report.csv"
+cleanup_logs_pid
