@@ -1,6 +1,5 @@
 # Build hw-event-proxy binaries
-# FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.16-openshift-4.9 AS go-builder
-FROM docker.io/openshift/origin-release:golang-1.15 AS go-builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.16-openshift-4.9 AS go-builder
 
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1
