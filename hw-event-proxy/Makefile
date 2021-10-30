@@ -17,10 +17,9 @@ deps-update:
 	go mod tidy && \
 	go mod vendor
 
-build:test
+build: build-only test
 	go fmt ./...
 	make lint
-	go build -o ./build/hw-event-proxy cmd/main.go
 
 build-only:
 	go build -o ./build/hw-event-proxy cmd/main.go
@@ -36,5 +35,4 @@ test:
 	go test ./...  -coverprofile=cover.out
 
 # For GitHub Actions CI
-gha:
-	go test ./...  -coverprofile=cover.out
+gha: build
