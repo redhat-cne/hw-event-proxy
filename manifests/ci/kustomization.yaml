@@ -10,6 +10,6 @@ secretGenerator:
   namespace: cloud-native-events
   type: Opaque
   literals:
-  - username=foo
-  - password=bar
+  - username=admin
+  - password=admin
   - hostaddr=127.0.0.1

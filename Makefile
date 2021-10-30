@@ -38,63 +38,52 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
-# label a worker node as local
+# label the first Ready worker node as local
 label-node:
 	kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
 
-export REDFISH_ENV_FILE=./examples/manifests/.env
-
-# Make a dummy .env for ci test
-dummy-env:
-	echo username=foo > $$REDFISH_ENV_FILE \
-	echo password=bar >> $$REDFISH_ENV_FILE \
-	echo hostaddr=127.0.0.1 >> $$REDFISH_ENV_FILE
-
-check-env:
-	if [ ! -f $$REDFISH_ENV_FILE ]; then \
-   		echo "File $$REDFISH_ENV_FILE does not exist."; \
-		exit 1; \
-	fi
-
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
+deploy-amq:kustomize
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
+
+undeploy-amq:kustomize
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
+
 deploy-basic:kustomize
 	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
-		&& $(KUSTOMIZE) edit set replicas consumer=1
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./manifests/basic | kubectl apply -f -
 
-
-# Deploy all in the configured Kubernetes cluster in ~/.kube/config
-deploy-example:kustomize check-env
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
-		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
-		&& $(KUSTOMIZE) edit set replicas consumer=1
-	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
-
-# Deploy all in the configured Kubernetes cluster in ~/.kube/config
-undeploy-example:kustomize
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+undeploy-basic:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./examples/manifests | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/basic | kubectl delete -f -
 
-# Deploy with 20 consumers for performance testing
-deploy-perf:kustomize check-env
-	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+deploy-perf:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
-		&& $(KUSTOMIZE) edit set replicas consumer=20
-	$(KUSTOMIZE) build ./examples/manifests | kubectl apply -f -
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
+	$(KUSTOMIZE) build ./manifests/perf | kubectl apply -f -
 
-# Deploy all in the configured Kubernetes cluster in ~/.kube/config
-deploy-amq:kustomize
-	$(KUSTOMIZE) build ./examples/manifests/amq-installer | kubectl apply -f -
+undeploy-perf:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
+	$(KUSTOMIZE) build ./manifests/perf | kubectl delete -f -
 
-# Deploy all in the configured Kubernetes cluster in ~/.kube/config
-undeploy-amq:kustomize
-	$(KUSTOMIZE) build ./examples/manifests/amq-installer | kubectl delete -f -
+deploy-ci:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
+	$(KUSTOMIZE) build ./manifests/ci | kubectl apply -f -
+
+undeploy-ci:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
+	$(KUSTOMIZE) build ./manifests/ci | kubectl delete -f -
 
 test-only:
 	e2e-tests/scripts/test.sh
@@ -102,9 +91,9 @@ test-only:
 test-perf-only:
 	e2e-tests/scripts/test.sh -p
 
-test: | label-node deploy-amq deploy-example test-only undeploy-example undeploy-amq
+test: | label-node deploy-amq deploy-basic test-only undeploy-basic undeploy-amq
 
-test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-example undeploy-amq
+test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-perf undeploy-amq
 
 # Used by openshift/release
-test-ci:  | label-node dummy-env deploy-amq deploy-example test-only undeploy-example undeploy-amq
+test-ci:  | label-node deploy-amq deploy-ci test-only undeploy-ci undeploy-amq
