@@ -170,14 +170,12 @@ test_perf() {
 
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
-    if [ $num_events_send -ne $num_events_received ]; then
-        echo -e "${YELLOW}Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
-    fi
     head -10 ${LOG_DIR}/_report.csv
     percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+    echo
+    echo "Performance target: 95% of the massages have latency within 10ms."
     if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
-        echo -e "$RED Error: Performance actual: ${percent_10ms}% of the massages have latency <= 10ms. $COLOR_RESET"
-        echo "Performance target: 95% of the massages have latency <= 10ms."
+        echo -e "$RED Error: Performance actual: ${percent_10ms}% of the massages have latency within 10ms. $COLOR_RESET"
         fail_test
     fi
     echo -e "***$GREEN TEST PASSED $COLOR_RESET***"

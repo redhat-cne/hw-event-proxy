@@ -124,10 +124,6 @@ make test-perf
 ```
 The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the `hw-event-proxy` at a rate of 10 msgs/sec for 10 minutes.
 
-The tests are marked PASSED if all the events are received by the consumer and the performance targets are met.
+The tests are marked PASSED if the performance targets are met.
 
-Performance Target:
-
-**95%** of the massages should have latency <= **10ms**.
-
-Test Report is available at logs/_report.csv at end of the test run.
+Performance Target: **95%** of the massages should have latency <= **10ms**.
