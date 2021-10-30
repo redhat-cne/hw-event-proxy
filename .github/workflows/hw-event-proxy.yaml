@@ -35,7 +35,7 @@ jobs:
       with:
         go-version: '1.15'
     - name: tidy
-      run: go mod tidy
+      run: make deps-update
     - name: Run Test Scripts
       run: |
         make gha
