@@ -35,4 +35,4 @@ test:
 	go test ./...  -coverprofile=cover.out
 
 # For GitHub Actions CI
-gha: build-only test
+gha: build-only
