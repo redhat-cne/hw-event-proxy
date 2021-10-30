@@ -13,7 +13,7 @@ The Hardware Event Proxy works with [Cloud Event Proxy](https://github.com/redha
 Run cloud-event-proxy sidecar and consumer example from the cloud-event-proxy repo for testing locally.
 
 ### Set environment variables
-```
+```shell
 export NODE_NAME=mynode
 export HW_PLUGIN=true; export HW_EVENT_PORT=9087; export CONSUMER_TYPE=HW
 export MSG_PARSER_PORT=9097; export MSG_PARSER_TIMEOUT=10
@@ -24,7 +24,7 @@ export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOS
 ```
 
 ### Install and run Apache Qpid Dispach Router
-```
+```shell
 sudo dnf install qpid-dispatch-router
 qdrouterd &
 ```
@@ -83,11 +83,11 @@ export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOS
 ```
 
 ### Deploy for basic tests
-```
+```shell
 make deploy-basic
 ```
 
-### Undeploy examples
+### Undeploy
 ```shell
 make undeploy-basic
 ```
@@ -97,7 +97,7 @@ make undeploy-basic
 Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBECONFIG` set pointing to your cluster.
 
 ### Build Test Tool Image
-```
+```shell
 cd e2e-tests
 make build
 scripts/build-image.sh
@@ -122,9 +122,6 @@ make test-perf
 ```
 The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes.
 
-```shell
-make test-perf
-```
 The tests are marked PASSED if all the events are received by the consumer and the performance targets are met.
 
 Performance Target:

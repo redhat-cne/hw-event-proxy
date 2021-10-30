@@ -1,8 +1,9 @@
 #!/bin/bash
 
 COLOR_RESET='\033[0m'
-GREEN='\033[1;32m'
 RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW="\033[1;33m"
 BOLD='\033[1m'
 
 NAMESPACE=cloud-native-events
@@ -91,7 +92,7 @@ test_basic() {
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
     consumer_pod=`kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`
-    kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/$consumer_pod.log &
+    kubectl -n ${NAMESPACE} logs -f --tail=1 -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/$consumer_pod.log &
     echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
 
     # start the test
@@ -169,20 +170,18 @@ test_perf() {
 
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
-    if [ $num_events_send -eq $num_events_received ]; then
-        head -10 ${LOG_DIR}/_report.csv
-        percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
-        if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
-            echo -e "$RED Error: Performance actual: ${percent_10ms}% of the massages have latency <= 10ms. $COLOR_RESET"
-            echo "Performance target: 95% of the massages have latency <= 10ms."
-            fail_test
-        fi
-        echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
-        echo
-    else
-        echo -e "$RED Error: Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
+    if [ $num_events_send -ne $num_events_received ]; then
+        echo -e "$YELLOW Error: Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
+    fi
+    head -10 ${LOG_DIR}/_report.csv
+    percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
+    if [ $percent_10ms -lt $PERF_TARGET_PERCENT_10MS ]; then
+        echo -e "$RED Error: Performance actual: ${percent_10ms}% of the massages have latency <= 10ms. $COLOR_RESET"
+        echo "Performance target: 95% of the massages have latency <= 10ms."
         fail_test
     fi
+    echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
+    echo
     echo "Full test report is available at ${LOG_DIR}/_report.csv"
 }
 
