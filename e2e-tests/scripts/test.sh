@@ -121,7 +121,7 @@ test_basic() {
     echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
 }
 
-run_perf() {
+test_perf() {
 
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
