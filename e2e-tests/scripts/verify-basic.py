@@ -25,8 +25,8 @@ def main():
     with open(FILE_EVENT_FIELDS_TO_VERIFY, 'r') as f:
         fields_to_verify = json.load(f)['keys']
 
-    with open(consumer_log_file, 'r') as reader:
-        while (event_received := reader.readline().rstrip()):
+    with open(consumer_log_file, 'r') as f:
+        for event_received in f:
             match_found = True
             for k, v in event_expected.items():
                 if k in fields_to_verify and compare(event_received, k, v) != 0:
