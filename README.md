@@ -64,23 +64,13 @@ python3 server.py
 ### Build Images
 
 ```shell
-1. scripts/build-go.sh
-3. scripts/build-image.sh
-# find out image tags ${TAG}
-5. podman images
-```
-
-### Push images to a repo
-
-```shell
+scripts/build-go.sh
+scripts/build-image.sh
+TAG=xxx
 podman push localhost/hw-event-proxy:${TAG} quay.io/redhat_emp1/hw-event-proxy:latest
 ```
 
-Use consumer.yaml and service.yaml from examples/manifests folder to deploy to a cluster.
-Make sure you update the image path.
-
-
-## Deploying examples using kustomize
+## Deploying examples to kubernetes cluster
 
 ### Set Env variables
 ```shell
@@ -88,35 +78,18 @@ export VERSION=latest
 export PROXY_IMG=quay.io/redhat_emp1/hw-event-proxy:${VERSION}
 export SIDECAR_IMG=quay.io/redhat_emp1/cloud-event-proxy:${VERSION}
 export CONSUMER_IMG=quay.io/redhat_emp1/cloud-native-event-consumer:${VERSION}
+# replace the following with real Redfish credentials and BMC ip address
+export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
 ```
 
-### Setup AMQ Interconnect
-
-Install AMQ router following https://github.com/redhat-cne/amq-installer.
-
-In consumer.yaml, change the `transport-host` args for `cloud-native-event-sidecar` container from
+### Deploy for basic tests
 ```
-- "--transport-host=amqp://amq-interconnect"
-```
-to
-```
-- "--transport-host=amqp://router.router.svc.cluster.local"
-```
-
-### Set node affinity
-The example consumer pod requires node affinity for baremetal worker node.
-```
-oc label node <worker node> app=local
-```
-
-### Deploy examples
-```shell
-make deploy-example
+make deploy-basic
 ```
 
 ### Undeploy examples
 ```shell
-make undeploy-example
+make undeploy-basic
 ```
 
 ## End to End Tests
@@ -128,26 +101,25 @@ Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBEC
 cd e2e-tests
 make build
 scripts/build-image.sh
-podman images
 TAG=xxx
 podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-event-test:latest
 ```
 
 ### Basic Test
-The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec for 10 seconds.
-
 ```shell
 make test
 ```
-This invokes 2 test cases:
-* TEST 1:  WITH MESSAGE FIELD
-* TEST 2:  WITHOUT MESSAGE FIELD
+The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
 
-NOTE: TEST 2 waits for a random duration between 1 to 60 seconds for preloading Redfish Registries. By making the wait time random the test is able to test different scenarios when the Message Parser is not, partly or fully ready to process event messages.
+The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are descriptions can be found at [here](e2e-tests/data/README.md).
 
-The tests are marked PASSED if all the events are received by the consumer. There is no verification of performance targets.
+The contents of the received events are verified. The list of fields to check are defined the file [e2e-tests/data/EVENT_FIELDS_TO_VERIFY](e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
+
 
 ### Performance Test
+```shell
+make test-perf
+```
 The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 10 msgs/sec for 10 minutes.
 
 ```shell
@@ -159,5 +131,4 @@ Performance Target:
 
 **95%** of the massages should have latency <= **10ms**.
 
-### Test Report
 Test Report is available at logs/_report.csv at end of the test run.

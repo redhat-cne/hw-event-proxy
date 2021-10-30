@@ -8,8 +8,7 @@ import sys
 import logging
 
 LOG_DIR = './logs'
-
-FIELDS_TO_VERIFY = ['EventId', 'EventTimestamp', 'EventType', 'MemberId', 'Message', 'MessageArgs', 'MessageId', 'Severity']
+FILE_EVENT_FIELDS_TO_VERIFY = './e2e-tests/data/EVENT_FIELDS_TO_VERIFY'
 
 def main():
     logging.basicConfig(filename=LOG_DIR + '/verify-basic.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
@@ -23,11 +22,14 @@ def main():
         sys.exit(1)
     logging.debug("Expected event: %s", event_expected)
 
+    with open(FILE_EVENT_FIELDS_TO_VERIFY, 'r') as f:
+        fields_to_verify = json.load(f)['keys']
+
     with open(consumer_log_file, 'r') as reader:
         while (event_received := reader.readline().rstrip()):
             match_found = True
             for k, v in event_expected.items():
-                if k in FIELDS_TO_VERIFY and compare(event_received, k, v) != 0:
+                if k in fields_to_verify and compare(event_received, k, v) != 0:
                     match_found = False
                     break
             if match_found:

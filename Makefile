@@ -40,13 +40,14 @@ endif
 
 # Configure redfish credentials and BMC ip from environment variables
 redfish-config:
-	sed -i -e "s/redfish-user/${REDFISH_USERNAME}/" ./manifests/basic/kustomization.yaml
-	sed -i -e "s/redfish-pass/${REDFISH_PASSWORD}/" ./manifests/basic/kustomization.yaml
-	sed -i -e "s/127.0.0.1/${REDFISH_HOSTADDR}/" ./manifests/basic/kustomization.yaml
+	@[[ -z "${REDFISH_USERNAME}" ]] && echo "WARNING: Redfish environment variables are not set."
+	@sed -i -e "s/redfish-user/${REDFISH_USERNAME}/" ./manifests/basic/kustomization.yaml
+	@sed -i -e "s/redfish-pass/${REDFISH_PASSWORD}/" ./manifests/basic/kustomization.yaml
+	@sed -i -e "s/127.0.0.1/${REDFISH_HOSTADDR}/" ./manifests/basic/kustomization.yaml
 
 # label the first Ready worker node as local
 label-node:
-	kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
+	@kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
 
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
 deploy-amq:kustomize
@@ -55,25 +56,25 @@ deploy-amq:kustomize
 undeploy-amq:kustomize
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
 
-deploy-basic:kustomize redfish-config
+deploy-basic:kustomize redfish-config label-node deploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./manifests/basic | kubectl apply -f -
 
-undeploy-basic:kustomize
+undeploy-basic:kustomize undeploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./manifests/basic | kubectl delete -f -
 
-deploy-perf:kustomize redfish-config
+deploy-perf:kustomize redfish-config label-node deploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
 	$(KUSTOMIZE) build ./manifests/perf | kubectl apply -f -
 
-undeploy-perf:kustomize
+undeploy-perf:kustomize undeploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
@@ -85,9 +86,9 @@ test-only:
 test-perf-only:
 	e2e-tests/scripts/test.sh -p
 
-test: | label-node deploy-amq deploy-basic test-only undeploy-basic undeploy-amq
+test: | deploy-basic test-only undeploy-basic
 
-test-perf: | label-node deploy-amq deploy-perf test-perf-only undeploy-perf undeploy-amq
+test-perf: | deploy-perf test-perf-only undeploy-perf
 
 # Used by openshift/release
 test-ci: test
