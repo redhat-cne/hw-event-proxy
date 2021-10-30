@@ -126,4 +126,4 @@ The basic test sets up one test pod and **20** consumers in the same node and se
 
 The tests are marked PASSED if the performance targets are met.
 
-Performance Target: **95%** of the massages should have latency <= **10ms**.
+Performance Target: **95%** of the massages should have latency within **10ms**.
