@@ -2,13 +2,9 @@ package hwevent
 
 import (
 	"io"
-
-	"encoding/base64"
-	"strconv"
 	"sync"
 
 	jsoniter "github.com/json-iterator/go"
-
 	"github.com/redhat-cne/sdk-go/pkg/types"
 )
 
@@ -44,38 +40,140 @@ func ReadDataJSON(out *Data, reader io.Reader) error {
 	return readDataJSONFromIterator(out, iterator)
 }
 
-// readJSONFromIterator allows you to read the bytes reader as an event
-func readDataJSONFromIterator(out *Data, iterator *jsoniter.Iterator) error {
+func readEventRecord(iter *jsoniter.Iterator) ([]EventRecord, error) {
+	var result []EventRecord
+	var err error
+	for iter.ReadArray() {
+		e := EventRecord{}
+		for eField := iter.ReadObject(); eField != ""; eField = iter.ReadObject() {
+			switch eField {
+			case "Actions":
+				e.Actions = iter.SkipAndReturnBytes()
+			case "Context":
+				e.Context = iter.ReadString()
+			case "EventGroupId":
+				e.EventGroupID = iter.ReadInt()
+			case "EventId":
+				e.EventID = iter.ReadString()
+			case "EventTimestamp":
+				e.EventTimestamp = iter.ReadString()
+			case "EventType":
+				e.EventType = iter.ReadString()
+			case "MemberId":
+				e.MemberID = iter.ReadString()
+			case "Message":
+				e.Message = iter.ReadString()
+			case "MessageArgs":
+				for iter.ReadArray() {
+					arg := iter.ReadString()
+					e.MessageArgs = append(e.MessageArgs, arg)
+				}
+			case "MessageId":
+				e.MessageID = iter.ReadString()
+			case "Oem":
+				e.Oem = iter.SkipAndReturnBytes()
+			case "OriginOfCondition":
+				e.OriginOfCondition = iter.SkipAndReturnBytes()
+			case "Severity":
+				e.Severity = iter.ReadString()
+			case "Resolution":
+				e.Resolution = iter.ReadString()
+			default:
+				iter.Skip()
+			}
+		}
+		result = append(result, e)
+	}
+
+	return result, err
+}
+
+func readRedfishEvent(iter *jsoniter.Iterator) (RedfishEvent, error) {
+	result := RedfishEvent{}
+	var err error
+
+	for key := iter.ReadObject(); key != ""; key = iter.ReadObject() {
+		// Check if we have some error in our error cache
+		if iter.Error != nil {
+			return result, iter.Error
+		}
+
+		switch key {
+		case "@odata.context":
+			result.OdataContext = iter.ReadString()
+		case "@odata.type":
+			result.OdataType = iter.ReadString()
+		case "Actions":
+			result.Actions = iter.SkipAndReturnBytes()
+		case "Context":
+			result.Context = iter.ReadString()
+		case "Description":
+			result.Description = iter.ReadString()
+		case "Id":
+			result.ID = iter.ReadString()
+		case "Name":
+			result.Name = iter.ReadString()
+		case "Oem":
+			result.Oem = iter.SkipAndReturnBytes()
+		case "Events":
+			e, err := readEventRecord(iter)
+			if err != nil {
+				return result, err
+			}
+			result.Events = e
+		default:
+			iter.Skip()
+		}
+	}
+	return result, err
+}
+
+// readRedfishEventJSONFromIterator allows you to read the bytes reader as an RedfishEvent
+func readRedfishEventJSONFromIterator(out *RedfishEvent, iter *jsoniter.Iterator) error {
+	e, err := readRedfishEvent(iter)
+	if err != nil {
+		return err
+	}
+	*out = e
+	return nil
+}
+
+// readDataJSONFromIterator allows you to read the bytes reader as a Data
+func readDataJSONFromIterator(out *Data, iter *jsoniter.Iterator) error {
 	var (
 		// Universally parseable fields.
 		version string
-		data    []byte
+		data    RedfishEvent
 		// These fields require knowledge about the specversion to be parsed.
 		//schemaurl jsoniter.Any
 	)
 
-	for key := iterator.ReadObject(); key != ""; key = iterator.ReadObject() {
+	for key := iter.ReadObject(); key != ""; key = iter.ReadObject() {
 		// Check if we have some error in our error cache
-		if iterator.Error != nil {
-			return iterator.Error
+		if iter.Error != nil {
+			return iter.Error
 		}
 
 		// If no specversion ...
 		switch key {
 		case "version":
-			version = iterator.ReadString()
+			version = iter.ReadString()
 		case "data":
-			data = iterator.SkipAndReturnBytes()
+			e, err := readRedfishEvent(iter)
+			if err != nil {
+				return err
+			}
+			data = e
 		default:
-			iterator.Skip()
+			iter.Skip()
 		}
 	}
 
-	if iterator.Error != nil {
-		return iterator.Error
+	if iter.Error != nil {
+		return iter.Error
 	}
 	out.Version = version
-	out.Data = data
+	out.Data = &data
 	return nil
 }
 
@@ -146,17 +244,11 @@ func readData(iter *jsoniter.Iterator) (*Data, error) {
 		case "version":
 			data.Version = iter.ReadString()
 		case "data":
-			data.Data = iter.SkipAndReturnBytes()
-			unQuoted, err := strconv.Unquote(string(data.Data))
+			e, err := readRedfishEvent(iter)
 			if err != nil {
 				return data, err
 			}
-			// []byte is encoded as a base64-encoded string with json.Marshal
-			decoded, err := base64.StdEncoding.DecodeString(unQuoted)
-			if err != nil {
-				return data, err
-			}
-			data.Data = decoded
+			data.Data = &e
 		default:
 			iter.Skip()
 		}
@@ -179,4 +271,12 @@ func (d *Data) UnmarshalJSON(b []byte) error {
 	iterator := jsoniter.ConfigFastest.BorrowIterator(b)
 	defer jsoniter.ConfigFastest.ReturnIterator(iterator)
 	return readDataJSONFromIterator(d, iterator)
+}
+
+// UnmarshalJSON implements the json unmarshal method used when this type is
+// unmarshaled using json.Unmarshal.
+func (d *RedfishEvent) UnmarshalJSON(b []byte) error {
+	iterator := jsoniter.ConfigFastest.BorrowIterator(b)
+	defer jsoniter.ConfigFastest.ReturnIterator(iterator)
+	return readRedfishEventJSONFromIterator(d, iterator)
 }

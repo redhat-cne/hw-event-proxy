@@ -46,7 +46,7 @@ func (e *Event) GetCloudNativeEvents(ce *cloudevent.Event) (err error) {
 	}
 	data := Data{}
 	if err = json.Unmarshal(ce.Data(), &data); err != nil {
-		return
+		return err
 	}
 	e.SetDataContentType(ApplicationJSON)
 	e.SetTime(ce.Time())
