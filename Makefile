@@ -57,6 +57,15 @@ check-env:
 	fi
 
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
+deploy-basic:kustomize
+	cd ./manifests/base && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG} \
+		&& $(KUSTOMIZE) edit set replicas consumer=1
+	$(KUSTOMIZE) build ./manifests/basic | kubectl apply -f -
+
+
+# Deploy all in the configured Kubernetes cluster in ~/.kube/config
 deploy-example:kustomize check-env
 	cd ./examples/manifests && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
