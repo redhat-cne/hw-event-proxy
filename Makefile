@@ -58,7 +58,7 @@ deploy-amq:kustomize
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
 
 undeploy-amq:kustomize
-	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
+	@$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
 
 deploy-basic:kustomize redfish-config label-node deploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
@@ -70,7 +70,7 @@ undeploy-basic:kustomize undeploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./manifests/basic | kubectl delete -f -
+	@$(KUSTOMIZE) build ./manifests/basic | kubectl delete -f -
 
 deploy-perf:kustomize redfish-config label-node deploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
@@ -82,7 +82,7 @@ undeploy-perf:kustomize undeploy-amq
 	cd ./manifests/basic && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
 		&& $(KUSTOMIZE) edit set image cloud-event-proxy=${SIDECAR_IMG} \
 		&& $(KUSTOMIZE) edit set image  cloud-native-event-consumer=${CONSUMER_IMG}
-	$(KUSTOMIZE) build ./manifests/perf | kubectl delete -f -
+	@$(KUSTOMIZE) build ./manifests/perf | kubectl delete -f -
 
 test-only:
 	e2e-tests/scripts/test.sh

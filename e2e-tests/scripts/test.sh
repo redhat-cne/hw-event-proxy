@@ -171,7 +171,7 @@ test_perf() {
     num_events_send=$(grep 'Total Msg Sent:' ${LOG_DIR}/redfish-event-test.log | cut -f6 -d" " | sed 's/"$//')
     num_events_received=$(grep -rIn "Events per Consumer" ${LOG_DIR}/_report.csv | sed 's/.*\t//')
     if [ $num_events_send -ne $num_events_received ]; then
-        echo -e "$YELLOW Error: Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
+        echo -e "${YELLOW}Events sent: $num_events_send, Events received: $num_events_received. $COLOR_RESET"
     fi
     head -10 ${LOG_DIR}/_report.csv
     percent_10ms=$(grep 'Percentage within 10ms' ${LOG_DIR}/_report.csv | sed 's/.*\t//' | sed 's/\..*//')
@@ -192,14 +192,14 @@ cleanup_logs_pid
 cleanup_logs
 
 echo "--- Check if consumer pod is available ---"
-wait_for_resource deployment/consumer available 60s
+wait_for_resource deployment/consumer available 60s >/dev/null 2>&1
 if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
 
 echo "--- Check if hw-event-proxy pod is available ---"
-wait_for_resource deployment/hw-event-proxy available 60s
+wait_for_resource deployment/hw-event-proxy available 60s >/dev/null 2>&1
 if [[ $job_result -eq 1 ]]; then
     echo "hw-event-proxy pod is not available"
     exit 1

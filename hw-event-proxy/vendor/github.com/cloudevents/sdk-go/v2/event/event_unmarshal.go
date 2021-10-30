@@ -1,8 +1,3 @@
-/*
- Copyright 2021 The CloudEvents Authors
- SPDX-License-Identifier: Apache-2.0
-*/
-
 package event
 
 import (
@@ -355,17 +350,16 @@ func consumeDataAsBytes(e *Event, isBase64 bool, b []byte) error {
 		// Allocate payload byte buffer
 		base64Encoded := b[1 : len(b)-1] // remove quotes
 		e.DataEncoded = make([]byte, base64.StdEncoding.DecodedLen(len(base64Encoded)))
-		length, err := base64.StdEncoding.Decode(e.DataEncoded, base64Encoded)
+		len, err := base64.StdEncoding.Decode(e.DataEncoded, base64Encoded)
 		if err != nil {
 			return err
 		}
-		e.DataEncoded = e.DataEncoded[0:length]
+		e.DataEncoded = e.DataEncoded[0:len]
 		return nil
 	}
 
-	mt, _ := e.Context.GetDataMediaType()
-	// Empty content type assumes json
-	if mt != "" && mt != ApplicationJSON && mt != TextJSON {
+	ct := e.DataContentType()
+	if ct != ApplicationJSON && ct != TextJSON {
 		// If not json, then data is encoded as string
 		iter := jsoniter.ParseBytes(jsoniter.ConfigFastest, b)
 		src := iter.ReadString() // handles escaping
@@ -384,16 +378,16 @@ func consumeData(e *Event, isBase64 bool, iter *jsoniter.Iterator) error {
 		// Allocate payload byte buffer
 		base64Encoded := iter.ReadStringAsSlice()
 		e.DataEncoded = make([]byte, base64.StdEncoding.DecodedLen(len(base64Encoded)))
-		length, err := base64.StdEncoding.Decode(e.DataEncoded, base64Encoded)
+		len, err := base64.StdEncoding.Decode(e.DataEncoded, base64Encoded)
 		if err != nil {
 			return err
 		}
-		e.DataEncoded = e.DataEncoded[0:length]
+		e.DataEncoded = e.DataEncoded[0:len]
 		return nil
 	}
 
-	mt, _ := e.Context.GetDataMediaType()
-	if mt != ApplicationJSON && mt != TextJSON {
+	ct := e.DataContentType()
+	if ct != ApplicationJSON && ct != TextJSON {
 		// If not json, then data is encoded as string
 		src := iter.ReadString() // handles escaping
 		e.DataEncoded = []byte(src)

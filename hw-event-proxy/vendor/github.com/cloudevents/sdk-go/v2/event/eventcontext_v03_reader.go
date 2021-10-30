@@ -1,13 +1,8 @@
-/*
- Copyright 2021 The CloudEvents Authors
- SPDX-License-Identifier: Apache-2.0
-*/
-
 package event
 
 import (
 	"fmt"
-	"strings"
+	"mime"
 	"time"
 )
 
@@ -27,12 +22,11 @@ func (ec EventContextV03) GetDataContentType() string {
 // GetDataMediaType implements EventContextReader.GetDataMediaType
 func (ec EventContextV03) GetDataMediaType() (string, error) {
 	if ec.DataContentType != nil {
-		dct := *ec.DataContentType
-		i := strings.IndexRune(dct, ';')
-		if i == -1 {
-			return dct, nil
+		mediaType, _, err := mime.ParseMediaType(*ec.DataContentType)
+		if err != nil {
+			return "", err
 		}
-		return strings.TrimSpace(dct[0:i]), nil
+		return mediaType, nil
 	}
 	return "", nil
 }
