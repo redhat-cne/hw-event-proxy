@@ -40,7 +40,7 @@ endif
 
 # Configure redfish credentials and BMC ip from environment variables
 redfish-config:
-	@[[ -z "${REDFISH_USERNAME}" ]] && echo "WARNING: Redfish environment variables are not set."
+	@[[ -z "${REDFISH_USERNAME}" ]] && echo "WARNING: Redfish environment variables are not set." || true
 	@sed -i -e "s/redfish-user/${REDFISH_USERNAME}/" ./manifests/basic/kustomization.yaml
 	@sed -i -e "s/redfish-pass/${REDFISH_PASSWORD}/" ./manifests/basic/kustomization.yaml
 	@sed -i -e "s/127.0.0.1/${REDFISH_HOSTADDR}/" ./manifests/basic/kustomization.yaml
