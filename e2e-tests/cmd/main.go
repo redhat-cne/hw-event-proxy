@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -90,7 +90,7 @@ func initLogger() {
 }
 
 func basicTest() {
-	files, err := os.ReadDir(dataDir)
+	files, err := filepath.Glob(dataDir + "*.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func basicTest() {
 	res := fasthttp.AcquireResponse()
 
 	for _, file := range files {
-		event, err := os.ReadFile(fmt.Sprintf("%s%s", dataDir, file.Name()))
+		event, err := os.ReadFile(file)
 		if err != nil {
 			log.Fatal(err)
 		}
