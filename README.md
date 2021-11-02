@@ -66,9 +66,9 @@ Response
 ```go
 package main
 import (
-	v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
+    v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
     v1amqp "github.com/redhat-cne/sdk-go/v1/amqp"
-	"github.com/redhat-cne/sdk-go/pkg/types"
+    "github.com/redhat-cne/sdk-go/pkg/types"
 )
 func main(){
     
