@@ -65,13 +65,14 @@ Response
 ### Create Subscription with Golang Example
 ```go
 package main
+
 import (
     v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
     v1amqp "github.com/redhat-cne/sdk-go/v1/amqp"
     "github.com/redhat-cne/sdk-go/pkg/types"
 )
+
 func main(){
-    
     nodeName := os.Getenv("NODE_NAME")
     resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
 
