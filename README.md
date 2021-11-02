@@ -1,129 +1,94 @@
 # Hardware Event Proxy
 
-Hardware Event Proxy handles Redfish hardware events. It contains a main `hw-event-proxy` module written in Go and a `message-parser` module written in Python.
+In a baremetal cloud environment, applications may need to be able to act upon hardware changes and failures quickly to achieve high reliability. Hardware Event Proxy provides a way for such applications to subscribe and receive Redfish hardware events with low-latency.
 
-The `message-parser` module is used to parse messages from Redfish Event Message Registry. At startup, it queries the Redfish API and downloads all the Message Registries (if not already included in Sushy library) including custom registries.
+Hardware Event Proxy [subscribes](#event-subscription-to-bmc) to Redfish Events of the target hardware and creates publishers for the events using [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy) framework. Users/Applications can subscibe to the events using the APIs provided by Cloud Event Proxy.
 
-Once subscribed, Redfish events can be received by Webhook located in the `hw-event-proxy` module. If the event received does not contain the Message field, `hw-event-proxy` will send a request with Message ID to `message-parser`. Message Parser uses the Message ID to search in the Message Registries and find the Message and Resolution and pass them back to Hhw-event-proxy. `hw-event-proxy` adds them to the event content and converts the event to Cloud Event and sends it out to AMQP channel.  
+ [![go-doc](https://godoc.org/github.com/redhat-cne/hw-event-proxy?status.svg)](https://godoc.org/github.com/redhat-cne/hw-event-proxy)
+ [![Go Report Card](https://goreportcard.com/badge/github.com/redhat-cne/hw-event-proxy)](https://goreportcard.com/report/github.com/redhat-cne/hw-event-proxy)
+ [![LICENSE](https://img.shields.io/github/license/redhat-cne/hw-event-proxy.svg)](https://github.com/redhat-cne/hw-event-proxy/blob/main/LICENSE)
+
+## How It Works
+
+Hardware Event Proxy contains a main `hw-event-proxy` module written in Go and a `message-parser` module written in Python.
+
+The `message-parser` module is used to parse messages from Redfish Event Message Registry. At startup, it queries the Redfish API and downloads all the Message Registries (if not already included in [Sushy](https://github.com/openstack/sushy) library) including custom registries.
+
+Once subscribed, Redfish events can be received by the webhook located in the `hw-event-proxy` module. If the event received does not contain a `Message` field, `hw-event-proxy` will send a request with `MessageId` to `message-parser`. Message Parser uses the `MessageId` to search in the Message Registries and find the `Message` and `Resolution` and pass them back to `hw-event-proxy`. `hw-event-proxy` adds these fields to the event content and converts the event to Cloud Event and sends it out to Cloud Event Proxy framework.  
 
 
-## Running examples locally
+## Event Subscription to BMC
 
-The Hardware Event Proxy works with [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy).
-Run cloud-event-proxy sidecar and consumer example from the cloud-event-proxy repo for testing locally.
+Hardware Event Proxy subscribes to Redfish Events by sending a subscription request to the baseboard management controller (BMC) of the target hardware. The request should include the webhook URL of `Hardware Event Proxy` as the destination address. A perfered way of subscription is via [BMCEventSubscription CRD](https://github.com/metal3-io/metal3-docs/pull/167).
 
-### Set environment variables
-```shell
-export NODE_NAME=mynode
-export HW_PLUGIN=true; export HW_EVENT_PORT=9087; export CONSUMER_TYPE=HW
-export MSG_PARSER_PORT=9097; export MSG_PARSER_TIMEOUT=10
-export LOG_LEVEL=debug
-# replace the following with real Redfish credentials and BMC ip address
-export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
-
+```yaml
+apiVersion: metal3.io/v1alpha1
+kind: BMCEventSubscription
+metadata:
+  name: worker-1-events
+spec:
+   hostRef: ostest-worker-1
+   destination: https://hw-event-proxy-cloud-native-events.apps.corp.example.com/webhook
+   context: “SomeUserContext”
+   eventTypes:
+   - Alert
+   protocol: Redfish
+   httpHeadersRef:
+     name: some-secret-name
+     namespace: cloud-native-events
+status:
+  errorMessage: ""
+  errorCount: 0
+  subscriptionID: aa618a32-9335-42bc-a04b-20ddeed13ade
 ```
 
-### Install and run Apache Qpid Dispach Router
-```shell
-sudo dnf install qpid-dispatch-router
-qdrouterd &
-```
-### Run side car
-```shell
-cd <cloud-event-proxy repo>
-make build-plugins
-make run
-```
-### Run consumer
-```shell
-cd <cloud-event-proxy repo>
-make run-consumer
-```
-### Run hw event proxy
-```shell
-cd <hw-event-proxy repo>/hw-event-proxy
-make run
-```
-### Run message parser
-```shell
-cd <hw-event-proxy repo>/message-parser
-# install dependencies
-pip3 install -r requirements.txt
-python3 server.py
+## Subscribe to Hardware Event Proxy
+### Create Subscription with JSON Example
+Request
+```json
+{
+  "Resource": "/cluster/node/nodename/redfish/event",
+  "UriLocation”: “http://localhost:9089/event"
+}
 ```
 
-## Building images
-
-### Build with local dependencies
-
-```shell
-1. scripts/local-ldd-dep.sh
-2. edit build-image.sh and rename Dockerfile to Dockerfile.local
+Response
+```json
+{
+  "ID": "da42fb86-819e-47c5-84a3-5512d5a3c732",
+  "Resource": "/cluster/node/nodename/redfish/event",
+  "endpointURI": "http://127.0.0.1:9089/event",
+  "URILocation": "http://localhost:8089/api/cloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
+}
 ```
 
-### Build Images
+### Create Subscription with Golang Example
+```go
+package main
+import (
+    v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
+    v1amqp "github.com/redhat-cne/sdk-go/v1/amqp"
+    "github.com/redhat-cne/sdk-go/pkg/types"
+)
+func main(){
+    
+    nodeName := os.Getenv("NODE_NAME")
+    resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
 
-```shell
-scripts/build-go.sh
-scripts/build-image.sh
-TAG=xxx
-podman push localhost/hw-event-proxy:${TAG} quay.io/redhat_emp1/hw-event-proxy:latest
+    //channel for the transport handler subscribed to get and set events  
+    eventInCh := make(chan *channel.DataChan, 10)
+        
+    pubSubInstance = v1pubsub.GetAPIInstance(".")
+    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:8089", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
+    // create subscription 
+    pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
+    // once the subscription response is received, create a transport listener object to receive events.
+    if err==nil{
+        v1amqp.CreateListener(eventInCh, pub.GetResource())
+    }
+}
 ```
+A complete example of consumer implementation is avialble at [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy/tree/main/examples/consumer) repo.
 
-## Deploying examples to kubernetes cluster
-
-### Set Env variables
-```shell
-export VERSION=latest
-export PROXY_IMG=quay.io/redhat_emp1/hw-event-proxy:${VERSION}
-export SIDECAR_IMG=quay.io/redhat_emp1/cloud-event-proxy:${VERSION}
-export CONSUMER_IMG=quay.io/redhat_emp1/cloud-native-event-consumer:${VERSION}
-# replace the following with real Redfish credentials and BMC ip address
-export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
-```
-
-### Deploy for basic tests
-```shell
-make deploy-basic
-```
-
-### Undeploy
-```shell
-make undeploy-basic
-```
-
-## End to End Tests
-
-Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBECONFIG` set pointing to your cluster.
-
-### Build Test Tool Image
-```shell
-cd e2e-tests
-make build
-scripts/build-image.sh
-TAG=xxx
-podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-event-test:latest
-```
-
-### Basic Test
-```shell
-make test
-```
-The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
-
-The contents of the received events are verified in the test. The list of fields to check are defined the file [`e2e-tests/data/EVENT_FIELDS_TO_VERIFY`](e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
-
-The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are described [here](e2e-tests/data/README.md).
-
-> 📝 New tests can be added by simply adding JSON files in `e2e-tests/data`.
-
-
-### Performance Test
-```shell
-make test-perf
-```
-The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the `hw-event-proxy` at a rate of 10 msgs/sec for 10 minutes.
-
-The tests are marked PASSED if the performance targets are met.
-
-Performance Target: **95%** of the massages should have latency within **10ms**.
+## Developer Guide
+Instructions for development and tests are available at [Developer Guide](docs/development.md).
