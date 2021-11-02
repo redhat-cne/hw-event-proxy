@@ -72,7 +72,8 @@ import (
 )
 func main(){
     
-    resourceAddressHwEvent := "/cluster/node/nodename/redfish/event"
+    nodeName := os.Getenv("NODE_NAME")
+    resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
 
     //channel for the transport handler subscribed to get and set events  
     eventInCh := make(chan *channel.DataChan, 10)
