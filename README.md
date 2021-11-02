@@ -65,22 +65,23 @@ Response
 ### Create Subscription with Golang Example
 ```go
 package main
+
 import (
     v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
     v1amqp "github.com/redhat-cne/sdk-go/v1/amqp"
     "github.com/redhat-cne/sdk-go/pkg/types"
 )
+
 func main(){
-    
     nodeName := os.Getenv("NODE_NAME")
     resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
 
     //channel for the transport handler subscribed to get and set events  
-    eventInCh := make(chan *channel.DataChan, 10)
-        
+    eventInCh := make(chan *channel.DataChan, 10)       
     pubSubInstance = v1pubsub.GetAPIInstance(".")
     endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:8089", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
-    // create subscription 
+
+    // create subscription
     pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
     // once the subscription response is received, create a transport listener object to receive events.
     if err==nil{
