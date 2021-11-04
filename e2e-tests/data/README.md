@@ -1,5 +1,9 @@
 # Test Events
 
+The events to be tested are defined in the e2e-tests/data folder with one JSON file per event.
+
+> Naming convention: MessageId-<notes>.json
+
 ## Temp
 - TMP0100.json
 - TMP0100-no-msg-field.json
