@@ -113,7 +113,7 @@ The contents of the received events are verified in the test. The list of fields
 The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are described [here](../e2e-tests/data/README.md).
 
 #### Modify Tests
-> 📝 Add new tests by adding JSON files in `e2e-tests/data`.
+> 📝 Add new tests by adding JSON files in `e2e-tests/data`. Add [description](../e2e-tests/data/README.md) if needed.
 
 > 📝 Update message fields to check by updating `e2e-tests/data/EVENT_FIELDS_TO_VERIFY`.
 
