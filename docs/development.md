@@ -108,11 +108,14 @@ make test
 ```
 The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
 
-The contents of the received events are verified in the test. The list of fields to check are defined the file [`e2e-tests/data/EVENT_FIELDS_TO_VERIFY`](e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
+The contents of the received events are verified in the test. The list of fields to check are defined the file [`e2e-tests/data/EVENT_FIELDS_TO_VERIFY`](../e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
 
-The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are described [here](e2e-tests/data/README.md).
+The events to be tested are defined in the `e2e-tests/data` folder with one JSON file per event. List of events are described [here](../e2e-tests/data/README.md).
 
-> 📝 New tests can be added by simply adding JSON files in `e2e-tests/data`.
+#### Modify Tests
+> 📝 Add new tests by adding JSON files in `e2e-tests/data`. Add [description](../e2e-tests/data/README.md) if needed.
+
+> 📝 Update message fields to check by updating `e2e-tests/data/EVENT_FIELDS_TO_VERIFY`.
 
 
 ### Performance Test
