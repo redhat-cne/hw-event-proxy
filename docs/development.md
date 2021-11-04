@@ -114,6 +114,7 @@ The events to be tested are defined in the `e2e-tests/data` folder with one JSON
 
 #### Modify Tests
 > 📝 Add new tests by adding JSON files in `e2e-tests/data`.
+
 > 📝 Update message fields to check by updating `e2e-tests/data/EVENT_FIELDS_TO_VERIFY`.
 
 
