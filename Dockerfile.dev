@@ -1,4 +1,4 @@
-# Used by quay.io ci builds
+# Used by quay.io ci builds or developer tests
 FROM docker.io/openshift/origin-release:golang-1.15 AS go-builder
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1
