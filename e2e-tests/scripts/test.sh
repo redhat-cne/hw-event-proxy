@@ -119,7 +119,7 @@ test_basic() {
         fi
     done
 
-    echo -e "***$GREEN TEST PASSED $COLOR_RESET***"
+    echo -e "***$GREEN TEST PASSED 😄 $COLOR_RESET***"
 }
 
 test_perf() {
