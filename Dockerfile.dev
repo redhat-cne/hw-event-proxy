@@ -1,5 +1,5 @@
 # Used by quay.io ci builds or developer tests
-FROM docker.io/openshift/origin-release:golang-1.16 AS go-builder
+FROM quay.io/jacding/openshift/origin-release:golang-1.16 AS go-builder
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 ENV GO111MODULE=on
 ENV CGO_ENABLED=1
