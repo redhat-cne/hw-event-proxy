@@ -1,10 +1,11 @@
 # Used by quay.io ci builds or developer tests
-FROM docker.io/openshift/origin-release:golang-1.15 AS go-builder
-ENV GO111MODULE=off
+FROM docker.io/openshift/origin-release:golang-1.16 AS go-builder
+# Export GO111MODULE=on to enable project to be built from within GOPATH/src
+ENV GO111MODULE=on
 ENV CGO_ENABLED=1
+ENV GOFLAGS=-mod=vendor
 ENV COMMON_GO_ARGS=-race
 ENV GOOS=linux
-ENV GOPATH=/go
 
 COPY ./scripts /scripts
 WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy
