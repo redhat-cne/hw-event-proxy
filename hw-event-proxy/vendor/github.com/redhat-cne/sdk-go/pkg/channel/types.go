@@ -51,30 +51,3 @@ const (
 func (t Type) String() string {
 	return [...]string{"LISTENER", "SENDER", "EVENT", "STATUS"}[t]
 }
-
-// EventDataType types passed to cloud events
-type EventDataType string
-
-const (
-	// PTPEvent event type is ptp
-	PTPEvent EventDataType = "PTP_EVENT"
-	// PTPStatus event type is ptp status
-	PTPStatus = "PTP_STATUS"
-	// HWEvent event type is hw
-	HWEvent = "HW_EVENT"
-	// Event event type is generic event
-	Event = "EVENT"
-)
-
-// String return string eventType
-func (e EventDataType) String() string {
-	EventType := [...]string{"PTP_EVENT", "PTP_STATUS", "HW_EVENT", "EVENT"}
-
-	x := string(e)
-	for _, v := range EventType {
-		if v == x {
-			return x
-		}
-	}
-	return "EVENT"
-}

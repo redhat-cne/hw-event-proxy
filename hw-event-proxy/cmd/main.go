@@ -27,8 +27,8 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
 
-	hwevent "github.com/redhat-cne/sdk-go/pkg/hwevent"
-
+	"github.com/redhat-cne/sdk-go/pkg/event"
+	"github.com/redhat-cne/sdk-go/pkg/event/redfish"
 	"github.com/redhat-cne/sdk-go/pkg/pubsub"
 	"github.com/redhat-cne/sdk-go/pkg/types"
 	"github.com/redhat-cne/sdk-go/pkg/util/wait"
@@ -38,14 +38,13 @@ import (
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/util"
 	"google.golang.org/grpc"
 
-	v1hwevent "github.com/redhat-cne/sdk-go/v1/hwevent"
+	v1event "github.com/redhat-cne/sdk-go/v1/event"
 	v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
 	hwEventVersion string = "v1"
-	eventType      string = "HW_EVENT"
 	// in seconds
 	publisherRetryInterval = 5
 	webhookRetryInterval   = 5
@@ -167,8 +166,8 @@ func ackEvent(ctx *fasthttp.RequestCtx) {
 // and publishes to the event framework publisher
 func handleHwEvent(ctx *fasthttp.RequestCtx) {
 	log.Tracef("webhook received event %s", string(ctx.PostBody()))
-	event := createHwEvent()
-	redfishEvent := hwevent.RedfishEvent{}
+	e := createHwEvent()
+	redfishEvent := redfish.Event{}
 	err := json.Unmarshal(ctx.PostBody(), &redfishEvent)
 	if err != nil {
 		log.Errorf("failed to unmarshal hw event: %v", err)
@@ -186,24 +185,30 @@ func handleHwEvent(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	data := v1hwevent.CloudNativeData()
+	data := v1event.CloudNativeData()
+	value := event.DataValue{
+		Resource:  resourceAddress,
+		DataType:  event.NOTIFICATION,
+		ValueType: event.REDFISH_EVENT,
+		Value:     redfishEvent,
+	}
 	data.SetVersion(hwEventVersion) //nolint:errcheck
-	data.SetData(&redfishEvent)
-	event.SetData(data)
-	err = publishHwEvent(event)
+	data.AppendValues(value)        //nolint:errcheck
+	e.SetData(data)
+	err = publishHwEvent(e)
 	if err != nil {
 		log.Errorf("failed to publish hw event: %v", err)
 	}
 }
 
-func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
+func parseMessage(m redfish.EventRecord) (redfish.EventRecord, error) {
 	addr := fmt.Sprintf("localhost:%d", msgParserPort)
 	ctx, cancel := context.WithTimeout(context.Background(), msgParserTimeout)
 	defer cancel()
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithBlock(), grpc.WithInsecure())
 
 	if err != nil {
-		return hwevent.EventRecord{}, err
+		return redfish.EventRecord{}, err
 	}
 	defer conn.Close()
 
@@ -215,7 +220,7 @@ func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
 
 	resp, err := client.Parse(context.Background(), req)
 	if err != nil {
-		return hwevent.EventRecord{}, err
+		return redfish.EventRecord{}, err
 	}
 
 	m.Message = resp.Message
@@ -224,17 +229,17 @@ func parseMessage(m hwevent.EventRecord) (hwevent.EventRecord, error) {
 	return m, nil
 }
 
-func createHwEvent() hwevent.Event {
-	event := v1hwevent.CloudNativeEvent()
-	event.ID = pub.ID
-	event.Type = eventType
-	event.SetTime(types.Timestamp{Time: time.Now().UTC()}.Time)
-	event.SetDataContentType(hwevent.ApplicationJSON)
-	return event
+func createHwEvent() event.Event {
+	e := v1event.CloudNativeEvent()
+	e.ID = pub.ID
+	e.Type = string(redfish.Alert)
+	e.SetTime(types.Timestamp{Time: time.Now().UTC()}.Time)
+	e.SetDataContentType(event.ApplicationJSON)
+	return e
 }
 
-func publishHwEvent(e hwevent.Event) error {
-	url := fmt.Sprintf("%s%s", baseURL, "create/hwevent")
+func publishHwEvent(e event.Event) error {
+	url := fmt.Sprintf("%s%s", baseURL, "create/event")
 	rc := restclient.New()
 	b, err := json.Marshal(e)
 	if err != nil {

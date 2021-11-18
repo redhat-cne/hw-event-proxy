@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hwevent
+package event
 
 import (
 	"time"
@@ -54,8 +54,4 @@ type Writer interface {
 	SetDataContentType(string)
 	// SetData
 	SetData(Data)
-	// MarshalJSON
-	MarshalJSON() ([]byte, error)
-	// UnmarshalJSON
-	UnmarshalJSON(data []byte) error
 }
