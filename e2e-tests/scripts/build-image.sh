@@ -2,10 +2,10 @@ repo_root=$(dirname $0)/..
 
 BUILDCMD=${BUILDCMD:-podman build}
 
-REPO=${REPO:-redfish-event-test}
+REPO=${REPO:-hw-event-proxy}
 if [ -z ${VERSION+a} ]; then
 	VERSION=$(git describe --abbrev=8 --dirty --always)
 fi
-NAME=${REPO}:${VERSION}
+NAME=${REPO}-e2e-test:${VERSION}
 
 ${BUILDCMD} -f Dockerfile -t "${NAME}" $(dirname $0)/..

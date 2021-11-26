@@ -11,7 +11,7 @@ LOG_DIR = './logs'
 FILE_EVENT_FIELDS_TO_VERIFY = './e2e-tests/data/EVENT_FIELDS_TO_VERIFY'
 
 def main():
-    logging.basicConfig(filename=LOG_DIR + '/verify-basic.log', filemode='w', level=logging.DEBUG)
+    logging.basicConfig(filename=LOG_DIR + '/verify-sanity.log', filemode='w', level=logging.DEBUG)
     event_data_file = sys.argv[1]
     consumer_log_file = sys.argv[2]
     event_received = None

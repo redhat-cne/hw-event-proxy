@@ -29,7 +29,7 @@ spec:
       serviceAccountName: hw-event-proxy-sa
       containers:
         - name: hw-event-proxy
-          image: quay.io/redhat_emp1/hw-event-proxy:latest
+          image: quay.io/jacding/hw-event-proxy:latest
           args:
             - "--api-port=8089"
           ports:
@@ -69,7 +69,7 @@ spec:
             - name: LOG_LEVEL
               value: "trace"
         - name: cloud-native-event-sidecar
-          image: quay.io/redhat_emp1/cloud-event-proxy:latest
+          image: quay.io/jacding/cloud-event-proxy:latest
           args:
             - "--metrics-addr=127.0.0.1:9091"
             - "--store-path=/store"

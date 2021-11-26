@@ -10,7 +10,7 @@ function exitonsigterm() {
 }
 trap exitonsigterm SIGTERM
 
-./redfish-event-test
+/redfish-event-test
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start redfish-event-test: $status"
