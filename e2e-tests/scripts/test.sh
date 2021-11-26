@@ -42,11 +42,11 @@ wait_for_resource(){
     condition=$2
     timeout=$3
     while true; do
-        if kubectl -n ${NAMESPACE} wait --for=condition=$condition --timeout=$timeout $resoure_name 2>/dev/null; then
+        if kubectl -n ${NAMESPACE} wait --for=condition=$condition --timeout=$timeout $resoure_name  >/dev/null 2>&1; then
             job_result=0
             break
         fi
-        if kubectl -n ${NAMESPACE} wait --for=condition=failed --timeout=$timeout $resoure_name 2>/dev/null; then
+        if kubectl -n ${NAMESPACE} wait --for=condition=failed --timeout=$timeout $resoure_name  >/dev/null 2>&1; then
             job_result=1
             break
         fi
@@ -154,7 +154,7 @@ test_perf() {
         echo "Test will run for $(( ($TEST_DURATION_SEC + $INITIAL_DELAY_SEC)/60 )) minutes."
     fi
 
-    wait_for_resource job/redfish-event-test complete 0 >/dev/null
+    wait_for_resource job/redfish-event-test complete 0  >/dev/null 2>&1
     if [[ $job_result -eq 1 ]]; then
         fail_test
     fi
