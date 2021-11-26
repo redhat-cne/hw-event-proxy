@@ -1,11 +1,11 @@
 # Developer Guide
 
-## Running examples locally
+## Run Examples Locally
 
 The Hardware Event Proxy works with [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy).
 Run cloud-event-proxy sidecar and consumer example from the cloud-event-proxy repo for testing locally.
 
-### Set environment variables
+### Set Environment Variables
 ```shell
 export NODE_NAME=mynode
 export HW_PLUGIN=true; export HW_EVENT_PORT=9087; export CONSUMER_TYPE=HW
@@ -16,32 +16,32 @@ export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOS
 
 ```
 
-### Install and run Apache Qpid Dispach Router
+### Install And Run Apache Qpid Dispach Router
 ```shell
 sudo dnf install qpid-dispatch-router
 qdrouterd &
 ```
 
-### Run side car
+### Run SideCar
 ```shell
 cd <cloud-event-proxy repo>
 make build-plugins
 make run
 ```
 
-### Run consumer
+### Run Consumer
 ```shell
 cd <cloud-event-proxy repo>
 make run-consumer
 ```
 
-### Run hw event proxy
+### Run Hw-event-proxy
 ```shell
 cd <hw-event-proxy repo>/hw-event-proxy
 make run
 ```
 
-### Run message parser
+### Run Message Parser
 ```shell
 cd <hw-event-proxy repo>/message-parser
 # install dependencies
@@ -49,9 +49,9 @@ pip3 install -r requirements.txt
 python3 server.py
 ```
 
-## Building images
+## Build Images
 
-### Build with local dependencies
+### Build With Local Dependencies
 
 ```shell
 1. scripts/local-ldd-dep.sh
@@ -67,9 +67,9 @@ TAG=xxx
 podman push localhost/hw-event-proxy:${TAG} quay.io/jacding/hw-event-proxy:latest
 ```
 
-## Deploying examples to kubernetes cluster
+## Deploy Examples To Kubernetes Cluster
 
-### Set Env variables
+### Set Env Variables
 ```shell
 export VERSION=latest
 export PROXY_IMG=quay.io/jacding/hw-event-proxy:${VERSION}
@@ -79,14 +79,14 @@ export CONSUMER_IMG=quay.io/jacding/cloud-native-event-consumer:${VERSION}
 export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
 ```
 
-### Deploy for basic tests
+### Deploy for Sanity Tests
 ```shell
-make deploy-basic
+make deploy
 ```
 
 ### Undeploy
 ```shell
-make undeploy-basic
+make undeploy
 ```
 
 ## End to End Tests
@@ -102,11 +102,11 @@ TAG=xxx
 podman push localhost/hw-event-proxy-e2e-test:${TAG} quay.io/jacding/hw-event-proxy-e2e-test:latest
 ```
 
-### Basic Test
+### Sanity Test
 ```shell
 make test
 ```
-The basic test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
+The sanity test sets up one test pod and **one** consumer in the same node and sends out Redfish Events to the hw-event-proxy at a rate of 1 msg/sec.
 
 The contents of the received events are verified in the test. The list of fields to check are defined the file [`e2e-tests/data/EVENT_FIELDS_TO_VERIFY`](../e2e-tests/data/EVENT_FIELDS_TO_VERIFY).
 
@@ -122,7 +122,7 @@ The events to be tested are defined in the `e2e-tests/data` folder with one JSON
 ```shell
 make test-perf
 ```
-The basic test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the `hw-event-proxy` at a rate of 10 msgs/sec for 10 minutes.
+The performance test sets up one test pod and **20** consumers in the same node and sends out Redfish Events to the `hw-event-proxy` at a rate of 10 msgs/sec for 10 minutes.
 
 The tests are marked PASSED if the performance targets are met.
 
