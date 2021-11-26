@@ -15,20 +15,20 @@ replicas:
   name: hw-event-proxy
 images:
 - name: cloud-event-proxy
-  newName: quay.io/redhat_emp1/cloud-event-proxy
+  newName: quay.io/jacding/cloud-event-proxy
   newTag: latest
 - name: cloud-native-event-consumer
-  newName: quay.io/redhat_emp1/cloud-native-event-consumer
+  newName: quay.io/jacding/cloud-native-event-consumer
   newTag: latest
 - name: hw-event-proxy
-  newName: quay.io/redhat_emp1/hw-event-proxy
+  newName: quay.io/jacding/hw-event-proxy
   newTag: latest
 
 secretGenerator:
 - literals:
-  - username=admin
-  - password=admin
-  - hostaddr=127.0.0.1
+  - username=root
+  - password=calvin
+  - hostaddr=10.19.28.42
   name: redfish-basic-auth
   namespace: cloud-native-events
   type: Opaque

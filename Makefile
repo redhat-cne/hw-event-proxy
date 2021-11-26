@@ -4,9 +4,9 @@
 VERSION ?=latest
 
 # Default image tag
-PROXY_IMG ?= quay.io/redhat_emp1/hw-event-proxy:$(VERSION)
-SIDECAR_IMG ?= quay.io/redhat_emp1/cloud-event-proxy:$(VERSION)
-CONSUMER_IMG ?= quay.io/redhat_emp1/cloud-native-event-consumer:$(VERSION)
+PROXY_IMG ?= quay.io/jacding/hw-event-proxy:$(VERSION)
+SIDECAR_IMG ?= quay.io/jacding/cloud-event-proxy:$(VERSION)
+CONSUMER_IMG ?= quay.io/jacding/cloud-native-event-consumer:$(VERSION)
 
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 export GO111MODULE=on

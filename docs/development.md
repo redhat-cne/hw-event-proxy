@@ -64,7 +64,7 @@ python3 server.py
 scripts/build-go.sh
 scripts/build-image.sh
 TAG=xxx
-podman push localhost/hw-event-proxy:${TAG} quay.io/redhat_emp1/hw-event-proxy:latest
+podman push localhost/hw-event-proxy:${TAG} quay.io/jacding/hw-event-proxy:latest
 ```
 
 ## Deploying examples to kubernetes cluster
@@ -72,9 +72,9 @@ podman push localhost/hw-event-proxy:${TAG} quay.io/redhat_emp1/hw-event-proxy:l
 ### Set Env variables
 ```shell
 export VERSION=latest
-export PROXY_IMG=quay.io/redhat_emp1/hw-event-proxy:${VERSION}
-export SIDECAR_IMG=quay.io/redhat_emp1/cloud-event-proxy:${VERSION}
-export CONSUMER_IMG=quay.io/redhat_emp1/cloud-native-event-consumer:${VERSION}
+export PROXY_IMG=quay.io/jacding/hw-event-proxy:${VERSION}
+export SIDECAR_IMG=quay.io/jacding/cloud-event-proxy:${VERSION}
+export CONSUMER_IMG=quay.io/jacding/cloud-native-event-consumer:${VERSION}
 # replace the following with real Redfish credentials and BMC ip address
 export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
 ```
@@ -99,7 +99,7 @@ cd e2e-tests
 make build
 scripts/build-image.sh
 TAG=xxx
-podman push localhost/redfish-event-test:${TAG} quay.io/redhat_emp1/redfish-event-test:latest
+podman push localhost/hw-event-proxy-e2e-test:${TAG} quay.io/jacding/hw-event-proxy-e2e-test:latest
 ```
 
 ### Basic Test
