@@ -26,9 +26,9 @@ images:
 
 secretGenerator:
 - literals:
-  - username=admin
-  - password=admin
-  - hostaddr=127.0.0.1
+  - username=root
+  - password=calvin
+  - hostaddr=10.19.28.42
   name: redfish-basic-auth
   namespace: cloud-native-events
   type: Opaque

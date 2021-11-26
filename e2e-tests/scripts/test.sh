@@ -88,7 +88,7 @@ fail_test(){
 }
 
 
-test_basic() {
+test_sanity() {
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
     consumer_pod=`kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`
@@ -113,7 +113,7 @@ test_basic() {
     grep "received event" ${LOG_DIR}/$consumer_pod.log | sed 's/\\\"//g' >> ${LOG_DIR}/event-received.log
 
     for eventFile in ${DATA_DIR}/*.json; do
-        e2e-tests/scripts/verify-basic.py $eventFile ${LOG_DIR}/event-received.log
+        e2e-tests/scripts/verify-sanity.py $eventFile ${LOG_DIR}/event-received.log
         if [[ $? -eq 1 ]]; then
             fail_test
         fi
@@ -207,8 +207,8 @@ if [[ $perf -eq 1 ]]; then
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
     test_perf
 else
-    echo -e "---$BOLD BASIC TEST $COLOR_RESET---"
-    test_basic
+    echo -e "---$BOLD SANITY TEST $COLOR_RESET---"
+    test_sanity
 fi
 
 cleanup_logs_pid
