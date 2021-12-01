@@ -1,4 +1,4 @@
-// Copyright 2020 The Cloud Native Events Authors
+// Copyright 2021 The Cloud Native Events Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hwevent
+package redfish
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -132,7 +131,7 @@ func (e EventRecord) String() string {
 	return b.String()
 }
 
-// RedfishEvent is defined in Redfish schema Event.v1_4_1.json
+// Event is defined in Redfish schema Event.v1_4_1.json
 // https://redfish.dmtf.org/schemas/v1/Event.v1_4_1.json
 // The Event schema describes the JSON payload received by an Event Destination,
 // which has subscribed to event notification, when events occur.  This Resource
@@ -140,7 +139,7 @@ func (e EventRecord) String() string {
 // link to a Message Registry that can be accessed for further information.
 //
 // Required fields: @odata.type, Events, Id, Name
-type RedfishEvent struct {
+type Event struct {
 	// +optional
 	OdataContext string `json:"@odata.context,omitempty"`
 	// +required
@@ -165,8 +164,8 @@ type RedfishEvent struct {
 	Oem []byte `json:"Oem,omitempty"`
 }
 
-// String returns a pretty-printed representation of the RedfishEvent.
-func (e RedfishEvent) String() string {
+// String returns a pretty-printed representation of the Redfish Event.
+func (e Event) String() string {
 	b := strings.Builder{}
 	if e.OdataContext != "" {
 		b.WriteString("\n    @odata.context: " + e.OdataContext + "\n")
@@ -188,44 +187,4 @@ func (e RedfishEvent) String() string {
 		b.WriteString(e.String())
 	}
 	return b.String()
-}
-
-// Data ... cloud native events data
-// Data Json payload is as follows,
-//{
-//	"version": "v1.4.1",
-//
-//}
-type Data struct {
-	Version string        `json:"version" example:"v1"`
-	Data    *RedfishEvent `json:"data"`
-}
-
-// String returns a pretty-printed representation of the Data.
-func (d Data) String() string {
-	b := strings.Builder{}
-	b.WriteString("\n  version: " + d.Version + "\n")
-	b.WriteString("  data:")
-	b.WriteString(d.Data.String())
-	return b.String()
-}
-
-// SetVersion  ...
-func (d *Data) SetVersion(s string) error {
-	d.Version = s
-	if s == "" {
-		err := fmt.Errorf("version cannot be empty")
-		return err
-	}
-	return nil
-}
-
-// GetVersion ...
-func (d *Data) GetVersion() string {
-	return d.Version
-}
-
-// SetData ...
-func (d *Data) SetData(b *RedfishEvent) {
-	d.Data = b
 }

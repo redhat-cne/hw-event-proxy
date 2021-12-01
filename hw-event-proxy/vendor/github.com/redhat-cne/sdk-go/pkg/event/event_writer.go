@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hwevent
+package event
 
 import (
 	"net/url"
@@ -67,12 +67,23 @@ func (e *Event) SetDataContentType(ct string) {
 	}
 }
 
-// SetData ...
+//SetData ...
 func (e *Event) SetData(data Data) {
 	nData := Data{
 		Version: data.Version,
-		Data:    data.Data,
 	}
 
+	var nValues []DataValue
+
+	for _, v := range data.Values {
+		nValue := DataValue{
+			Resource:  v.Resource,
+			DataType:  v.DataType,
+			ValueType: v.ValueType,
+			Value:     v.Value,
+		}
+		nValues = append(nValues, nValue)
+	}
+	nData.Values = nValues
 	e.Data = &nData
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hwevent
+package event
 
 import (
 	"encoding/json"
@@ -23,7 +23,7 @@ import (
 	"github.com/redhat-cne/sdk-go/pkg/pubsub"
 )
 
-// NewCloudEvent create new cloud event from cloud native events and pubsub
+//NewCloudEvent create new cloud event from cloud native events and pubsub
 func (e *Event) NewCloudEvent(ps *pubsub.PubSub) (*cloudevent.Event, error) {
 	ce := cloudevent.NewEvent(cloudevent.VersionV03)
 	ce.SetTime(e.GetTime())
@@ -32,7 +32,6 @@ func (e *Event) NewCloudEvent(ps *pubsub.PubSub) (*cloudevent.Event, error) {
 	ce.SetSource(ps.Resource) // bus address
 	ce.SetSpecVersion(cloudevent.VersionV03)
 	ce.SetID(uuid.New().String())
-
 	if err := ce.SetData(cloudevent.ApplicationJSON, e.GetData()); err != nil {
 		return nil, err
 	}
@@ -46,7 +45,7 @@ func (e *Event) GetCloudNativeEvents(ce *cloudevent.Event) (err error) {
 	}
 	data := Data{}
 	if err = json.Unmarshal(ce.Data(), &data); err != nil {
-		return err
+		return
 	}
 	e.SetDataContentType(ApplicationJSON)
 	e.SetTime(ce.Time())

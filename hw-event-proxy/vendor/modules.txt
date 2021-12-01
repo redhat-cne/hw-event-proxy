@@ -1,6 +1,8 @@
 # github.com/andybalholm/brotli v1.0.2
+## explicit; go 1.12
 github.com/andybalholm/brotli
 # github.com/cloudevents/sdk-go/v2 v2.5.0
+## explicit; go 1.14
 github.com/cloudevents/sdk-go/v2
 github.com/cloudevents/sdk-go/v2/binding
 github.com/cloudevents/sdk-go/v2/binding/format
@@ -16,50 +18,60 @@ github.com/cloudevents/sdk-go/v2/protocol
 github.com/cloudevents/sdk-go/v2/protocol/http
 github.com/cloudevents/sdk-go/v2/types
 # github.com/golang/protobuf v1.5.0
+## explicit; go 1.9
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/uuid v1.3.0
+## explicit
 github.com/google/uuid
 # github.com/json-iterator/go v1.1.12
-## explicit
+## explicit; go 1.12
 github.com/json-iterator/go
 # github.com/klauspost/compress v1.13.4
+## explicit; go 1.13
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+## explicit
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
+## explicit; go 1.12
 github.com/modern-go/reflect2
-# github.com/redhat-cne/sdk-go v0.1.1-0.20210927021319-526cc32c66ed
-## explicit
+# github.com/redhat-cne/sdk-go v0.1.1-0.20211130185743-65c3912ba066
+## explicit; go 1.15
 github.com/redhat-cne/sdk-go/pkg/channel
-github.com/redhat-cne/sdk-go/pkg/hwevent
+github.com/redhat-cne/sdk-go/pkg/event
+github.com/redhat-cne/sdk-go/pkg/event/redfish
 github.com/redhat-cne/sdk-go/pkg/pubsub
 github.com/redhat-cne/sdk-go/pkg/store
 github.com/redhat-cne/sdk-go/pkg/types
 github.com/redhat-cne/sdk-go/pkg/util/clock
 github.com/redhat-cne/sdk-go/pkg/util/wait
-github.com/redhat-cne/sdk-go/v1/hwevent
+github.com/redhat-cne/sdk-go/v1/event
 github.com/redhat-cne/sdk-go/v1/pubsub
 # github.com/sirupsen/logrus v1.8.1
-## explicit
+## explicit; go 1.13
 github.com/sirupsen/logrus
 # github.com/valyala/bytebufferpool v1.0.0
+## explicit
 github.com/valyala/bytebufferpool
 # github.com/valyala/fasthttp v1.31.0
-## explicit
+## explicit; go 1.12
 github.com/valyala/fasthttp
 github.com/valyala/fasthttp/fasthttputil
 github.com/valyala/fasthttp/stackless
 # go.uber.org/atomic v1.4.0
+## explicit
 go.uber.org/atomic
 # go.uber.org/multierr v1.1.0
+## explicit
 go.uber.org/multierr
 # go.uber.org/zap v1.10.0
+## explicit
 go.uber.org/zap
 go.uber.org/zap/buffer
 go.uber.org/zap/internal/bufferpool
@@ -67,7 +79,7 @@ go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
 # golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
-## explicit
+## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -76,18 +88,21 @@ golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
 # golang.org/x/sys v0.0.0-20210603081109-ebe580a85c40
+## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.6
+## explicit; go 1.11
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+## explicit; go 1.11
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.42.0
-## explicit
+## explicit; go 1.14
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -134,7 +149,7 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # google.golang.org/protobuf v1.27.1
-## explicit
+## explicit; go 1.9
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
