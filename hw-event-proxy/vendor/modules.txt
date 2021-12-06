@@ -41,8 +41,8 @@ github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 ## explicit; go 1.12
 github.com/modern-go/reflect2
-# github.com/redhat-cne/sdk-go v0.1.1-0.20211130185743-65c3912ba066
-## explicit; go 1.15
+# github.com/redhat-cne/sdk-go v0.1.1-0.20211206194140-5b52c616af2b
+## explicit; go 1.17
 github.com/redhat-cne/sdk-go/pkg/channel
 github.com/redhat-cne/sdk-go/pkg/event
 github.com/redhat-cne/sdk-go/pkg/event/redfish

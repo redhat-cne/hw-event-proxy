@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/json-iterator/go v1.1.12
-	github.com/redhat-cne/sdk-go v0.1.1-0.20211130185743-65c3912ba066
+	github.com/redhat-cne/sdk-go v0.1.1-0.20211206194140-5b52c616af2b
 	github.com/sirupsen/logrus v1.8.1
 	github.com/valyala/fasthttp v1.31.0
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
