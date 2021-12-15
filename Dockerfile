@@ -11,7 +11,7 @@ COPY ./hw-event-proxy ./hw-event-proxy
 RUN /scripts/build-go.sh
 
 # Install dependencies for message-parser
-FROM registry.access.redhat.com/ubi8/python-38
+FROM registry.access.redhat.com/ubi8/python-39
 COPY /scripts/entrypoint.sh /
 WORKDIR /message-parser
 COPY ./message-parser .

@@ -5,7 +5,7 @@ WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy
 COPY ./hw-event-proxy ./hw-event-proxy
 
 # Install dependencies for message-parser
-FROM registry.access.redhat.com/ubi8/python-38
+FROM registry.access.redhat.com/ubi8/python-39
 COPY /scripts/entrypoint.sh /
 WORKDIR /message-parser
 COPY ./message-parser .

@@ -4,9 +4,13 @@
 VERSION ?=latest
 
 # Image name
-PROXY_IMG ?= quay.io/jacding/hw-event-proxy
-SIDECAR_IMG ?= quay.io/jacding/cloud-event-proxy
-CONSUMER_IMG ?= quay.io/jacding/cloud-native-event-consumer
+PROXY_IMG_NAME ?= quay.io/jacding/hw-event-proxy
+SIDECAR_IMG_NAME ?= quay.io/jacding/cloud-event-proxy
+CONSUMER_IMG_NAME ?= quay.io/jacding/cloud-native-event-consumer
+
+PROXY_IMG ?= ${PROXY_IMG_NAME}:${VERSION}
+SIDECAR_IMG ?= ${SIDECAR_IMG_NAME}:${VERSION}
+CONSUMER_IMG ?= ${CONSUMER_IMG_NAME}:${VERSION}
 
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 export GO111MODULE=on
@@ -54,9 +58,9 @@ label-node:
 	@kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
 
 update-image:kustomize
-	cd ./manifests/base && $(KUSTOMIZE) edit set image ${PROXY_IMG}=*:${VERSION} \
-		&& $(KUSTOMIZE) edit set image ${SIDECAR_IMG}=*:${VERSION} \
-		&& $(KUSTOMIZE) edit set image ${CONSUMER_IMG}=*:${VERSION}
+	cd ./manifests/base && $(KUSTOMIZE) edit set image ${PROXY_IMG_NAME}=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image ${SIDECAR_IMG_NAME}=${SIDECAR_IMG} \
+		&& $(KUSTOMIZE) edit set image ${CONSUMER_IMG_NAME}=${CONSUMER_IMG}
 
 # Deploy all in the configured Kubernetes cluster in ~/.kube/config
 deploy-amq:kustomize
