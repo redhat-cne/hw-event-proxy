@@ -203,6 +203,11 @@ if [[ $job_result -eq 1 ]]; then
     exit 1
 fi
 
+# This help verifying the image used is the latest image built from CI
+echo "Use image:"
+kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].image
+kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].imageID
+
 if [[ $perf -eq 1 ]]; then
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
     test_perf
