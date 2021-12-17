@@ -54,6 +54,25 @@ wait_for_resource(){
     done
 }
 
+check_images(){
+    TIMEOUT_SEC=180
+    start_time="$(date -u +%s)"
+    while true; do
+        current_time="$(date -u +%s)"
+        elapsed_seconds=$(($current_time-$start_time))
+        if [ $elapsed_seconds -gt $TIMEOUT_SEC ]; then
+            echo "timeout of $TIMEOUT_SEC sec"
+            exit 0
+        fi
+        kubectl -n ${NAMESPACE} get pods || true
+        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].image || true
+        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].imageID || true
+        sleep 1
+    done
+}
+
+
+
 cleanup_logs(){
     rm -f ${LOG_DIR}/* 2>/dev/null
 }
@@ -195,6 +214,8 @@ if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
+
+check_images
 
 echo "--- Check if hw-event-proxy pod is available ---"
 wait_for_resource deployment/hw-event-proxy available 60s >/dev/null 2>&1
