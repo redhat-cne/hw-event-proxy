@@ -55,18 +55,20 @@ wait_for_resource(){
 }
 
 check_images(){
-    TIMEOUT_SEC=180
+    TIMEOUT_SEC=120
     start_time="$(date -u +%s)"
     while true; do
         current_time="$(date -u +%s)"
         elapsed_seconds=$(($current_time-$start_time))
         if [ $elapsed_seconds -gt $TIMEOUT_SEC ]; then
             echo "timeout of $TIMEOUT_SEC sec"
-            exit 0
+            break
         fi
         kubectl -n ${NAMESPACE} get pods || true
         kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].image || true
         kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].imageID || true
+        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[1].image || true
+        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[1].imageID || true
         sleep 1
     done
 }
@@ -228,6 +230,8 @@ fi
 echo "Use image:"
 kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].image
 kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[0].imageID
+kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[1].image
+kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses[1].imageID
 
 if [[ $perf -eq 1 ]]; then
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
