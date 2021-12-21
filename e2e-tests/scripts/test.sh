@@ -214,7 +214,8 @@ if [[ $job_result -eq 1 ]]; then
     exit 1
 fi
 
-check_images
+# uncomment this when debugging image issues
+# check_images
 
 echo "--- Check if hw-event-proxy pod is available ---"
 wait_for_resource deployment/hw-event-proxy available 60s >/dev/null 2>&1
