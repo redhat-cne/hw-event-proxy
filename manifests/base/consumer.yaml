@@ -27,7 +27,7 @@ spec:
       serviceAccountName: sidecar-consumer-sa
       containers:
         - name: cloud-native-event-consumer
-          image: quay.io/jacding/cloud-native-event-consumer
+          image: quay.io/redhat-cne/cloud-native-event-consumer
           args:
             - "--local-api-addr=127.0.0.1:9089"
             - "--api-path=/api/cloudNotifications/v1/"
@@ -42,7 +42,7 @@ spec:
             - name: LOG_LEVEL
               value: "debug"
         - name: cloud-native-event-sidecar
-          image: quay.io/jacding/cloud-event-proxy
+          image: quay.io/redhat-cne/cloud-event-proxy
           args:
             - "--metrics-addr=127.0.0.1:9091"
             - "--store-path=/store"
