@@ -4,9 +4,9 @@
 VERSION ?=latest
 
 # Image name
-PROXY_IMG_NAME ?= quay.io/jacding/hw-event-proxy
-SIDECAR_IMG_NAME ?= quay.io/jacding/cloud-event-proxy
-CONSUMER_IMG_NAME ?= quay.io/jacding/cloud-native-event-consumer
+PROXY_IMG_NAME ?= quay.io/redhat-cne/hw-event-proxy
+SIDECAR_IMG_NAME ?= quay.io/redhat-cne/cloud-event-proxy
+CONSUMER_IMG_NAME ?= quay.io/redhat-cne/cloud-native-event-consumer
 
 PROXY_IMG ?= ${PROXY_IMG_NAME}:${VERSION}
 SIDECAR_IMG ?= ${SIDECAR_IMG_NAME}:${VERSION}
