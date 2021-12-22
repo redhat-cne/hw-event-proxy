@@ -18,7 +18,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Start the hw-event-proxy
-/hw-event-proxy
+/hw-event-proxy $1
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start hw-event-proxy: $status"
