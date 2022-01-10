@@ -25,6 +25,11 @@ func (e *Event) GetType() string {
 	return e.Type
 }
 
+// GetSource implements Reader.Source
+func (e *Event) GetSource() string {
+	return e.Source
+}
+
 // GetID implements Reader.ID
 func (e *Event) GetID() string {
 	return e.ID

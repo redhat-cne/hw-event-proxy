@@ -187,7 +187,7 @@ func handleHwEvent(ctx *fasthttp.RequestCtx) {
 
 	data := v1event.CloudNativeData()
 	value := event.DataValue{
-		Resource:  resourceAddress,
+		Resource:  string(redfish.Systems),
 		DataType:  event.NOTIFICATION,
 		ValueType: event.REDFISH_EVENT,
 		Value:     redfishEvent,
@@ -233,6 +233,7 @@ func createHwEvent() event.Event {
 	e := v1event.CloudNativeEvent()
 	e.ID = pub.ID
 	e.Type = string(redfish.Alert)
+	e.Source = resourceAddress
 	e.SetTime(types.Timestamp{Time: time.Now().UTC()}.Time)
 	e.SetDataContentType(event.ApplicationJSON)
 	return e

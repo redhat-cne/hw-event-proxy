@@ -28,30 +28,20 @@ import (
 //{
 //	"id": "5ce55d17-9234-4fee-a589-d0f10cb32b8e",
 //	"type": "event.sync.sync-status.synchronization-state-change",
+//	"source": "/cluster/node/example.com/ptp/clock_realtime",
 //	"time": "2021-02-05T17:31:00Z",
 //	"data": {
 //		"version": "v1.0",
 //		"values": [{
-//			"resource": "/cluster/node/ptp",
+//			"resource": "/sync/sync-status/sync-state",
 //			"dataType": "notification",
 //			"valueType": "enumeration",
 //			"value": "ACQUIRING-SYNC"
 //			}, {
-//			"resource": "/cluster/node/clock",
+//			"resource": "/sync/sync-status/sync-state",
 //			"dataType": "metric",
 //			"valueType": "decimal64.3",
 //			"value": 100.3
-//			}, {
-//			"resource": "/cluster/node/temp",
-//			"dataType": "notification",
-//			"valueType": "redfish-event",
-//			"value": {
-//			"@odata.context": "/redfish/v1/$metadata#Event.Event",
-//			"@odata.type": "#Event.v1_3_0.Event",
-//			"Context": "any string is valid",
-//			"Events": [{"EventId": "2162", "MemberId": "615703", "MessageId": "TMP0100"}],
-//			"Id": "5e004f5a-e3d1-11eb-ae9c-3448edf18a38",
-//			"Name": "Event Array"
 //			}]
 //		}
 //}
@@ -63,6 +53,9 @@ type Event struct {
 	// Type - The type of the occurrence which has happened.
 	// +required
 	Type string `json:"type" example:"event.sync.sync-status.synchronization-state-change"`
+	// Source - The source of the occurrence which has happened.
+	// +required
+	Source string `json:"source" example:"/cluster/node/example.com/ptp/clock_realtime"`
 	// DataContentType - the Data content type
 	// +required
 	DataContentType *string `json:"dataContentType" example:"application/json"`

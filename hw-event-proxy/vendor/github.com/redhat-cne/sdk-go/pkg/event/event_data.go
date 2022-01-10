@@ -46,17 +46,17 @@ const (
 //{
 //	"version": "v1.0",
 //	"values": [{
-//		"resource": "/cluster/node/ptp",
+//		"resource": "/sync/sync-status/sync-state",
 //		"dataType": "notification",
 //		"valueType": "enumeration",
 //		"value": "ACQUIRING-SYNC"
 //		}, {
-//		"resource": "/cluster/node/clock",
+//		"resource": "/sync/sync-status/sync-state",
 //		"dataType": "metric",
 //		"valueType": "decimal64.3",
 //		"value": 100.3
 //		}, {
-//		"resource": "/cluster/node/temp",
+//		"resource": "/redfish/v1/Systems",
 //		"dataType": "notification",
 //		"valueType": "redfish-event",
 //		"value": {

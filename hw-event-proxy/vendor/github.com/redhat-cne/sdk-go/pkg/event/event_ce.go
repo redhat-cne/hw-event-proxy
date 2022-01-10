@@ -50,6 +50,7 @@ func (e *Event) GetCloudNativeEvents(ce *cloudevent.Event) (err error) {
 	e.SetDataContentType(ApplicationJSON)
 	e.SetTime(ce.Time())
 	e.SetType(ce.Type())
+	e.SetSource(ce.Source())
 	e.SetData(data)
 	return
 }

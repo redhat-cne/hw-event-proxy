@@ -29,6 +29,11 @@ func (e *Event) SetType(t string) {
 	e.Type = t
 }
 
+// SetSource implements Writer.SetSource
+func (e *Event) SetSource(s string) {
+	e.Source = s
+}
+
 // SetID implements Writer.SetID
 func (e *Event) SetID(id string) {
 	e.ID = id

@@ -39,6 +39,10 @@ func WriteJSON(in *Event, writer io.Writer) error {
 
 			stream.WriteObjectField("type")
 			stream.WriteString(in.GetType())
+			stream.WriteMore()
+
+			stream.WriteObjectField("source")
+			stream.WriteString(in.GetSource())
 
 			if in.GetDataContentType() != "" {
 				stream.WriteMore()
