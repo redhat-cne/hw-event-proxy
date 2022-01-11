@@ -110,6 +110,7 @@ func GetCloudNativeEvents(ce cloudevents.Event) (e event.Event, err error) {
 	e.SetDataContentType(event.ApplicationJSON)
 	e.SetTime(ce.Time())
 	e.SetType(ce.Type())
+	e.SetSource(ce.Source())
 	e.SetData(data)
 	return
 }

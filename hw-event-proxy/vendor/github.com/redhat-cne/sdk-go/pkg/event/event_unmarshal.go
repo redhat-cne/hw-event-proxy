@@ -85,11 +85,12 @@ func readDataJSONFromIterator(out *Data, iterator *jsoniter.Iterator) error {
 func readJSONFromIterator(out *Event, iterator *jsoniter.Iterator) error {
 	var (
 		// Universally parseable fields.
-		id   string
-		typ  string
-		time *types.Timestamp
-		data *Data
-		err  error
+		id     string
+		typ    string
+		source string
+		time   *types.Timestamp
+		data   *Data
+		err    error
 
 		// These fields require knowledge about the specversion to be parsed.
 		//schemaurl jsoniter.Any
@@ -107,6 +108,8 @@ func readJSONFromIterator(out *Event, iterator *jsoniter.Iterator) error {
 			id = iterator.ReadString()
 		case "type":
 			typ = iterator.ReadString()
+		case "source":
+			source = iterator.ReadString()
 		case "time":
 			time = readTimestamp(iterator)
 		case "data":
@@ -130,6 +133,7 @@ func readJSONFromIterator(out *Event, iterator *jsoniter.Iterator) error {
 	out.Time = time
 	out.ID = id
 	out.Type = typ
+	out.Source = source
 	if data != nil {
 		out.SetData(*data)
 	}
