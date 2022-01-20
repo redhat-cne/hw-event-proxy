@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: redfish-event-test
-          image: quay.io/jacding/hw-event-proxy-e2e-test:latest
+          image: quay.io/redhat-cne/hw-event-proxy-e2e-test:latest
           env:
             - name: MSG_PER_SEC
               value: "1"

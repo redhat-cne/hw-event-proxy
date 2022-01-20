@@ -1,5 +1,6 @@
-# Used by quay.io ci builds or developer tests
-FROM quay.io/jacding/openshift-origin-release:golang-1.16 AS go-builder
+# Used by quay.io to trigger developer builds
+FROM quay.io/redhat-cne/openshift-origin-release:golang-1.17 AS go-builder
+
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1
 ENV COMMON_GO_ARGS=-race
