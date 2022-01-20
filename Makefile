@@ -4,8 +4,8 @@
 VERSION ?=latest
 
 # Image name
-PROXY_IMG_NAME ?= quay.io/redhat-cne/hw-event-proxy
-SIDECAR_IMG_NAME ?= quay.io/redhat-cne/cloud-event-proxy
+PROXY_IMG_NAME ?= quay.io/openshift/origin-baremetal-hardware-event-proxy
+SIDECAR_IMG_NAME ?= quay.io/openshift/origin-cloud-event-proxy
 CONSUMER_IMG_NAME ?= quay.io/redhat-cne/cloud-native-event-consumer
 
 PROXY_IMG ?= ${PROXY_IMG_NAME}:${VERSION}
