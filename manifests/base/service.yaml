@@ -13,9 +13,6 @@ spec:
     - name: hw-event
       port: 9087
       targetPort: 9087
-    - name: https
-      port: 8443
-      targetPort: https
   selector:
     app: hw-event-proxy
   type: ClusterIP
