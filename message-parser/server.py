@@ -11,6 +11,7 @@ import sushy
 import sys
 from sushy import auth
 from sushy.resources import base
+from sushy.resources import constants
 from sushy.resources.registry import message_registry
 
 # disable InsecureRequestWarning: Unverified HTTPS request is being made to host
@@ -65,21 +66,27 @@ class MessageParserServicer(MessageParserServicer):
     
     def Parse(self, request, context):
         logging.debug('request message_id: %s', request.message_id)
-        logging.debug('request %d message_args', len(request.message_args))
-        for a in request.message_args:
-            logging.debug('found message arg %s', a)
 
         m = base.MessageListField('Message')
         m.message_id = request.message_id
         m.message_args = request.message_args
         m.severity = None
         m.resolution = None
+        m.message = None
 
-        message_registry.parse_message(self.registries, m)
-        resp = ParserResponse(message=m.message, severity=m.severity, resolution=m.resolution)
+        m_parsed = message_registry.parse_message(self.registries, m)
+
+        # Unable to find message for registry
+        if m_parsed.message == 'unknown':
+            m_parsed.severity = 'unknown'
+            m_parsed.resolution = 'unknown'
+
+        if isinstance(m_parsed.severity, constants.Health):
+            m_parsed.severity = m_parsed.severity.value
+
+        resp = ParserResponse(message=m_parsed.message, severity=m_parsed.severity, resolution=m_parsed.resolution)
         logging.debug('resp: %s', resp)
         return resp
-
 
 if __name__ == '__main__':
     l = os.environ.get('LOG_LEVEL', 'DEBUG')
