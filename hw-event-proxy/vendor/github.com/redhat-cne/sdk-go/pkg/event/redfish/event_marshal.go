@@ -19,6 +19,7 @@ import (
 	"io"
 
 	jsoniter "github.com/json-iterator/go"
+	log "github.com/sirupsen/logrus"
 )
 
 // WriteJSONEvent ...
@@ -64,12 +65,17 @@ func WriteJSONEvent(in *Event, writer io.Writer, stream *jsoniter.Stream) error 
 			stream.WriteString(data.OdataType)
 			stream.WriteMore()
 		} else {
-			return fmt.Errorf("@odata.type is not set")
+			log.Warningf("@odata.type is not set")
 		}
 		if data.Events != nil {
 			stream.WriteObjectField("Events")
 			stream.WriteArrayStart()
+			count := 0
 			for i, v := range data.Events {
+				if count > 0 {
+					stream.WriteMore()
+				}
+				count++
 				if err := writeJSONEventRecord(&v, writer, stream); err != nil {
 					return fmt.Errorf("error writing Event[%d]: %w", i, err)
 				}
@@ -77,14 +83,14 @@ func WriteJSONEvent(in *Event, writer io.Writer, stream *jsoniter.Stream) error 
 			stream.WriteArrayEnd()
 			stream.WriteMore()
 		} else {
-			return fmt.Errorf("field Events is not set")
+			log.Warningf("field Events is not set")
 		}
 		if data.ID != "" {
 			stream.WriteObjectField("Id")
 			stream.WriteString(data.ID)
 			stream.WriteMore()
 		} else {
-			return fmt.Errorf("field Id is not set")
+			log.Warningf("field Id is not set")
 		}
 		if data.Name != "" {
 			stream.WriteObjectField("Name")
@@ -95,7 +101,7 @@ func WriteJSONEvent(in *Event, writer io.Writer, stream *jsoniter.Stream) error 
 
 		stream.WriteObjectEnd()
 	} else {
-		return fmt.Errorf("@odata.type is not set")
+		return fmt.Errorf("Name is not set")
 	}
 
 	// Let's do a check on the error
@@ -183,30 +189,29 @@ func writeJSONEventRecord(in *EventRecord, writer io.Writer, stream *jsoniter.St
 			stream.WriteString(data.Resolution)
 			stream.WriteMore()
 		}
-		if data.EventType != "" {
-			stream.WriteObjectField("EventType")
-			stream.WriteString(data.EventType)
-			stream.WriteMore()
-		} else {
-			return fmt.Errorf("field EventType is not set")
-		}
 		if data.MessageID != "" {
 			stream.WriteObjectField("MessageId")
 			stream.WriteString(data.MessageID)
 			stream.WriteMore()
 		} else {
-			return fmt.Errorf("field MessageId is not set")
+			log.Warningf("field MessageId is not set")
 		}
 		if data.MemberID != "" {
 			stream.WriteObjectField("MemberId")
 			stream.WriteString(data.MemberID)
+			stream.WriteMore()
 		} else {
-			return fmt.Errorf("field MemberId is not set")
+			log.Warningf("field MemberId is not set")
 		}
-
+		if data.EventType != "" {
+			stream.WriteObjectField("EventType")
+			stream.WriteString(data.EventType)
+		} else {
+			return fmt.Errorf("field EventType is not set")
+		}
 		stream.WriteObjectEnd()
 	} else {
-		return fmt.Errorf("field EventType is not set")
+		return fmt.Errorf("EventType is not set")
 	}
 
 	// Let's do a check on the error

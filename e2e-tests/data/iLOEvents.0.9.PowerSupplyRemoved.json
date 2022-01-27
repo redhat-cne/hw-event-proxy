@@ -1,0 +1,21 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.type": "#Event.v1_0_0.Event",
+  "Events": [
+    {
+      "EventId": "TestEventId",
+      "EventTimestamp": "2022-01-24T16:00:00Z",
+      "EventType": "Alert",
+      "Message": "Test Event",
+      "MessageArgs": [
+        "NoAMS",
+        "Busy",
+        "Cached"
+      ],
+      "MessageId": "iLOEvents.0.9.PowerSupplyRemoved",
+      "OriginOfCondition": "/redfish/v1/Systems/1/",
+      "Severity": "OK"
+    }
+  ],
+  "Name": "Events"
+}
