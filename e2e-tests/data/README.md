@@ -19,6 +19,7 @@ The events to be tested are defined in the e2e-tests/data folder with one JSON f
 
 ## Power
 - PWR1004.json
+- iLOEvents.0.9.PowerSupplyRemoved.json (HPE iLO 5)
 
 ## Memory
 - MEM0004.json
@@ -26,4 +27,5 @@ The events to be tested are defined in the e2e-tests/data folder with one JSON f
 ## Misc
 - RAC1195.json
     - A lifecycle log used to test multiple MessageArgs
-
+- Multiple-EventRecords.json
+    - A fake event to test multiple EventRecords included in one event
