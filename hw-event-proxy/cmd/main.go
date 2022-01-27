@@ -219,10 +219,12 @@ func parseMessage(m redfish.EventRecord) (redfish.EventRecord, error) {
 	}
 
 	resp, err := client.Parse(context.Background(), req)
+	if resp.Message == "unknown" {
+		err = fmt.Errorf("unable to find message in Redfish Registries")
+	}
 	if err != nil {
 		return redfish.EventRecord{}, err
 	}
-
 	m.Message = resp.Message
 	m.Severity = resp.Severity
 	m.Resolution = resp.Resolution
