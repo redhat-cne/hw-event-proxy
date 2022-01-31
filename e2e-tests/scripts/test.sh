@@ -145,7 +145,7 @@ test_perf() {
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
     for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
-        kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $consumer_pod | grep "Latency for hardware event" >> ${LOG_DIR}/$consumer_pod.log &
+        kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $consumer_pod | grep "Latency for the event" >> ${LOG_DIR}/$consumer_pod.log &
         echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
     done
 
