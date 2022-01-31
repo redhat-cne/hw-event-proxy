@@ -21,7 +21,7 @@ LATENCY_MAX = 99999
 
 # pattern to search in the consumer logs:
 # example line: time="2021-08-19T18:26:19Z" level=info msg="Latency for hardware event: 2 ms\n"
-LATENCY_PATTERN = 'time="([^"]+)" level=info msg="Latency for hardware event: (\d+) ms'
+LATENCY_PATTERN = 'time="([^"]+)" level=info msg="Latency for the event: (\d+) ms'
 
 def log_debug(log):
     if VERBOSE:
