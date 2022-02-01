@@ -21,25 +21,22 @@ Once subscribed, Redfish events can be received by the webhook located in the `h
 
 Hardware Event Proxy subscribes to Redfish Events by sending a subscription request to the baseboard management controller (BMC) of the target hardware. The request should include the webhook URL of `Hardware Event Proxy` as the destination address. A perfered way of subscription is via [BMCEventSubscription CRD](https://github.com/metal3-io/metal3-docs/pull/167).
 
+Example:
+
 ```yaml
 apiVersion: metal3.io/v1alpha1
 kind: BMCEventSubscription
 metadata:
-  name: worker-1-events
+  name: sub-01
+  namespace: some-namespace
 spec:
-   hostRef: ostest-worker-1
-   destination: https://hw-event-proxy-cloud-native-events.apps.corp.example.com/webhook
+   hostName: baremetal-host-name
+   destination: https://events.apps.corp.example.com/webhook
    context: “SomeUserContext”
-   eventTypes:
-   - Alert
-   protocol: Redfish
-   httpHeadersRef:
-     name: some-secret-name
-     namespace: cloud-native-events
-status:
-  errorMessage: ""
-  errorCount: 0
-  subscriptionID: aa618a32-9335-42bc-a04b-20ddeed13ade
+```
+The  `baremetal-host-name` can be found from the following command. It is the host where target BMC is located.
+```
+oc -n openshift-machine-api get bmh
 ```
 
 ## Subscribe to Hardware Event Proxy
