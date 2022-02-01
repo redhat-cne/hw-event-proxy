@@ -23,7 +23,8 @@ jobs:
           skip-pkg-cache: true
           skip-build-cache: true
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.42.1
+          version: v1.42
+          args: --timeout 3m0s
           working-directory: ./hw-event-proxy
   unit-tests:
     name: Unit Tests
