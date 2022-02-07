@@ -128,7 +128,7 @@ test_sanity() {
     fi
 
     echo "--- Check test result ---"
-    grep "received event" ${LOG_DIR}/$consumer_pod.log | sed 's/\\\"//g' >> ${LOG_DIR}/event-received.log
+    grep "received event" ${LOG_DIR}/$consumer_pod.log >> ${LOG_DIR}/event-received.log
 
     for eventFile in ${DATA_DIR}/*.json; do
         e2e-tests/scripts/verify-sanity.py $eventFile ${LOG_DIR}/event-received.log

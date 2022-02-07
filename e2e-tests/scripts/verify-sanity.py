@@ -42,16 +42,16 @@ def main():
 def compare(received, k, expected):
     pattern = None
     if k == 'MessageArgs':
-        pattern = ',{}:\[(.*?)\]'.format(k)
+        pattern = ',\\\\"{}\\\\":\[\\\\"(.*?)\\\\"\]'.format(k)
     else:
-        pattern = ',{}:(.*?)[,}}]'.format(k)
+        pattern = ',\\\\"{}\\\\":\\\\"(.*?)\\\\"'.format(k)
     m = re.search(pattern, received)
     if not m:
         logging.debug("key %s not found. Pattern used: %s", k, pattern)
         return -1
     actual = m.group(1)
     if k == 'MessageArgs':
-        args = actual.split(',')
+        args = actual.split('\\",\\"')
         if set(args) != set(expected):
             logging.debug("key: %s, expected: %s, actual: %s", k, expected, args)
             return -1

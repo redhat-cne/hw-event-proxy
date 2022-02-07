@@ -1,0 +1,23 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Event.Event",
+    "@odata.type": "#Event.v1_0_0.Event",
+    "Events": [
+        {
+            "EventId": "e771996e-e7ee-a913-13b5-f3ec75a47b06",
+            "EventTimestamp": "2022-01-28T18:41:11Z",
+            "EventType": "ResourceUpdated",
+            "MemberId": "0",
+            "MessageId": "iLOEvents.2.3.ResourceUpdated",
+            "Oem": {
+                "Hpe": {
+                    "@odata.context": "/redfish/v1/$metadata#HpeEvent.HpeEvent",
+                    "@odata.type": "#HpeEvent.v2_1_0.HpeEvent",
+                    "Resource": "/redfish/v1/Systems/1/Memory"
+                }
+            },
+            "OriginOfCondition": "/redfish/v1/Systems/1/Memory",
+            "Severity": "OK"
+        }
+    ],
+    "Name": "Events"
+}

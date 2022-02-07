@@ -10,6 +10,10 @@ The events to be tested are defined in the e2e-tests/data folder with one JSON f
     - No message field. Used to test Message Parser.
 - TMP0120.json
     - This is a message received from real hardware PowerEdge R640 BIOS=2.8.1, iDRAC Firmware=5.00.00.00
+- TMP0120-multiple-records.json
+    - A fake event to test multiple EventRecords included in one event
+- ZT_Event_Service_Log.1.0.Alert-PSU_1_TEMP_2.json
+    - Real message generated on a ZT System (firmware 0.21.0) by lowering `Upper Critical` of sensor `PSU_1_TEMP_2` to below the current temporature.
 
 ## Fan failure
 - FAN0001.json
@@ -23,9 +27,9 @@ The events to be tested are defined in the e2e-tests/data folder with one JSON f
 
 ## Memory
 - MEM0004.json
+- iLOEvents.2.3.ResourceUpdated.json
+  - Real message provided by HPE engineer (HPE iLO 5 firmware 2.60)
 
 ## Misc
 - RAC1195.json
     - A lifecycle log used to test multiple MessageArgs
-- Multiple-EventRecords.json
-    - A fake event to test multiple EventRecords included in one event

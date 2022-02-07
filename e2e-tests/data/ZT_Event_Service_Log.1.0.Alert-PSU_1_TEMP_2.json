@@ -1,0 +1,22 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.type": "#Event.v1_4_1.Event",
+  "Context": "any string is valid",
+  "Events": [
+    {
+      "Context": "any string is valid",
+      "EventId": "Redfish:Chassis:Self:LogServices:Logs:Entries:23 - 1643724222",
+      "EventTimestamp": "2022-02-01T14:03:43+00:00",
+      "EventType": "Other",
+      "MemberId": "Redfish:Chassis:Self:LogServices:Logs:Entries:23 - 1643724222",
+      "Message": "PSU_1_TEMP_2 - Threshold action was triggered which requires attention, SEL HEX raw data:0x61:0x00:0x02:0xBA:0x3D:0xF9:0x61:0x20:0x00:0x04:0x01:0x93:0x01:0x59:0x38:0x36",
+      "MessageId": "ZT_Event_Service_Log.1.0.Alert",
+      "Severity": "Critical"
+    }
+  ],
+  "Events@odata.count": 1,
+  "Id": "20",
+  "Name": "Event Array",
+  "hostname": "ZTS3868DD504E16"
+}
+
