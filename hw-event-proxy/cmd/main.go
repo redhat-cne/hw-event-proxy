@@ -18,6 +18,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,7 +26,6 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/valyala/fasthttp"
 
 	"github.com/redhat-cne/sdk-go/pkg/event"
 	"github.com/redhat-cne/sdk-go/pkg/event/redfish"
@@ -101,7 +101,7 @@ func main() {
 	log.Infof("Created publisher %v", pub)
 	var wg sync.WaitGroup
 	wg.Add(1)
-	startWebhook(&wg)
+	startWebhook(&wg, hwEventPort)
 	log.Info("waiting for events")
 	wg.Wait()
 }
@@ -130,45 +130,49 @@ func createPublisher() (pub pubsub.PubSub, err error) {
 	return pub, nil
 }
 
-func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
-	switch string(ctx.Path()) {
-	case "/ack/event":
-		ackEvent(ctx)
-	case "/webhook":
-		handleHwEvent(ctx)
-	default:
-		ctx.Error("Unsupported path %s", fasthttp.StatusNotFound)
-	}
-
-}
-
-func startWebhook(wg *sync.WaitGroup) {
+func startWebhook(wg *sync.WaitGroup, port int) {
+	http.HandleFunc("/ack/event", ackEvent)
+	http.HandleFunc("/webhook", webhook)
 	go wait.Until(func() {
 		defer wg.Done()
-
-		err := fasthttp.ListenAndServe(fmt.Sprintf(":%d", hwEventPort), fastHTTPHandler)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 		if err != nil {
 			log.Errorf("error starting webhook: %s\n, will retry in %d seconds", err.Error(), webhookRetryInterval)
 		}
 	}, webhookRetryInterval*time.Second, wait.NeverStop)
 }
 
-func ackEvent(ctx *fasthttp.RequestCtx) {
-	body := ctx.PostBody()
-	if len(body) > 0 {
-		log.Debugf("received ack %s", string(body))
-	} else {
-		ctx.SetStatusCode(http.StatusNoContent)
+func ackEvent(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Errorf("error reading acknowledgment %v", err)
 	}
+	e := string(bodyBytes)
+	if e != "" {
+		log.Debugf("received ack %s", string(bodyBytes))
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func webhook(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Errorf("error reading hw event: %v", err)
+		return
+	}
+	handleHwEvent(bodyBytes)
 }
 
 // handleHwEvent gets redfish HW events and converts it to cloud native event
 // and publishes to the event framework publisher
-func handleHwEvent(ctx *fasthttp.RequestCtx) {
-	log.Tracef("webhook received event %s", string(ctx.PostBody()))
+func handleHwEvent(bodyBytes []byte) {
+	log.Tracef("webhook received event %s", bodyBytes)
 	e := createHwEvent()
 	redfishEvent := redfish.Event{}
-	err := json.Unmarshal(ctx.PostBody(), &redfishEvent)
+	err := json.Unmarshal(bodyBytes, &redfishEvent)
 	if err != nil {
 		log.Errorf("failed to unmarshal hw event: %v", err)
 		return
