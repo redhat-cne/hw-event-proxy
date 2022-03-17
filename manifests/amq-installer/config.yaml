@@ -14,6 +14,7 @@ data:
     }
 
     listener {
+        # for ipv6 use host: ::
         host: 0.0.0.0
         port: 5672
         role: normal

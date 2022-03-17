@@ -73,7 +73,7 @@ func main() {
 		nodeName = "mock"
 	}
 
-	resourceAddress = fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
+	resourceAddress = fmt.Sprintf("/cluster/node/%s%s", nodeName, string(redfish.Systems))
 	baseURL = types.ParseURI(fmt.Sprintf("http://localhost:%d%s", apiPort, apiPath))
 
 	// check sidecar api health
