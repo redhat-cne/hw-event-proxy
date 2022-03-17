@@ -26,12 +26,12 @@ spec:
                       - local
       serviceAccountName: sidecar-consumer-sa
       containers:
-        - name: cloud-native-event-consumer
-          image: quay.io/redhat-cne/cloud-native-event-consumer
+        - name: cloud-event-consumer
+          image: quay.io/redhat-cne/cloud-event-consumer
           args:
-            - "--local-api-addr=127.0.0.1:9089"
+            - "--local-api-addr=localhost:9089"
             - "--api-path=/api/cloudNotifications/v1/"
-            - "--api-addr=127.0.0.1:8089"
+            - "--api-addr=localhost:8089"
           env:
             - name: NODE_NAME
               valueFrom:
