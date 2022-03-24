@@ -1,6 +1,6 @@
-# github.com/andybalholm/brotli v1.0.2
+# github.com/andybalholm/brotli v1.0.4
 github.com/andybalholm/brotli
-# github.com/klauspost/compress v1.13.4
+# github.com/klauspost/compress v1.15.0
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
@@ -9,12 +9,12 @@ github.com/klauspost/compress/zlib
 github.com/sirupsen/logrus
 # github.com/valyala/bytebufferpool v1.0.0
 github.com/valyala/bytebufferpool
-# github.com/valyala/fasthttp v1.31.0
+# github.com/valyala/fasthttp v1.34.0
 ## explicit
 github.com/valyala/fasthttp
 github.com/valyala/fasthttp/fasthttputil
 github.com/valyala/fasthttp/stackless
-# golang.org/x/sys v0.0.0-20210514084401-e8d321eab015
+# golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
