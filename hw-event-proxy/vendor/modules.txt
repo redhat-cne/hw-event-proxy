@@ -33,7 +33,7 @@ github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 ## explicit; go 1.12
 github.com/modern-go/reflect2
-# github.com/redhat-cne/sdk-go v0.1.1-0.20220127152823-2487c3dd9ce7
+# github.com/redhat-cne/sdk-go v0.1.1-0.20220324183018-77240adc404d
 ## explicit; go 1.17
 github.com/redhat-cne/sdk-go/pkg/channel
 github.com/redhat-cne/sdk-go/pkg/event
