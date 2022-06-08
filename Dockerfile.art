@@ -1,0 +1,59 @@
+#Go builder
+#@follow_tag(registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.17)
+FROM registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.17.7-202205130029.el8.gba2694f AS builder
+USER root
+ENV PKG_ROOT=hw-event-proxy
+ENV PKG_PATH=/go/src/$PKG_ROOT
+RUN mkdir -p $PKG_PATH
+COPY $REMOTE_SOURCE ./
+RUN mv ./app/* $PKG_PATH/ && rm -rf ./app
+
+WORKDIR $PKG_PATH/hw-event-proxy
+
+ENV CGO_ENABLED=1
+ENV COMMON_GO_ARGS=-race
+ENV GOOS=linux
+ENV GOPATH=/go
+RUN go build -mod=vendor -o ./build/hw-event-proxy cmd/main.go
+
+# Install dependencies for message-parser
+#@follow_tag(registry.redhat.io/ubi8/ubi-minimal)
+FROM registry.redhat.io/ubi8/ubi-minimal:8.6-751
+
+COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
+
+RUN microdnf install python39-pip python39-devel gcc-c++ && \
+    microdnf clean all && \
+    ln -sf /usr/bin/python3 /usr/local/bin/python
+
+ENV PYTHON_DEPS=/usr/src/deps
+RUN mkdir -p ${PYTHON_DEPS}
+WORKDIR ${PYTHON_DEPS}
+
+COPY --from=builder --chown=1001 /go/src/hw-event-proxy/message-parser-cachito/* .
+RUN source $CACHITO_ENV_FILE && \
+    python -m pip install --no-cache-dir --upgrade setuptools pip && \
+    python -m pip install --no-cache-dir wheel && \
+    python -m pip install -v --no-cache-dir -r build_requirements.txt && \
+    python -m pip install --no-cache-dir -r requirements.txt
+
+COPY --from=builder /go/src/hw-event-proxy/scripts/entrypoint.sh /
+
+WORKDIR /message-parser
+COPY --from=builder /go/src/hw-event-proxy/message-parser/* ./
+COPY --from=builder --chown=1001 /go/src/hw-event-proxy/message-parser-cachito/requirements.txt .
+
+COPY --from=builder /go/src/hw-event-proxy/hw-event-proxy/build/hw-event-proxy /
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+LABEL com.redhat.component="baremetal-hardware-event-proxy-container" \
+      name="telco-5g-ran4/baremetal-hardware-event-proxy" \
+      version="${CI_CONTAINER_VERSION}" \
+      summary="Container Image to subscribe to Redfish Hardware Events" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="data,images" \
+      io.k8s.display-name="baremetal-hardware-event-proxy" \
+      maintainer="nparekh@redhat.com" \
+      description="Container Image to subscribe to Redfish Hardware Events" \
+      io.openshift.maintainer.product="Telco 5G RAN"
