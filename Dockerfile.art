@@ -5,7 +5,7 @@ USER root
 ENV PKG_ROOT=hw-event-proxy
 ENV PKG_PATH=/go/src/$PKG_ROOT
 RUN mkdir -p $PKG_PATH
-COPY $REMOTE_SOURCE ./
+COPY $REMOTE_SOURCES ./
 RUN mv ./app/* $PKG_PATH/ && rm -rf ./app
 
 WORKDIR $PKG_PATH/hw-event-proxy
@@ -20,7 +20,7 @@ RUN go build -mod=vendor -o ./build/hw-event-proxy cmd/main.go
 #@follow_tag(registry.redhat.io/ubi8/ubi-minimal)
 FROM registry.redhat.io/ubi8/ubi-minimal:8.6-751
 
-COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
+COPY $REMOTE_SOURCES $REMOTE_SOURCES_DIR
 
 RUN microdnf install python39-pip python39-devel gcc-c++ && \
     microdnf clean all && \
