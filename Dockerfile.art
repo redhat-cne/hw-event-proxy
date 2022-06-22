@@ -5,7 +5,7 @@ USER root
 ENV PKG_ROOT=hw-event-proxy
 ENV PKG_PATH=/go/src/$PKG_ROOT
 RUN mkdir -p $PKG_PATH
-COPY $REMOTE_SOURCES ./
+COPY $REMOTE_SOURCES/cachito-gomod-with-deps/ ./
 RUN mv ./app/* $PKG_PATH/ && rm -rf ./app
 
 WORKDIR $PKG_PATH/hw-event-proxy
@@ -22,16 +22,16 @@ FROM registry.redhat.io/ubi8/ubi-minimal:8.6-751
 
 COPY $REMOTE_SOURCES $REMOTE_SOURCES_DIR
 
-RUN microdnf install python39-pip python39-devel gcc-c++ && \
+RUN microdnf install -y python39-pip python39-devel gcc-c++ && \
     microdnf clean all && \
-    ln -sf /usr/bin/python3 /usr/local/bin/python
+    ln -sf /usr/bin/python3.9 /usr/local/bin/python
 
 ENV PYTHON_DEPS=/usr/src/deps
 RUN mkdir -p ${PYTHON_DEPS}
 WORKDIR ${PYTHON_DEPS}
 
 COPY --from=builder --chown=1001 /go/src/hw-event-proxy/message-parser-cachito/* .
-RUN source $CACHITO_ENV_FILE && \
+RUN source $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/cachito.env && \
     python -m pip install --no-cache-dir --upgrade setuptools pip && \
     python -m pip install --no-cache-dir wheel && \
     python -m pip install -v --no-cache-dir -r build_requirements.txt && \
