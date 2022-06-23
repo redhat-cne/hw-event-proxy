@@ -1,6 +1,6 @@
 #Go builder
 #@follow_tag(registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.17)
-FROM registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.17.7-202205130029.el8.gba2694f AS builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.17-openshift-4.10 AS builder
 USER root
 ENV PKG_ROOT=hw-event-proxy
 ENV PKG_PATH=/go/src/$PKG_ROOT
@@ -18,7 +18,7 @@ RUN go build -mod=vendor -o ./build/hw-event-proxy cmd/main.go
 
 # Install dependencies for message-parser
 #@follow_tag(registry.redhat.io/ubi8/ubi-minimal)
-FROM registry.redhat.io/ubi8/ubi-minimal:8.6-751
+FROM registry.ci.openshift.org/ocp/4.10:base
 
 COPY $REMOTE_SOURCES $REMOTE_SOURCES_DIR
 
