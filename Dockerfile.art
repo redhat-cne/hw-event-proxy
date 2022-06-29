@@ -24,7 +24,8 @@ COPY $REMOTE_SOURCES $REMOTE_SOURCES_DIR
 
 RUN microdnf install -y python39-pip python39-devel gcc-c++ && \
     microdnf clean all && \
-    ln -sf /usr/bin/python3.9 /usr/local/bin/python
+    ln -sf /usr/bin/python3.9 /usr/local/bin/python && \
+    alternatives --remove python3 /usr/bin/python3.6
 
 ENV PYTHON_DEPS=/usr/src/deps
 RUN mkdir -p ${PYTHON_DEPS}
