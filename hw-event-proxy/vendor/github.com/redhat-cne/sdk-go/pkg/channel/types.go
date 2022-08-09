@@ -37,10 +37,10 @@ func (s Status) String() string {
 type Type int
 
 const (
-	// LISTENER  the type to create listener
-	LISTENER Type = iota
-	//SENDER  the  type is to create sender
-	SENDER
+	// SUBSCRIBER  the type to create listener
+	SUBSCRIBER Type = iota
+	//PUBLISHER  the  type is to create sender
+	PUBLISHER
 	//EVENT  the type is an event
 	EVENT
 	//STATUS  the type is an STATUS CHECK
@@ -49,5 +49,5 @@ const (
 
 // String represent of Type enum
 func (t Type) String() string {
-	return [...]string{"LISTENER", "SENDER", "EVENT", "STATUS"}[t]
+	return [...]string{"SUBSCRIBER", "PUBLISHER", "EVENT", "STATUS"}[t]
 }

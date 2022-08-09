@@ -20,9 +20,11 @@ import (
 
 // DataChan ...
 type DataChan struct {
+	ID      string
 	Address string
 	Data    *cloudevents.Event
-	Status  Status
+	//Subscriber *subscriber.Subscriber
+	Status Status
 	//Type defines type of data (Notification,Metric,Status)
 	Type Type
 	// OnReceiveFn  to do on OnReceive

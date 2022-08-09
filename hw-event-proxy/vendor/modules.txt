@@ -1,7 +1,7 @@
 # github.com/BurntSushi/toml v0.3.1
 ## explicit
 github.com/BurntSushi/toml
-# github.com/cloudevents/sdk-go/v2 v2.5.0
+# github.com/cloudevents/sdk-go/v2 v2.6.0
 ## explicit; go 1.14
 github.com/cloudevents/sdk-go/v2
 github.com/cloudevents/sdk-go/v2/binding
@@ -36,7 +36,7 @@ github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 ## explicit; go 1.12
 github.com/modern-go/reflect2
-# github.com/redhat-cne/sdk-go v0.1.1-0.20220526200012-719244ead29f
+# github.com/redhat-cne/sdk-go v0.1.1-0.20220809012624-c063932e639c
 ## explicit; go 1.17
 github.com/redhat-cne/sdk-go/pkg/channel
 github.com/redhat-cne/sdk-go/pkg/event

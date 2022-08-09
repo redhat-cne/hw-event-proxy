@@ -20,7 +20,7 @@ import (
 	"github.com/redhat-cne/sdk-go/pkg/types"
 )
 
-// PubSub represents the canonical representation of a Cloud Native Event Publisher and Subscribers .
+// PubSub represents the canonical representation of a Cloud Native Event Publisher and Sender .
 // PubSub Json request payload is as follows,
 // {
 //  "id": "789be75d-7ac3-472e-bbbc-6d62878aad4a",
@@ -34,7 +34,7 @@ type PubSub struct {
 	ID string `json:"id" omit:"empty"`
 	// EndPointURI - A URI describing the event action link.
 	// +required
-	EndPointURI *types.URI `json:"endpointUri" example:"http://localhost:9090/ack/event"`
+	EndPointURI *types.URI `json:"endpointUri" example:"http://localhost:9090/ack/event" omit:"empty"`
 
 	// URILocation - A URI describing the producer/subscription get link.
 	URILocation *types.URI `json:"uriLocation" omit:"empty"`
@@ -46,7 +46,7 @@ type PubSub struct {
 // String returns a pretty-printed representation of the Event.
 func (ps *PubSub) String() string {
 	b := strings.Builder{}
-	b.WriteString("  endpointURI: " + ps.GetEndpointURI() + "\n")
+	b.WriteString("  EndpointURI: " + ps.GetEndpointURI() + "\n")
 	b.WriteString("  URILocation: " + ps.GetURILocation() + "\n")
 	b.WriteString("  ID: " + ps.GetID() + "\n")
 	b.WriteString("  Resource: " + ps.GetResource() + "\n")

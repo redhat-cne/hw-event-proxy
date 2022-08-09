@@ -31,7 +31,16 @@ type PubSubStore struct {
 func (ps *PubSubStore) Set(key string, val pubsub.PubSub) {
 	ps.Lock()
 	defer ps.Unlock()
-	ps.Store[key] = &val
+	storeSub := &pubsub.PubSub{
+		ID:          val.ID,
+		EndPointURI: val.EndPointURI,
+		URILocation: val.URILocation,
+		Resource:    val.Resource,
+	}
+	if ps.Store == nil {
+		ps.Store = make(map[string]*pubsub.PubSub)
+	}
+	ps.Store[key] = storeSub
 }
 
 // Delete ... delete from store
