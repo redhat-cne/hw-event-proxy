@@ -10,10 +10,9 @@ Run cloud-event-proxy sidecar and consumer example from the cloud-event-proxy re
 export NODE_NAME=mynode
 export HW_PLUGIN=true; export HW_EVENT_PORT=9087; export CONSUMER_TYPE=HW
 export MSG_PARSER_PORT=9097; export MSG_PARSER_TIMEOUT=10
-export LOG_LEVEL=debug
+export LOG_LEVEL=trace
 # replace the following with real Redfish credentials and BMC ip address
-export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
-
+export REDFISH_USERNAME=root; export REDFISH_PASSWORD=calvin; export REDFISH_HOSTADDR=10.16.231.97
 ```
 
 ### Install And Run Apache Qpid Dispach Router

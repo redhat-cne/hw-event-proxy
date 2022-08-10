@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openshift-bare-metal-events
+resources:
+- service-account.yaml
+- roles.yaml
+- service.yaml
+- deployment.yaml
+replicas:
+- count: 1
+  name: consumer
+images:
+- name: cloud-event-consumer
+  newName: quay.io/jacding/cloud-event-consumer
+  newTag: http
+- name: cloud-event-sidecar
+  newName: quay.io/jacding/cloud-event-proxy
+  newTag: http

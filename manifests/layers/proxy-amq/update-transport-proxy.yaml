@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hw-event-proxy
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloud-event-sidecar
+          env:
+            - name: TRANSPORT_PROTOCAL
+              value: "amqp"
+            - name: TRANSPORT_SERVICE
+              value: "router"
+            - name: TRANSPORT_NAMESPACE
+              value: "router"
+            - name: TRANSPORT_PORT
+              value: ""

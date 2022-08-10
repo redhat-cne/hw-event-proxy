@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cloud-native-events
+  name: openshift-bare-metal-events
   labels:
-    name: cloud-native-events
+    name: openshift-bare-metal-events
     openshift.io/cluster-monitoring: "true"

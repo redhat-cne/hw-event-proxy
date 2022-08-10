@@ -5,7 +5,6 @@ metadata:
   annotations:
     haproxy.router.openshift.io/disable_cookies: true
   name: hw-event-proxy
-  namespace: cloud-native-events
 spec:
   to:
     kind: Service

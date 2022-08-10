@@ -6,7 +6,7 @@ GREEN='\033[1;32m'
 YELLOW="\033[1;33m"
 BOLD='\033[1m'
 
-NAMESPACE=cloud-native-events
+NAMESPACE=openshift-bare-metal-events
 LOG_DIR=./logs
 DATA_DIR=e2e-tests/data
 job_result=0
@@ -115,6 +115,8 @@ test_sanity() {
 
     # start the test
     echo "--- Start testing ---"
+    # add some delay for HTTP transport
+    sleep 10
     kubectl -n ${NAMESPACE} apply -f e2e-tests/manifests/redfish-event-test.yaml
 
     # streaming logs for the test tool
@@ -158,6 +160,9 @@ test_perf() {
     | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
     | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
     | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" > ${LOG_DIR}/redfish-event-test.yaml
+
+    # add some delay for HTTP transport
+    sleep 10
 
     # start the test
     echo "--- Start testing ---"

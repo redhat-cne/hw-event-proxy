@@ -1,16 +1,11 @@
 .PHONY: test
 
 # Current  version
-VERSION ?=latest
+VERSION ?=http
 
-# Image name
-PROXY_IMG_NAME ?= quay.io/openshift/origin-baremetal-hardware-event-proxy
-SIDECAR_IMG_NAME ?= quay.io/openshift/origin-cloud-event-proxy
-CONSUMER_IMG_NAME ?= quay.io/redhat-cne/cloud-event-consumer
-
-PROXY_IMG ?= ${PROXY_IMG_NAME}:${VERSION}
-SIDECAR_IMG ?= ${SIDECAR_IMG_NAME}:${VERSION}
-CONSUMER_IMG ?= ${CONSUMER_IMG_NAME}:${VERSION}
+PROXY_IMG ?= quay.io/jacding/hw-event-proxy:$(VERSION)
+SIDECAR_IMG ?= quay.io/jacding/cloud-event-proxy:${VERSION}
+CONSUMER_IMG ?= quay.io/jacding/cloud-event-consumer:$(VERSION)
 
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 export GO111MODULE=on
@@ -43,43 +38,70 @@ KUSTOMIZE=$(shell which kustomize)
 endif
 
 check-env:
-	@test $${REDFISH_USERNAME?Please set environment variable REDFISH_USERNAME}
-	@test $${REDFISH_PASSWORD?Please set environment variable REDFISH_PASSWORD}
-	@test $${REDFISH_HOSTADDR?Please set environment variable REDFISH_HOSTADDR}
+	@test $${BMC_USERNAME?Please set environment variable BMC_USERNAME}
+	@test $${BMC_PASSWORD?Please set environment variable BMC_PASSWORD}
+	@test $${BMC_HOSTADDR?Please set environment variable BMC_HOSTADDR}
 
 # Configure redfish credentials and BMC ip from environment variables
 redfish-config:
-	@sed -i -e "s/username=.*/username=${REDFISH_USERNAME}/" ./manifests/base/kustomization.yaml
-	@sed -i -e "s/password=.*/password=${REDFISH_PASSWORD}/" ./manifests/base/kustomization.yaml
-	@sed -i -e "s/hostaddr=.*/hostaddr=${REDFISH_HOSTADDR}/" ./manifests/base/kustomization.yaml
+	@sed -i -e "s/username=.*/username=${BMC_USERNAME}/" ./manifests/proxy/kustomization.yaml
+	@sed -i -e "s/password=.*/password=${BMC_PASSWORD}/" ./manifests/proxy/kustomization.yaml
+	@sed -i -e "s/hostaddr=.*/hostaddr=${BMC_HOSTADDR}/" ./manifests/proxy/kustomization.yaml
 
 # label the first Ready worker node as local
 label-node:
 	@kubectl label --overwrite node $(shell kubectl get nodes -l node-role.kubernetes.io/worker="" | grep Ready | cut -f1 -d" " | head -1) app=local
 
 update-image:kustomize
-	cd ./manifests/base && $(KUSTOMIZE) edit set image ${PROXY_IMG_NAME}=${PROXY_IMG} \
-		&& $(KUSTOMIZE) edit set image ${SIDECAR_IMG_NAME}=${SIDECAR_IMG} \
-		&& $(KUSTOMIZE) edit set image ${CONSUMER_IMG_NAME}=${CONSUMER_IMG}
+	cd ./manifests/proxy && $(KUSTOMIZE) edit set image hw-event-proxy=${PROXY_IMG} \
+		&& $(KUSTOMIZE) edit set image cloud-event-sidecar=${SIDECAR_IMG}
+	cd ./manifests/consumer && $(KUSTOMIZE) edit set image cloud-event-consumer=${CONSUMER_IMG} \
+	    && $(KUSTOMIZE) edit set image cloud-event-sidecar=${SIDECAR_IMG}
 
-# Deploy all in the configured Kubernetes cluster in ~/.kube/config
-deploy-amq:kustomize
+# Deploy manifests in the configured Kubernetes cluster in ~/.kube/config
+deploy:update-image redfish-config label-node
+	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/proxy | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl apply -f -
+
+undeploy:update-image
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/proxy | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
+
+deploy-amq:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/consumer-amq | kubectl apply -f -
 
-undeploy-amq:kustomize
-	@$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
+undeploy-amq:update-image
+	$(KUSTOMIZE) build ./manifests/layers/consumer-amq | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
 
-deploy:update-image redfish-config label-node deploy-amq
-	$(KUSTOMIZE) build ./manifests/base | kubectl apply -f -
+deploy-perf:update-image redfish-config label-node
+	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/proxy | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/multi-consumer | kubectl apply -f -
 
-undeploy:update-image undeploy-amq
-	@$(KUSTOMIZE) build ./manifests/base | kubectl delete -f -
+undeploy-perf:update-image
+	$(KUSTOMIZE) build ./manifests/layers/multi-consumer | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/proxy | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
 
-deploy-perf:update-image redfish-config label-node deploy-amq
-	$(KUSTOMIZE) build ./manifests/perf | kubectl apply -f -
+deploy-perf-amq:update-image redfish-config label-node
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/multi-consumer-amq | kubectl apply -f -
 
-undeploy-perf:update-image undeploy-amq
-	@$(KUSTOMIZE) build ./manifests/perf | kubectl delete -f -
+undeploy-perf-amq:update-image
+	$(KUSTOMIZE) build ./manifests/layers/multi-consumer-amq | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
 
 test-only:
 	e2e-tests/scripts/test.sh
@@ -90,6 +112,10 @@ test-perf-only:
 test: | check-env deploy test-only undeploy
 
 test-perf: | check-env deploy-perf test-perf-only undeploy-perf
+
+test-amq: | check-env deploy-amq test-only undeploy-amq
+
+test-perf-amq: | check-env deploy-perf-amq test-perf-only undeploy-perf-amq
 
 # Used by openshift/release. Do not check-env here since redfish hardware is not available
 test-ci: | deploy test-only undeploy
