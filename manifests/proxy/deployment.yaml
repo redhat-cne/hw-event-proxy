@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hw-event-proxy
-  namespace: cloud-native-events
   labels:
     app: hw-event-proxy
   annotations:
@@ -17,19 +16,12 @@ spec:
       labels:
         app: hw-event-proxy
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - local
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       serviceAccountName: hw-event-proxy-sa
       containers:
         - name: hw-event-proxy
-          image: quay.io/openshift/origin-baremetal-hardware-event-proxy
+          image: hw-event-proxy
           args:
             - "--api-port=8089"
           ports:
@@ -68,12 +60,12 @@ spec:
                   key: hostaddr
             - name: LOG_LEVEL
               value: "trace"
-        - name: cloud-native-event-sidecar
-          image: quay.io/openshift/origin-cloud-event-proxy
+        - name: cloud-event-sidecar
+          image: cloud-event-sidecar
           args:
             - "--metrics-addr=127.0.0.1:9091"
             - "--store-path=/store"
-            - "--transport-host=amqp://router.$(AMQP_NAMESPACE).svc.cluster.local"
+            - "--transport-host=$(TRANSPORT_PROTOCAL)://$(TRANSPORT_SERVICE).$(TRANSPORT_NAMESPACE).svc.cluster.local:$(TRANSPORT_PORT)"
             - "--api-port=8089"
           volumeMounts:
             - name: pubsubstore
@@ -86,8 +78,14 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            - name: AMQP_NAMESPACE
-              value: "router"
+            - name: TRANSPORT_PROTOCAL
+              value: "http"
+            - name: TRANSPORT_SERVICE
+              value: "hw-event-publisher-service"
+            - name: TRANSPORT_NAMESPACE
+              value: "openshift-bare-metal-events"
+            - name: TRANSPORT_PORT
+              value: "9043"
             - name: LOG_LEVEL
               value: "debug"
         - name: kube-rbac-proxy

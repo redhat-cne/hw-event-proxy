@@ -6,11 +6,12 @@ GREEN='\033[1;32m'
 YELLOW="\033[1;33m"
 BOLD='\033[1m'
 
-NAMESPACE=cloud-native-events
+NAMESPACE=openshift-bare-metal-events
 LOG_DIR=./logs
 DATA_DIR=e2e-tests/data
 job_result=0
 perf=0
+n_consumer=1
 verbose=0
 
 # Performance target for Intra-Node:
@@ -20,17 +21,19 @@ PERF_TARGET_PERCENT_10MS=95
 
 Help()
 {
-   echo "$0 [-p|-h]"
+   echo "$0 [-p|-c|-h]"
    echo "options:"
    echo "-p  Performance tests."
+   echo "-c  Number of consumers."
    echo "-h  Print this Help."
    echo
 }
 
-while getopts ":hpv" option; do
+while getopts "hpc:" option; do
    case $option in
       h) Help
          exit;;
+      c) n_consumer=${OPTARG};;
       p) perf=1;;
      \?) echo "Error: Invalid option"
          exit;;
@@ -115,6 +118,8 @@ test_sanity() {
 
     # start the test
     echo "--- Start testing ---"
+    # add some delay for HTTP transport
+    sleep 10
     kubectl -n ${NAMESPACE} apply -f e2e-tests/manifests/redfish-event-test.yaml
 
     # streaming logs for the test tool
@@ -150,6 +155,7 @@ test_perf() {
     done
 
     MSG_PER_SEC=10
+    # default to 10 minutes
     TEST_DURATION_SEC=600
     INITIAL_DELAY_SEC=60
 
@@ -158,6 +164,9 @@ test_perf() {
     | sed "/MSG_PER_SEC/{n;s/1/$MSG_PER_SEC/}" \
     | sed "/TEST_DURATION_SEC/{n;s/10/$TEST_DURATION_SEC/}" \
     | sed "/INITIAL_DELAY_SEC/{n;s/10/$INITIAL_DELAY_SEC/}" > ${LOG_DIR}/redfish-event-test.yaml
+
+    # add some delay for HTTP transport
+    sleep 10
 
     # start the test
     echo "--- Start testing ---"
@@ -213,6 +222,17 @@ if [[ $job_result -eq 1 ]]; then
     echo "Consumer pod is not available"
     exit 1
 fi
+
+# number of additional consumers need to deploy/undeploy
+NUM_OF_CONSUMER=`expr $n_consumer - 1`
+for i in `seq $NUM_OF_CONSUMER`
+do
+  wait_for_resource deployment/consumer-$i available 60s >/dev/null 2>&1
+  if [[ $job_result -eq 1 ]]; then
+      echo "Consumer-$i pod is not available"
+      exit 1
+  fi
+done
 
 # uncomment this when debugging image issues
 # check_images

@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "false"
+    service.alpha.openshift.io/serving-cert-secret-name: sidecar-consumer-secret
+  name: consumer-sidecar-service
+  labels:
+    app: consumer-service
+spec:
+  ports:
+    - name: metrics
+      port: 8443
+      targetPort: https
+  selector:
+    app: consumer
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    service.alpha.openshift.io/serving-cert-secret-name: sidecar-consumer-secret
+  name: consumer-events-subscription-service
+  labels:
+    app: consumer-service
+spec:
+  ports:
+    - name: sub-port
+      port: 9043
+  selector:
+    app: consumer
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: consumer-sidecar-service-monitor
+  name: consumer-sidecar-service-monitor
+spec:
+  endpoints:
+    - interval: 30s
+      port: metrics
+      bearerTokenFile: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      scheme: "https"
+      tlsConfig:
+        caFile: "/etc/prometheus/configmaps/serving-certs-ca-bundle/service-ca.crt"
+        serverName: "consumer-sidecar-service"
+  selector:
+    matchLabels:
+      app: consumer-service
