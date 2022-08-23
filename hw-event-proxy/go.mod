@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/json-iterator/go v1.1.12
-	github.com/redhat-cne/sdk-go v0.1.1-0.20220526200012-719244ead29f
+	github.com/redhat-cne/sdk-go v0.1.1-0.20220822193014-8b3ad5ad0a44
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
 	google.golang.org/grpc v1.42.0
@@ -13,7 +13,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/cloudevents/sdk-go/v2 v2.5.0 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.6.0 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

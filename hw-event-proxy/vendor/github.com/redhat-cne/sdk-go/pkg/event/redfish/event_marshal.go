@@ -76,7 +76,8 @@ func WriteJSONEvent(in *Event, writer io.Writer, stream *jsoniter.Stream) error 
 					stream.WriteMore()
 				}
 				count++
-				if err := writeJSONEventRecord(&v, writer, stream); err != nil {
+				nv := v
+				if err := writeJSONEventRecord(&nv, stream); err != nil {
 					return fmt.Errorf("error writing Event[%d]: %w", i, err)
 				}
 			}
@@ -111,7 +112,7 @@ func WriteJSONEvent(in *Event, writer io.Writer, stream *jsoniter.Stream) error 
 	return nil
 }
 
-func writeJSONEventRecord(in *EventRecord, writer io.Writer, stream *jsoniter.Stream) error {
+func writeJSONEventRecord(in *EventRecord, stream *jsoniter.Stream) error {
 	stream.WriteObjectStart()
 
 	// Let's write the body
