@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: redfish-event-test
-  namespace: cloud-native-events
+  namespace: openshift-bare-metal-events
   labels:
     app: redfish-event-test
 spec:

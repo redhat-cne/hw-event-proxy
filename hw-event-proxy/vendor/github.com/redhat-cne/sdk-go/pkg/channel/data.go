@@ -20,6 +20,7 @@ import (
 
 // DataChan ...
 type DataChan struct {
+	ID      string
 	Address string
 	Data    *cloudevents.Event
 	Status  Status

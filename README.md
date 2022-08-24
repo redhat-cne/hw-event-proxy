@@ -44,7 +44,7 @@ oc -n openshift-machine-api get bmh
 Request
 ```json
 {
-  "Resource": "/cluster/node/nodename/redfish/event",
+  "Resource": "/cluster/node/nodename/redfish/v1/Systems",
   "UriLocation”: “http://localhost:9089/event"
 }
 ```
@@ -52,10 +52,10 @@ Request
 Response
 ```json
 {
-  "ID": "da42fb86-819e-47c5-84a3-5512d5a3c732",
-  "Resource": "/cluster/node/nodename/redfish/event",
-  "endpointURI": "http://127.0.0.1:9089/event",
-  "URILocation": "http://localhost:8089/api/cloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
+  "id": "da42fb86-819e-47c5-84a3-5512d5a3c732",
+  "resource": "/cluster/node/nodename/redfish/v1/Systems",
+  "endpointUri": "http://localhost:9089/event",
+  "uriLocation": "http://localhost:8089/api/cloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
 }
 ```
 
@@ -71,7 +71,7 @@ import (
 
 func main(){
     nodeName := os.Getenv("NODE_NAME")
-    resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/event", nodeName)
+    resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/v1/Systems", nodeName)
 
     //channel for the transport handler subscribed to get and set events  
     eventInCh := make(chan *channel.DataChan, 10)       

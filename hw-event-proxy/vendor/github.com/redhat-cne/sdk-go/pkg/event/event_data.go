@@ -38,7 +38,7 @@ const (
 	// DECIMAL ...
 	DECIMAL ValueType = "decimal64.3"
 	// REDFISH_EVENT ...
-	REDFISH_EVENT ValueType = "redfish-event"
+	REDFISH_EVENT ValueType = "redfish-event" //nolint:all
 )
 
 // Data ... cloud native events data

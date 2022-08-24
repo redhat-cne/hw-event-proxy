@@ -188,10 +188,10 @@ func (p *API) CreateSubscription(sub pubsub.PubSub) (pubsub.PubSub, error) {
 	return sub, nil
 }
 
-// CreatePublisher  create a publisher data and store it a file and cache
+// CreatePublisher create a publisher data and store it a file and cache
 func (p *API) CreatePublisher(pub pubsub.PubSub) (pubsub.PubSub, error) {
 	if pubExists, ok := p.HasPublisher(pub.GetResource()); ok {
-		log.Warnf("There was already a publisher,skipping creation %v", pubExists)
+		log.Warnf("There was already a publisher, skipping creation %v", pubExists)
 		p.pubStore.Set(pub.ID, pubExists)
 		return pubExists, nil
 	}
@@ -205,7 +205,7 @@ func (p *API) CreatePublisher(pub pubsub.PubSub) (pubsub.PubSub, error) {
 		log.Errorf("error writing to a store %v\n", err)
 		return pubsub.PubSub{}, err
 	}
-	log.Infof("publisher persisted into a file %s", fmt.Sprintf("%s/%s  - content %s", p.storeFilePath, p.subFile, pub.String()))
+	log.Infof("publisher persisted into a file %s", fmt.Sprintf("%s/%s  - content %s", p.storeFilePath, p.pubFile, pub.String()))
 	// store the publisher
 	p.pubStore.Set(pub.ID, pub)
 	return pub, nil

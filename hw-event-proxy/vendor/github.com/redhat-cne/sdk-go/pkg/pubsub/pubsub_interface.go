@@ -20,7 +20,7 @@ type Reader interface {
 	GetResource() string
 	// GetEndpointUri returns event.GetEndpointUri()
 	GetEndpointURI() string
-	// URILocation returns event.GetUriLocation()
+	// GetURILocation returns event.GetUriLocation()
 	GetURILocation() string
 	GetID() string
 	// String returns a pretty-printed representation of the PubSub.
@@ -31,11 +31,11 @@ type Reader interface {
 // If an error is thrown by a sub-component, Writer caches the error
 // internally and exposes errors with a call to Writer.Validate().
 type Writer interface {
-	// Resource performs event.SetResource()
+	// SetResource performs event.SetResource()
 	SetResource(string) error
-	// EndpointURI [erforms] event.SetEndpointURI()
+	// SetEndpointURI [erforms] event.SetEndpointURI()
 	SetEndpointURI(string) error
-	// URILocation performs event.SetURILocation()
+	// SetURILocation performs event.SetURILocation()
 	SetURILocation(string) error
 	// SetID performs event.SetID.
 	SetID(string)

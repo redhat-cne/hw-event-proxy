@@ -15,8 +15,9 @@
 package channel
 
 import (
-	log "github.com/sirupsen/logrus"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
