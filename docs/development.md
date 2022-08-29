@@ -2,7 +2,7 @@
 
 ## Run Examples Locally
 
-The Hardware Event Proxy works with [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy).
+The Bare Metal Event Relay works with [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy).
 Run cloud-event-proxy sidecar and consumer example from the cloud-event-proxy repo for testing locally.
 
 ### Set Environment Variables
@@ -83,9 +83,10 @@ podman push localhost/hw-event-proxy:${TAG} quay.io/jacding/hw-event-proxy:lates
 ### Set Env Variables
 ```shell
 export VERSION=latest
-export PROXY_IMG=quay.io/openshift/origin-baremetal-hardware-event-proxy:${VERSION}
-export SIDECAR_IMG=quay.io/openshift/origin-cloud-event-proxy:${VERSION}
-export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:${VERSION}
+export PROXY_IMG=quay.io/jacding/hw-event-proxy:${VERSION}
+export SIDECAR_IMG=quay.io/jacding/cloud-event-proxy:${VERSION}
+export CONSUMER_IMG=quay.io/jacding/cloud-event-consumer:${VERSION}
+
 # replace the following with real Redfish credentials and BMC ip address
 export REDFISH_USERNAME=root; export REDFISH_PASSWORD=calvin; export REDFISH_HOSTADDR=123.123.123.123
 ```
@@ -213,8 +214,8 @@ curl -X POST -i --insecure -u "${REDFISH_USERNAME}:${REDFISH_PASSWORD}" https://
 }'
 ```
 
-### Send Redfish Events to Hardware Event Proxy Directly
+### Send Redfish Events to Bare Metal Event Relay Directly
 ```
-export HOST_SNO=cnfde10.ptp.lab.eng.bos.redhat.com
+export HOST_SNO=example.com
 curl -X POST -i --insecure https://hw-event-proxy-openshift-bare-metal-events.apps.${HOST_SNO}/webhook -H "Content-Type: text/plain" --data @e2e-tests/data/TMP0100.json
 ```
