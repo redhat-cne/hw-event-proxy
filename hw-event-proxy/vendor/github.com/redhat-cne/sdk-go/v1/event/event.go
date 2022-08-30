@@ -27,7 +27,7 @@ import (
 	"github.com/redhat-cne/sdk-go/pkg/pubsub"
 )
 
-// PublishCloudEventToLog .. publish event data to a log
+// PublishCloudEventToLog ... publish event data to a log
 func PublishCloudEventToLog(e cloudevents.Event) {
 	log.Infof("Publishing event to log %#v", e)
 }

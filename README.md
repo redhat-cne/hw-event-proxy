@@ -1,8 +1,10 @@
-# Hardware Event Proxy
+# Bare Metal Event Relay (Hardware Event Proxy)
 
-In a baremetal cloud environment, applications may need to be able to act upon hardware changes and failures quickly to achieve high reliability. Hardware Event Proxy provides a way for such applications to subscribe and receive Redfish hardware events with low-latency.
+> **_NOTE:_** Bare Metal Event Relay was renamed from `Hardware Event Proxy`. In this repo the two terms are interchangeable.
 
-Hardware Event Proxy [subscribes](#event-subscription-to-bmc) to Redfish Events of the target hardware and creates publishers for the events using [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy) framework. Users/Applications can subscibe to the events using the APIs provided by Cloud Event Proxy.
+In a baremetal cloud environment, applications may need to be able to act upon hardware changes and failures quickly to achieve high reliability. Bare Metal Event Relay provides a way for such applications to subscribe and receive Redfish hardware events with low-latency.
+
+Bare Metal Event Relay [subscribes](#event-subscription-to-bmc) to Redfish Events of the target hardware and creates publishers for the events using [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy) framework. Users/Applications can subscibe to the events using the APIs provided by Cloud Event Proxy.
 
  [![go-doc](https://godoc.org/github.com/redhat-cne/hw-event-proxy?status.svg)](https://godoc.org/github.com/redhat-cne/hw-event-proxy)
  [![Go Report Card](https://goreportcard.com/badge/github.com/redhat-cne/hw-event-proxy)](https://goreportcard.com/report/github.com/redhat-cne/hw-event-proxy)
@@ -10,7 +12,7 @@ Hardware Event Proxy [subscribes](#event-subscription-to-bmc) to Redfish Events 
 
 ## How It Works
 
-Hardware Event Proxy contains a main `hw-event-proxy` module written in Go and a `message-parser` module written in Python.
+Bare Metal Event Relay contains a main `hw-event-proxy` module written in Go and a `message-parser` module written in Python.
 
 The `message-parser` module is used to parse messages from Redfish Event Message Registry. At startup, it queries the Redfish API and downloads all the Message Registries (if not already included in [Sushy](https://github.com/openstack/sushy) library) including custom registries.
 
@@ -19,7 +21,7 @@ Once subscribed, Redfish events can be received by the webhook located in the `h
 
 ## Event Subscription to BMC
 
-Hardware Event Proxy subscribes to Redfish Events by sending a subscription request to the baseboard management controller (BMC) of the target hardware. The request should include the webhook URL of `Hardware Event Proxy` as the destination address. A perfered way of subscription is via [BMCEventSubscription CRD](https://github.com/metal3-io/metal3-docs/pull/167).
+Bare Metal Event Relay subscribes to Redfish Events by sending a subscription request to the baseboard management controller (BMC) of the target hardware. The request should include the webhook URL of `Bare Metal Event Relay` as the destination address. A perfered way of subscription is via [BMCEventSubscription CRD](https://github.com/metal3-io/metal3-docs/pull/167).
 
 Example:
 
@@ -39,7 +41,7 @@ The  `baremetal-host-name` can be found from the following command. It is the ho
 oc -n openshift-machine-api get bmh
 ```
 
-## Subscribe to Hardware Event Proxy
+## Subscribe to Bare Metal Event Relay
 ### Create Subscription with JSON Example
 Request
 ```json
