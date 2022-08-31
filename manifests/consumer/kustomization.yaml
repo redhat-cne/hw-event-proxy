@@ -8,8 +8,8 @@ resources:
 - deployment.yaml
 images:
 - name: cloud-event-consumer
-  newName: quay.io/jacding/cloud-event-consumer
+  newName: quay.io/redhat-cne/cloud-event-consumer
   newTag: latest
 - name: cloud-event-sidecar
-  newName: quay.io/jacding/cloud-event-proxy
+  newName: quay.io/openshift/origin-cloud-event-proxy
   newTag: latest

@@ -63,7 +63,7 @@ var (
 )
 
 func main() {
-	flag.IntVar(&apiPort, "api-port", 8089, "The address the rest api endpoint binds to.")
+	flag.IntVar(&apiPort, "api-port", 9085, "The address the rest api endpoint binds to.")
 	flag.Parse()
 	util.InitLogger()
 
