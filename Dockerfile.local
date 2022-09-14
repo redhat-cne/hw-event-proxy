@@ -1,5 +1,5 @@
 # Build hw-event-proxy binaries
-FROM quay.io/redhat-cne/openshift-origin-release:golang-1.17 AS go-builder
+FROM quay.io/redhat-cne/openshift-origin-release:golang-1.18 AS go-builder
 
 WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy
 COPY ./hw-event-proxy ./hw-event-proxy
@@ -18,7 +18,7 @@ COPY --from=go-builder  /go/src/github.com/redhat-cne/hw-event-proxy/hw-event-pr
 COPY --from=go-builder  /go/src/github.com/redhat-cne/hw-event-proxy/hw-event-proxy/build/librt.so.1 /lib64/
 COPY --from=go-builder /go/src/github.com/redhat-cne/hw-event-proxy/hw-event-proxy/build/hw-event-proxy /
 
-LABEL io.k8s.display-name="Hw Event Proxy" \
+LABEL io.k8s.display-name="Bare Metal Event Relay" \
       io.k8s.description="This is a component of OpenShift Container Platform for handling hardware events." \
       io.openshift.tags="openshift" \
       maintainer="Jack Ding <jacding@redhat.com>"

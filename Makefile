@@ -62,6 +62,9 @@ update-image:kustomize
 	    && $(KUSTOMIZE) edit set image cloud-event-sidecar=${SIDECAR_IMG}
 
 # Deploy manifests in the configured Kubernetes cluster in ~/.kube/config
+deploy-consumer:update-image
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl apply -f -
+
 deploy:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
 	$(KUSTOMIZE) build ./manifests/proxy | kubectl apply -f -

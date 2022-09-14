@@ -19,8 +19,8 @@ secretGenerator:
   type: Opaque
 images:
 - name: cloud-event-sidecar
-  newName: quay.io/jacding/cloud-event-proxy
+  newName: quay.io/openshift/origin-cloud-event-proxy
   newTag: latest
 - name: hw-event-proxy
-  newName: quay.io/jacding/hw-event-proxy
+  newName: quay.io/openshift/origin-baremetal-hardware-event-proxy
   newTag: latest

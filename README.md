@@ -57,11 +57,36 @@ Response
   "id": "da42fb86-819e-47c5-84a3-5512d5a3c732",
   "resource": "/cluster/node/nodename/redfish/v1/Systems",
   "endpointUri": "http://localhost:9089/event",
-  "uriLocation": "http://localhost:8089/api/cloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
+  "uriLocation": "http://localhost:9085/api/cloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
 }
 ```
 
 ### Create Subscription with Golang Example
+
+#### With HTTP Transport
+```go
+package main
+
+import (
+    v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
+    "github.com/redhat-cne/sdk-go/pkg/types"
+)
+
+func main(){
+    nodeName := os.Getenv("NODE_NAME")
+    resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/v1/Systems", nodeName)
+
+    // channel for the transport handler subscribed to get and set events
+    eventInCh := make(chan *channel.DataChan, 10)
+    pubSubInstance = v1pubsub.GetAPIInstance(".")
+    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:9085", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
+
+    // create subscription
+    pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
+}
+```
+
+#### With AMQP Transport
 ```go
 package main
 
@@ -75,10 +100,10 @@ func main(){
     nodeName := os.Getenv("NODE_NAME")
     resourceAddressHwEvent := fmt.Sprintf("/cluster/node/%s/redfish/v1/Systems", nodeName)
 
-    //channel for the transport handler subscribed to get and set events  
-    eventInCh := make(chan *channel.DataChan, 10)       
+    // channel for the transport handler subscribed to get and set events
+    eventInCh := make(chan *channel.DataChan, 10)
     pubSubInstance = v1pubsub.GetAPIInstance(".")
-    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:8089", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
+    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:9085", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
 
     // create subscription
     pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
@@ -88,6 +113,8 @@ func main(){
     }
 }
 ```
+
+## Example Consumer Implementation
 A complete example of consumer implementation is avialble at [Cloud Event Proxy](https://github.com/redhat-cne/cloud-event-proxy/tree/main/examples/consumer) repo.
 
 ## Developer Guide
