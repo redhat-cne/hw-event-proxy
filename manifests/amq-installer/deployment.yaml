@@ -2,15 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: router
-  name: router
-  namespace: router
+    app: amq-router
+  name: amq-router
+  namespace: amq-router
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: router
+      app: amq-router
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -20,7 +20,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: router
+        app: amq-router
     spec:
       affinity:
         nodeAffinity:
@@ -37,7 +37,7 @@ spec:
               value: /opt/router/qdrouterd.conf
           image: quay.io/interconnectedcloud/qdrouterd:latest
           imagePullPolicy: Always
-          name: router
+          name: amq-router
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
@@ -49,5 +49,5 @@ spec:
       volumes:
         - configMap:
             defaultMode: 420
-            name: router
+            name: amq-router
           name: router-config
