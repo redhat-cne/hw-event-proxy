@@ -16,7 +16,7 @@ pbr==5.8.1
     # via
     #   stevedore
     #   sushy
-protobuf==3.20.0
+protobuf==3.20.2
     # via -r requirements.in
 python-dateutil==2.8.2
     # via sushy
