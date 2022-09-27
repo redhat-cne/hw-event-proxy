@@ -62,9 +62,6 @@ update-image:kustomize
 	    && $(KUSTOMIZE) edit set image cloud-event-sidecar=${SIDECAR_IMG}
 
 # Deploy manifests in the configured Kubernetes cluster in ~/.kube/config
-deploy-consumer:update-image
-	$(KUSTOMIZE) build ./manifests/consumer | kubectl apply -f -
-
 deploy:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
 	$(KUSTOMIZE) build ./manifests/proxy | kubectl apply -f -
@@ -73,7 +70,7 @@ deploy:update-image redfish-config label-node
 undeploy:update-image
 	$(KUSTOMIZE) build ./manifests/consumer | kubectl delete -f - | true
 	$(KUSTOMIZE) build ./manifests/proxy | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
 
 deploy-amq:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
@@ -84,8 +81,8 @@ deploy-amq:update-image redfish-config label-node
 undeploy-amq:update-image
 	$(KUSTOMIZE) build ./manifests/layers/consumer-amq | kubectl delete -f - | true
 	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f
 
 deploy-perf:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
@@ -97,7 +94,7 @@ undeploy-perf:update-image
 	$(KUSTOMIZE) build ./manifests/consumer | kubectl delete -f - | true
 	@e2e-tests/scripts/deploy-multi-consumer.sh undeploy ${NUM_CONSUMER}
 	$(KUSTOMIZE) build ./manifests/proxy | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
 
 deploy-perf-amq:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
@@ -108,8 +105,21 @@ deploy-perf-amq:update-image redfish-config label-node
 undeploy-perf-amq:update-image
 	$(KUSTOMIZE) build ./manifests/layers/multi-consumer-amq | kubectl delete -f - | true
 	$(KUSTOMIZE) build ./manifests/layers/proxy-amq | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f - | true
-	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
+	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl delete -f -
+
+# example consumer deployments
+deploy-consumer:update-image
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl apply -f -
+
+undeploy-consumer:update-image
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl delete -f -
+
+deploy-consumer-amq:update-image
+	$(KUSTOMIZE) build ./manifests/layers/consumer-amq | kubectl apply -f -
+
+undeploy-consumer-amq:update-image
+	$(KUSTOMIZE) build ./manifests/layers/consumer-amq | kubectl delete -f -
 
 test-only:
 	e2e-tests/scripts/test.sh

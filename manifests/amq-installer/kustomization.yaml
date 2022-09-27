@@ -4,6 +4,5 @@ resources:
   - namespace.yaml
   - config.yaml
   - service.yaml
-  #- router.yaml
   - deployment.yaml
 

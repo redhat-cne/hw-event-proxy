@@ -2,18 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: router
-  name: router
-  namespace: router
+    app: amq-router
+  name: amq-router
+  namespace: amq-router
 spec:
   ports:
     - name: "5672"
       port: 5672
       protocol: TCP
       targetPort: 5672
-      #nodePort: 30005
   selector:
-    app: router
+    app: amq-router
   type: ClusterIP
-  #type: NodePort
-  #externalTrafficPolicy: Local

@@ -7,12 +7,17 @@ spec:
     spec:
       containers:
         - name: cloud-event-sidecar
+          args:
+            - "--metrics-addr=127.0.0.1:9091"
+            - "--store-path=/store"
+            - "--transport-host=$(TRANSPORT_PROTOCAL)://$(TRANSPORT_SERVICE).$(TRANSPORT_NAMESPACE).svc.cluster.local:$(TRANSPORT_PORT)"
+            - "--api-port=9085"
           env:
             - name: TRANSPORT_PROTOCAL
               value: "amqp"
             - name: TRANSPORT_SERVICE
-              value: "router"
+              value: "amq-router"
             - name: TRANSPORT_NAMESPACE
-              value: "router"
+              value: "amq-router"
             - name: TRANSPORT_PORT
               value: ""

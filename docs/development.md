@@ -83,9 +83,9 @@ podman push localhost/hw-event-proxy:${TAG} quay.io/jacding/hw-event-proxy:lates
 ### Set Env Variables
 ```shell
 export VERSION=latest
-export PROXY_IMG=quay.io/jacding/hw-event-proxy:${VERSION}
-export SIDECAR_IMG=quay.io/jacding/cloud-event-proxy:${VERSION}
-export CONSUMER_IMG=quay.io/jacding/cloud-event-consumer:${VERSION}
+export PROXY_IMG=quay.io/redhat-cne/hw-event-proxy:${VERSION}
+export SIDECAR_IMG=quay.io/redhat-cne/cloud-event-proxy:${VERSION}
+export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:${VERSION}
 
 # replace the following with real Redfish credentials and BMC ip address
 export REDFISH_USERNAME=root; export REDFISH_PASSWORD=calvin; export REDFISH_HOSTADDR=123.123.123.123
@@ -216,6 +216,33 @@ curl -X POST -i --insecure -u "${REDFISH_USERNAME}:${REDFISH_PASSWORD}" https://
 
 ### Send Redfish Events to Bare Metal Event Relay Directly
 ```
-export HOST_SNO=example.com
-curl -X POST -i --insecure https://hw-event-proxy-openshift-bare-metal-events.apps.${HOST_SNO}/webhook -H "Content-Type: text/plain" --data @e2e-tests/data/TMP0100.json
+curl -X POST -i --insecure https://$(kubectl -n openshift-bare-metal-events get route hw-event-proxy -o jsonpath="{.spec.host}")/webhook \
+  -H "Content-Type: text/plain" \
+  --data @e2e-tests/data/TMP0100.json
+
+```
+
+## Deploy Example Consumer
+
+### for 4.10:
+```
+export SIDECAR_IMG=quay.io/redhat-cne/cloud-event-proxy:release-4.10
+export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:release-4.10
+make deploy-consumer-amq
+
+make undeploy-consumer-amq
+```
+
+### for 4.11 and later
+```
+export SIDECAR_IMG=quay.io/redhat-cne/cloud-event-proxy:latest
+export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:latest
+
+# for HTTP Transport
+make deploy-consumer
+make undeploy-consumer
+
+# for AMQP Transport
+make deploy-consumer-amq
+make undeploy-consumer-amq
 ```

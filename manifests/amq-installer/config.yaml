@@ -2,9 +2,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: router
-  name: router
-  namespace: router
+    app: amq-router
+  name: amq-router
+  namespace: amq-router
 data:
   qdrouterd.conf: |2+
 
