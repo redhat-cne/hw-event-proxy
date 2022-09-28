@@ -228,8 +228,9 @@ curl -X POST -i --insecure https://$(kubectl -n openshift-bare-metal-events get 
 ```
 export SIDECAR_IMG=quay.io/redhat-cne/cloud-event-proxy:release-4.10
 export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:release-4.10
-make deploy-consumer-amq
 
+# assuming amqp service is running at amq-router.amq-router
+make deploy-consumer-amq
 make undeploy-consumer-amq
 ```
 
