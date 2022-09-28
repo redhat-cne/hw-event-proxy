@@ -11,8 +11,8 @@ spec:
             - name: TRANSPORT_PROTOCAL
               value: "amqp"
             - name: TRANSPORT_SERVICE
-              value: "router"
+              value: "amq-router"
             - name: TRANSPORT_NAMESPACE
-              value: "router"
+              value: "amq-router"
             - name: TRANSPORT_PORT
               value: ""

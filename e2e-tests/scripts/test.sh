@@ -68,7 +68,7 @@ check_images(){
             break
         fi
         kubectl -n ${NAMESPACE} get pods || true
-        kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses || true
+        kubectl -n ${NAMESPACE} get pod $(kubectl -n ${NAMESPACE} get pod -l app=hw-event-proxy -o jsonpath="{.items[0].metadata.name}") -o json | jq .status.containerStatuses || true
         sleep 1
     done
 }
@@ -96,8 +96,9 @@ cleanup_test_pod(){
 fail_test(){
     cleanup_logs_pid
     echo "--- hw-event-proxy logs ---"
-    hw_event_proxy_pod=`kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "`
-    kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy $hw_event_proxy_pod >> ${LOG_DIR}/last_log_$hw_event_proxy_pod.log &
+    POD_HW_PROXY=$(kubectl -n ${NAMESPACE} get pod -l app=hw-event-proxy -o jsonpath="{.items[0].metadata.name}")
+
+    kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy ${POD_HW_PROXY} >> ${LOG_DIR}/last_log_${POD_HW_PROXY}.log &
     for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
          echo "--- consumer $consumer_pod logs ---"
          kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-event-consumer $consumer_pod >> ${LOG_DIR}/last_log_$consumer_pod.log &
@@ -210,6 +211,7 @@ test_perf() {
     echo "Full test report is available at ${LOG_DIR}/_report.csv"
 }
 
+### Main function start
 mkdir -p -- "$LOG_DIR"
 echo "--- Cleanup previous test pod and logs---"
 cleanup_test_pod
@@ -234,7 +236,7 @@ do
   fi
 done
 
-# uncomment this when debugging image issues
+# uncomment this when debugging image issues in a ci job
 # check_images
 
 echo "--- Check if hw-event-proxy pod is available ---"
@@ -243,10 +245,11 @@ if [[ $job_result -eq 1 ]]; then
     echo "hw-event-proxy pod is not available"
     exit 1
 fi
+POD_HW_PROXY=$(kubectl -n ${NAMESPACE} get pod -l app=hw-event-proxy -o jsonpath="{.items[0].metadata.name}")
 
 # This help verifying the image used is the latest image built from CI
 echo "Hw-event-proxy container status:"
-kubectl -n ${NAMESPACE} get pod `kubectl -n ${NAMESPACE} get pods | grep hw-event-proxy | cut -f1 -d" "` -o json | jq .status.containerStatuses
+kubectl -n ${NAMESPACE} get pod ${POD_HW_PROXY} -o json | jq .status.containerStatuses
 
 if [[ $perf -eq 1 ]]; then
     echo -e "---$BOLD PERFORMANCE TEST $COLOR_RESET---"
