@@ -10,20 +10,20 @@ jobs:
     name: Linting
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.19'
       - name: tidy
         run: go mod tidy
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.2.0
         with:
           # Caching conflicts happen in GHA, so just disable for now
           skip-pkg-cache: true
           skip-build-cache: true
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.42
+          version: v1.48.0
           args: --timeout 3m0s
           working-directory: ./hw-event-proxy
   unit-tests:
@@ -31,10 +31,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - uses: actions/setup-go@v2
       with:
-        go-version: '1.17'
+        go-version: '1.19'
     - name: tidy
       run: make deps-update
     - name: Run Test Scripts

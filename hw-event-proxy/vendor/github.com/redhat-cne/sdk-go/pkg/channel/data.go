@@ -35,6 +35,16 @@ type DataChan struct {
 	OnReceiveOverrideFn func(e cloudevents.Event, dataChan *DataChan) error
 	// ProcessEventFn  Optional, this allows to customize message handler thar was received at the out channel
 	ProcessEventFn func(e interface{}) error
+	// Only for status lost if marshalled to json
+	StatusChan    chan<- *StatusChan
+	ReturnAddress *string
+}
+
+// StatusChan channel used for writing  status data out here
+type StatusChan struct {
+	ID       string
+	ClientID uuid.UUID
+	Data     *cloudevents.Event
 }
 
 // CreateCloudEvents ...

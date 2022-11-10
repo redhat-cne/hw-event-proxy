@@ -31,14 +31,14 @@ func returnIterator(iter *jsoniter.Iterator) {
 	iterPool.Put(iter)
 }
 
-//ReadJSON ...
+// ReadJSON ...
 func ReadJSON(out *Event, reader io.Reader) error {
 	iterator := borrowIterator(reader)
 	defer returnIterator(iterator)
 	return readJSONFromIterator(out, iterator)
 }
 
-//ReadDataJSON ...
+// ReadDataJSON ...
 func ReadDataJSON(out *Data, reader io.Reader) error {
 	iterator := borrowIterator(reader)
 	defer returnIterator(iterator)
@@ -174,13 +174,13 @@ func readDataValue(iter *jsoniter.Iterator) ([]DataValue, error) {
 		} else if dv.ValueType == ENUMERATION {
 			dv.Value = cacheValue.(string)
 		} else if dv.ValueType == REDFISH_EVENT {
-			jsonRedfishEvent, err := json.Marshal(cacheValue)
-			if err != nil {
-				return values, err
+			jsonRedfishEvent, err2 := json.Marshal(cacheValue)
+			if err2 != nil {
+				return values, err2
 			}
 
 			e := redfish.Event{}
-			if err := json.Unmarshal(jsonRedfishEvent, &e); err != nil {
+			if err = json.Unmarshal(jsonRedfishEvent, &e); err != nil {
 				return values, err
 			}
 			dv.Value = e
