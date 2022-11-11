@@ -1,5 +1,5 @@
 # Build hw-event-proxy binaries
-FROM quay.io/redhat-cne/openshift-origin-release:golang-1.18 AS go-builder
+FROM quay.io/redhat-cne/openshift-origin-release:golang-1.19 AS go-builder
 
 WORKDIR /go/src/github.com/redhat-cne/hw-event-proxy
 COPY ./hw-event-proxy ./hw-event-proxy

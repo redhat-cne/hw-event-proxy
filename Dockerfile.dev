@@ -1,5 +1,5 @@
 # Used by quay.io to trigger developer builds
-FROM quay.io/redhat-cne/openshift-origin-release:golang-1.18 AS go-builder
+FROM quay.io/redhat-cne/openshift-origin-release:golang-1.19 AS go-builder
 
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1

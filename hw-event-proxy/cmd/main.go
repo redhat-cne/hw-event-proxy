@@ -18,7 +18,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -144,7 +144,7 @@ func startWebhook(wg *sync.WaitGroup, port int) {
 
 func ackEvent(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(req.Body)
+	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Errorf("error reading acknowledgment %v", err)
 	}
@@ -158,7 +158,7 @@ func ackEvent(w http.ResponseWriter, req *http.Request) {
 
 func webhook(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Errorf("error reading hw event: %v", err)
 		return
