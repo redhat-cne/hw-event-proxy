@@ -25,7 +25,6 @@ build-only:
 	go build -o ./build/hw-event-proxy cmd/main.go
 
 lint:
-	golint -set_exit_status `go list ./... | grep -v vendor`
 	golangci-lint run
 
 run:
