@@ -163,20 +163,24 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("error reading hw event: %v", err)
 		return
 	}
-	handleHwEvent(bodyBytes)
+	err = handleHwEvent(bodyBytes)
+	if err != nil {
+		log.Errorf("error handling hw event: %v", err)
+	}
 }
 
 // handleHwEvent gets redfish HW events and converts it to cloud native event
 // and publishes to the event framework publisher
-func handleHwEvent(bodyBytes []byte) {
+func handleHwEvent(bodyBytes []byte) error {
 	log.Tracef("webhook received event %s", bodyBytes)
 	e := createHwEvent()
 	redfishEvent := redfish.Event{}
 	err := json.Unmarshal(bodyBytes, &redfishEvent)
 	if err != nil {
-		log.Errorf("failed to unmarshal hw event: %v", err)
-		return
+
+		return fmt.Errorf("failed to unmarshal hw event: %v", err)
 	}
+
 	for i, e := range redfishEvent.Events {
 		if e.Message == "" {
 			parsed, err := parseMessage(e)
@@ -201,8 +205,9 @@ func handleHwEvent(bodyBytes []byte) {
 	e.SetData(data)
 	err = publishHwEvent(e)
 	if err != nil {
-		log.Errorf("failed to publish hw event: %v", err)
+		return fmt.Errorf("failed to publish hw event: %v", err)
 	}
+	return nil
 }
 
 func parseMessage(m redfish.EventRecord) (redfish.EventRecord, error) {

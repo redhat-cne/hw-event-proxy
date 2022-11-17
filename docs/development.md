@@ -26,15 +26,16 @@ qdrouterd &
 cd <cloud-event-proxy repo>
 make build-plugins
 # Test with HTTP Transport
-go run cmd/main.go --transport-host="localhost:9043" --http-event-publishers="localhost:9043"
+go run cmd/main.go --transport-host="localhost:9043" --http-event-publishers="localhost:9043" --api-port=9085
+
 # Test with AMQ Transport
-go run cmd/main.go --transport-host="amqp:localhost:5672"
+go run cmd/main.go --transport-host="amqp:localhost:5672" --api-port=9085
 ```
 
 ### Run Consumer
 ```shell
 cd <cloud-event-proxy repo>
-make run-consumer
+go run examples/consumer/main.go --api-addr=localhost:9085
 ```
 
 ### Run Hw-event-proxy
