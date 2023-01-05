@@ -12,9 +12,9 @@ replicas:
   name: hw-event-proxy
 secretGenerator:
 - literals:
-  - username=root
-  - password=calvin
-  - hostaddr=10.16.231.97
+  - username=user
+  - password=pass
+  - hostaddr=10.10.10.10
   name: redfish-basic-auth
   type: Opaque
 images:
