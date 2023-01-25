@@ -12,7 +12,7 @@ export HW_PLUGIN=true; export HW_EVENT_PORT=9087; export CONSUMER_TYPE=HW
 export MSG_PARSER_PORT=9097; export MSG_PARSER_TIMEOUT=10
 export LOG_LEVEL=trace
 # replace the following with real Redfish credentials and BMC ip address
-export REDFISH_USERNAME=root; export REDFISH_PASSWORD=calvin; export REDFISH_HOSTADDR=123.123.123.123
+export REDFISH_USERNAME=user; export REDFISH_PASSWORD=pass; export REDFISH_HOSTADDR=10.10.10.10
 ```
 
 ### For AMQ Transport: Install And Run Apache Qpid Dispach Router
@@ -89,7 +89,7 @@ export SIDECAR_IMG=quay.io/redhat-cne/cloud-event-proxy:${VERSION}
 export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:${VERSION}
 
 # replace the following with real Redfish credentials and BMC ip address
-export REDFISH_USERNAME=root; export REDFISH_PASSWORD=calvin; export REDFISH_HOSTADDR=123.123.123.123
+export REDFISH_USERNAME=user; export REDFISH_PASSWORD=pass; export REDFISH_HOSTADDR=10.10.10.10
 ```
 
 ### Deploy for Sanity Tests
