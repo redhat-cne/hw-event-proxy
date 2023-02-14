@@ -23,7 +23,7 @@ spec:
           image: cloud-event-consumer
           args:
             - "--local-api-addr=localhost:9089"
-            - "--api-path=/api/cloudNotifications/v1/"
+            - "--api-path=/api/ocloudNotifications/v1/"
             - "--api-addr=localhost:9085"
           env:
             - name: NODE_NAME
