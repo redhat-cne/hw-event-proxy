@@ -72,6 +72,26 @@ undeploy:update-image
 	$(KUSTOMIZE) build ./manifests/proxy | kubectl delete -f - | true
 	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
 
+install-pv:
+	$(KUSTOMIZE) build ./manifests/pv | kubectl apply -f -
+
+uninstall-pv:
+	kubectl patch pv cloud-event-proxy-store -p '{"metadata": {"finalizers": null}}' | true
+	kubectl delete pv cloud-event-proxy-store --grace-period=0 --force | true
+	$(KUSTOMIZE) build ./manifests/pv | kubectl delete -f - | true
+
+# Use PersistentVolumeClaim for pubsubstore
+# The LocalVolume configuration needs to be customized for the specific hardware being used
+deploy-pvc:update-image redfish-config label-node
+	$(KUSTOMIZE) build ./manifests/ns | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/layers/proxy-pvc | kubectl apply -f -
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl apply -f -
+
+undeploy-pvc:update-image
+	$(KUSTOMIZE) build ./manifests/consumer | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/layers/proxy-pvc | kubectl delete -f - | true
+	$(KUSTOMIZE) build ./manifests/ns | kubectl delete -f -
+
 deploy-amq:update-image redfish-config label-node
 	$(KUSTOMIZE) build ./manifests/amq-installer | kubectl apply -f -
 	kubectl -n amq-router wait --for condition=available --timeout=60s deployment/amq-router

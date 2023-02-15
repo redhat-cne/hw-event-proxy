@@ -110,6 +110,35 @@ make undeploy
 make undeploy-amq
 ```
 
+### Deploy Persistent Storage for HTTP transport
+With HTTP transport, the event producer uses a pubsubstore to store Subscriber information, including clientID, consumer service endpoint URI, resource ID etc. These are stored as one json file per registered subscriber. The pubsubstore needs to be mounted to a persistent volume using a Persistent Volume Claim (PVC) in order to survive a pod reboot.
+
+As a prerequisite, a Persistent Volume (PV) needs to be created to map to the PVC. The PV can be created either automatically by the [Local Storage operator](https://docs.openshift.com/container-platform/4.12/storage/persistent_storage/persistent-storage-local.html) or manually as the example below:
+
+Example of deploying PV using local storage:
+> 📝 NOTE: The /mnt/local-storage directory needs to be manually created on the node.
+
+```shell
+make install-pv
+```
+
+Undeploy
+```shell
+make uninstall-pv
+```
+
+Deploy using persistentVolumeClaim:
+```shell
+make deploy-pvc
+```
+
+Undeploy
+```shell
+make undeploy-pvc
+```
+> 📝 NOTE: The configuration of LocalVolume and PV need to be customized for the specific hardware being used.
+
+
 ## End to End Tests
 
 Prerequisite: a working Kubernetes cluster. Have the environment variable `KUBECONFIG` set pointing to your cluster.
