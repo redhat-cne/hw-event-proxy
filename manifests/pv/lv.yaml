@@ -1,0 +1,18 @@
+apiVersion: "local.storage.openshift.io/v1"
+kind: "LocalVolume"
+metadata:
+  name: "local-disks"
+  namespace: "openshift-local-storage"
+  annotations:
+    ran.openshift.io/ztp-deploy-wave: "10"
+spec:
+  logLevel: Normal
+  managementState: Managed
+  storageClassDevices:
+    # The list of storage classes and associated devicePaths need to be specified like this example:
+    - storageClassName: local-storage
+      volumeMode: Filesystem
+      fsType: xfs
+      # The below must be adjusted to the hardware
+      devicePaths:
+        - /dev/nvme0n1p4

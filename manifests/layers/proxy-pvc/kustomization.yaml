@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openshift-bare-metal-events
+
+bases:
+- ../../proxy
+
+resources:
+- pvc.yaml
+
+patchesStrategicMerge:
+- update-pvc.yaml

@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hw-event-proxy
+spec:
+  template:
+    spec:
+      volumes:
+        - name: pubsubstore
+          persistentVolumeClaim:
+            claimName: cloud-event-proxy-store
+          emptyDir: null
