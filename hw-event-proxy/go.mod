@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/json-iterator/go v1.1.12
-	github.com/redhat-cne/sdk-go v0.1.1-0.20221026032709-e226a93f380a
+	github.com/redhat-cne/sdk-go v0.1.1-0.20230217233027-881cc8467048
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f

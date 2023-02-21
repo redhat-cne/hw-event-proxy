@@ -5,6 +5,8 @@ The events to be tested are defined in the e2e-tests/data folder with one JSON f
 > Naming convention: MessageId-\<notes\>.json
 
 ## Temp
+- IDRAC.2.8.TMP0110
+    - This is the new verison of TMP0110 sent by Dell BMC with IDRAC firmware 6.10.00.00
 - TMP0100.json
 - TMP0100-no-msg-field.json
     - No message field. Used to test Message Parser.

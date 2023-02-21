@@ -26,7 +26,7 @@ var (
 	channelBufferSize = 10
 )
 
-//NewStatusListenerChannel ...
+// NewStatusListenerChannel ...
 func NewStatusListenerChannel(wg *sync.WaitGroup) *ListenerChannel {
 	listener := &ListenerChannel{
 		listener: make(chan RestAPIChannel, channelBufferSize),
@@ -38,7 +38,7 @@ func NewStatusListenerChannel(wg *sync.WaitGroup) *ListenerChannel {
 	return listener
 }
 
-//NewStatusRestAPIChannel ...
+// NewStatusRestAPIChannel ...
 func NewStatusRestAPIChannel(seqID int, dataCh chan<- cloudevents.Event) RestAPIChannel {
 	return RestAPIChannel{
 		sequenceID: seqID,
@@ -46,27 +46,27 @@ func NewStatusRestAPIChannel(seqID int, dataCh chan<- cloudevents.Event) RestAPI
 	}
 }
 
-//RestAPIChannel ...
+// RestAPIChannel ...
 type RestAPIChannel struct {
 	sequenceID int
 	dataCh     chan<- cloudevents.Event
 }
 
-//ListenerChannel ...
+// ListenerChannel ...
 type ListenerChannel struct {
 	listener chan RestAPIChannel
 	store    map[int]chan<- cloudevents.Event
 	done     chan bool
 }
 
-//Done ...
+// Done ...
 func (s *ListenerChannel) Done() {
 	s.done <- true
 }
 
-//Listen ...
+// Listen ...
 // put in the map; so the you receiver will read the map and sequence id is found then
-//send to channel found in the map
+// send to channel found in the map
 func (s *ListenerChannel) Listen(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer func() {
@@ -84,9 +84,9 @@ func (s *ListenerChannel) Listen(wg *sync.WaitGroup) {
 	}
 }
 
-//SendToCaller ...
-//TODO:Clean up store on errors
-//SendToCaller ...
+// SendToCaller ...
+// TODO:Clean up store on errors
+// SendToCaller ...
 func (s *ListenerChannel) SendToCaller(sequenceID int, dataCh cloudevents.Event) {
 	if d, ok := s.store[sequenceID]; ok {
 		d <- dataCh
@@ -96,7 +96,7 @@ func (s *ListenerChannel) SendToCaller(sequenceID int, dataCh cloudevents.Event)
 	}
 }
 
-//GetChannel ...
+// GetChannel ...
 func (s *ListenerChannel) GetChannel(sequenceID int) chan<- cloudevents.Event {
 	if d, ok := s.store[sequenceID]; ok {
 		return d
@@ -104,12 +104,12 @@ func (s *ListenerChannel) GetChannel(sequenceID int) chan<- cloudevents.Event {
 	return nil
 }
 
-//SetChannel ...
+// SetChannel ...
 func (s *ListenerChannel) SetChannel(seq int, dataCh chan<- cloudevents.Event) {
 	s.store[seq] = dataCh
 }
 
-//SendToListener ...
+// SendToListener ...
 func (s *ListenerChannel) SendToListener(fromRest RestAPIChannel) {
 	s.listener <- fromRest
 }

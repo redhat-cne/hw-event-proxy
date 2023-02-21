@@ -1,0 +1,32 @@
+{
+  "@odata.context": "/redfish/v1/$metadata#Event.Event",
+  "@odata.id": "/redfish/v1/EventService/Events/4ef0b8e8-ae3b-11ed-9ff2-c84bd67ac4d4",
+  "@odata.type": "#Event.v1_5_0.Event",
+  "Context": "root",
+  "Events": [
+    {
+      "Context": "root",
+      "EventId": "2161",
+      "EventTimestamp": "2023-02-16T15:50:29-0500",
+      "EventType": "Alert",
+      "MemberId": "298",
+      "Message": "The memory module 1 temperature is outside of range.",
+      "MessageArgs": [
+        "1"
+      ],
+      "MessageArgs@odata.count": 1,
+      "MessageId": "IDRAC.2.8.TMP0110",
+      "MessageSeverity": "Critical",
+      "Severity": "Critical"
+    }
+  ],
+  "Id": "4ef0b8e8-ae3b-11ed-9ff2-c84bd67ac4d4",
+  "Name": "Event Array",
+  "Oem": {
+    "Dell": {
+      "@odata.type": "#DellEvent.v1_0_0.DellEvent",
+      "ServerHostname": ""
+    }
+  }
+}
+
