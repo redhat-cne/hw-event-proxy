@@ -11,5 +11,5 @@ images:
   newName: quay.io/redhat-cne/cloud-event-consumer
   newTag: latest
 - name: cloud-event-sidecar
-  newName: quay.io/openshift/origin-cloud-event-proxy
+  newName: quay.io/redhat-cne/cloud-event-proxy
   newTag: latest
