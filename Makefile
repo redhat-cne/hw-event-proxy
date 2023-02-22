@@ -3,8 +3,8 @@
 # Current  version
 VERSION ?=latest
 
-PROXY_IMG ?= quay.io/openshift/origin-baremetal-hardware-event-proxy:$(VERSION)
-SIDECAR_IMG ?= quay.io/openshift/origin-cloud-event-proxy:${VERSION}
+PROXY_IMG ?= quay.io/redhat-cne/hw-event-proxy:$(VERSION)
+SIDECAR_IMG ?= quay.io/redhat-cne/cloud-event-proxy:${VERSION}
 CONSUMER_IMG ?= quay.io/redhat-cne/cloud-event-consumer:$(VERSION)
 
 # For performance test with HTTP transport
