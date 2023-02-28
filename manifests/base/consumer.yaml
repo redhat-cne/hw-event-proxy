@@ -30,7 +30,7 @@ spec:
           image: quay.io/redhat-cne/cloud-native-event-consumer
           args:
             - "--local-api-addr=127.0.0.1:9089"
-            - "--api-path=/api/cloudNotifications/v1/"
+            - "--api-path=/api/ocloudNotifications/v1/"
             - "--api-addr=127.0.0.1:8089"
           env:
             - name: NODE_NAME

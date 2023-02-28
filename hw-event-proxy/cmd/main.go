@@ -51,7 +51,7 @@ const (
 )
 
 var (
-	apiPath          = "/api/cloudNotifications/v1/"
+	apiPath          = "/api/ocloudNotifications/v1/"
 	apiPort          int
 	json             = jsoniter.ConfigCompatibleWithStandardLibrary
 	pub              pubsub.PubSub
