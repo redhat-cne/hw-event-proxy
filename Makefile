@@ -1,16 +1,16 @@
 .PHONY: test
 
 # Current  version
-VERSION ?=latest
+VERSION ?=4.10
 
 # Image name
 PROXY_IMG_NAME ?= quay.io/openshift/origin-baremetal-hardware-event-proxy
 SIDECAR_IMG_NAME ?= quay.io/openshift/origin-cloud-event-proxy
-CONSUMER_IMG_NAME ?= quay.io/redhat-cne/cloud-native-event-consumer
+CONSUMER_IMG_NAME ?= quay.io/redhat-cne/cloud-event-consumer
 
 PROXY_IMG ?= ${PROXY_IMG_NAME}:${VERSION}
 SIDECAR_IMG ?= ${SIDECAR_IMG_NAME}:${VERSION}
-CONSUMER_IMG ?= ${CONSUMER_IMG_NAME}:${VERSION}
+CONSUMER_IMG ?= ${CONSUMER_IMG_NAME}:release-4.10
 
 # Export GO111MODULE=on to enable project to be built from within GOPATH/src
 export GO111MODULE=on
