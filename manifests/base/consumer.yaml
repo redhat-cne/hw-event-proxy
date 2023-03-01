@@ -26,8 +26,8 @@ spec:
                       - local
       serviceAccountName: sidecar-consumer-sa
       containers:
-        - name: cloud-native-event-consumer
-          image: quay.io/redhat-cne/cloud-native-event-consumer
+        - name: cloud-event-consumer
+          image: quay.io/redhat-cne/cloud-event-consumer
           args:
             - "--local-api-addr=127.0.0.1:9089"
             - "--api-path=/api/ocloudNotifications/v1/"

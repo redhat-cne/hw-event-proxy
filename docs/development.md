@@ -74,7 +74,7 @@ podman push localhost/hw-event-proxy:${TAG} quay.io/jacding/hw-event-proxy:lates
 export VERSION=latest
 export PROXY_IMG=quay.io/openshift/origin-baremetal-hardware-event-proxy:${VERSION}
 export SIDECAR_IMG=quay.io/openshift/origin-cloud-event-proxy:${VERSION}
-export CONSUMER_IMG=quay.io/redhat-cne/cloud-native-event-consumer:${VERSION}
+export CONSUMER_IMG=quay.io/redhat-cne/cloud-event-consumer:${VERSION}
 # replace the following with real Redfish credentials and BMC ip address
 export REDFISH_USERNAME=admin; export REDFISH_PASSWORD=admin; export REDFISH_HOSTADDR=127.0.0.1
 ```

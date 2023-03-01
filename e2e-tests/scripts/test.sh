@@ -97,7 +97,7 @@ fail_test(){
     kubectl -n ${NAMESPACE} logs --tail=50 -c hw-event-proxy $hw_event_proxy_pod >> ${LOG_DIR}/last_log_$hw_event_proxy_pod.log &
     for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
          echo "--- consumer $consumer_pod logs ---"
-         kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/last_log_$consumer_pod.log &
+         kubectl -n ${NAMESPACE} logs --tail=50 -c cloud-event-consumer $consumer_pod >> ${LOG_DIR}/last_log_$consumer_pod.log &
     done
 
     echo "Check directory ${LOG_DIR} for more logs."
@@ -110,7 +110,7 @@ test_sanity() {
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
     consumer_pod=`kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`
-    kubectl -n ${NAMESPACE} logs -f --tail=1 -c cloud-native-event-consumer $consumer_pod >> ${LOG_DIR}/$consumer_pod.log &
+    kubectl -n ${NAMESPACE} logs -f --tail=1 -c cloud-event-consumer $consumer_pod >> ${LOG_DIR}/$consumer_pod.log &
     echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
 
     # start the test
@@ -145,7 +145,7 @@ test_perf() {
     # streaming logs for multiple consumers.
     echo "--- Start streaming consumer logs ---"
     for consumer_pod in `kubectl -n ${NAMESPACE} get pods | grep consumer| cut -f1 -d" "`; do
-        kubectl -n ${NAMESPACE} logs -f -c cloud-native-event-consumer $consumer_pod | grep "Latency for hardware event" >> ${LOG_DIR}/$consumer_pod.log &
+        kubectl -n ${NAMESPACE} logs -f -c cloud-event-consumer $consumer_pod | grep "Latency for hardware event" >> ${LOG_DIR}/$consumer_pod.log &
         echo "$!" > ${LOG_DIR}/log-$consumer_pod.pid
     done
 
