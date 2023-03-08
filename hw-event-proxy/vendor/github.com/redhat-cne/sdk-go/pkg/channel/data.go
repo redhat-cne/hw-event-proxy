@@ -42,9 +42,11 @@ type DataChan struct {
 
 // StatusChan channel used for writing  status data out here
 type StatusChan struct {
-	ID       string
-	ClientID uuid.UUID
-	Data     *cloudevents.Event
+	ID         string
+	ClientID   uuid.UUID
+	Data       *cloudevents.Event
+	Message    []byte
+	StatusCode int
 }
 
 // CreateCloudEvents ...
