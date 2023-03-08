@@ -27,6 +27,16 @@ type PubSubStore struct {
 	Store map[string]*pubsub.PubSub
 }
 
+// Get ...
+func (ps *PubSubStore) Get(subID string) pubsub.PubSub {
+	ps.Lock()
+	defer ps.Unlock()
+	if s, ok := ps.Store[subID]; ok {
+		return *s
+	}
+	return pubsub.PubSub{}
+}
+
 // Set is a wrapper for setting the value of a key in the underlying map
 func (ps *PubSubStore) Set(key string, val pubsub.PubSub) {
 	ps.Lock()
