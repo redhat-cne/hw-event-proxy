@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	httpTimeout time.Duration = 2 * time.Second
+	httpTimeout = 2 * time.Second
 )
 
 // Rest client to make http request

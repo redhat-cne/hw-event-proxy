@@ -24,7 +24,7 @@ import (
 type PubSubStore struct {
 	sync.RWMutex
 	// PublisherStore stores publishers in a map
-	Store map[string]*pubsub.PubSub
+	Store map[string]*pubsub.PubSub `json:"store" omit:"empty"`
 }
 
 // Get ...

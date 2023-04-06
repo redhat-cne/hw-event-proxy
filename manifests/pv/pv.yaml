@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: cloud-event-proxy-store
 spec:
-  storageClassName: local-storage
+  storageClassName: storage-class-http-events
   capacity:
     storage: 10Mi
   volumeMode: Filesystem
@@ -16,9 +16,7 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: node-role.kubernetes.io/worker
           operator: In
           values:
-          # replace this with the name of the node being used
-          - node1.example.com
-
+          - ""
