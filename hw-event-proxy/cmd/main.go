@@ -175,16 +175,13 @@ func handleHwEvent(bodyBytes []byte) error {
 	log.Tracef("webhook received event %s", bodyBytes)
 	e := createHwEvent()
 	redfishEvent := redfish.Event{}
-	err := json.Unmarshal(bodyBytes, &redfishEvent)
-	if err != nil {
-
+	if err := json.Unmarshal(bodyBytes, &redfishEvent); err != nil {
 		return fmt.Errorf("failed to unmarshal hw event: %v", err)
 	}
 
 	for i, e := range redfishEvent.Events {
 		if e.Message == "" {
-			parsed, err := parseMessage(e)
-			if err == nil {
+			if parsed, err := parseMessage(e); err == nil {
 				redfishEvent.Events[i] = parsed
 			} else {
 				// ignore error
@@ -203,8 +200,7 @@ func handleHwEvent(bodyBytes []byte) error {
 	data.SetVersion(hwEventVersion) //nolint:errcheck
 	data.AppendValues(value)        //nolint:errcheck
 	e.SetData(data)
-	err = publishHwEvent(e)
-	if err != nil {
+	if err := publishHwEvent(e); err != nil {
 		return fmt.Errorf("failed to publish hw event: %v", err)
 	}
 	return nil

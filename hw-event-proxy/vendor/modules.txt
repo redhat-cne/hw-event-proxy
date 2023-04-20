@@ -1,8 +1,8 @@
 # github.com/BurntSushi/toml v0.3.1
 ## explicit
 github.com/BurntSushi/toml
-# github.com/cloudevents/sdk-go/v2 v2.6.0
-## explicit; go 1.14
+# github.com/cloudevents/sdk-go/v2 v2.13.0
+## explicit; go 1.17
 github.com/cloudevents/sdk-go/v2
 github.com/cloudevents/sdk-go/v2/binding
 github.com/cloudevents/sdk-go/v2/binding/format
@@ -20,7 +20,7 @@ github.com/cloudevents/sdk-go/v2/types
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/golang/protobuf v1.5.0
+# github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -42,8 +42,8 @@ github.com/modern-go/reflect2
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/redhat-cne/sdk-go v0.1.1-0.20230307150649-58c5e6727aa1
-## explicit; go 1.17
+# github.com/redhat-cne/sdk-go v0.1.1-0.20230417130643-d8a16493413b
+## explicit; go 1.19
 github.com/redhat-cne/sdk-go/pkg/channel
 github.com/redhat-cne/sdk-go/pkg/event
 github.com/redhat-cne/sdk-go/pkg/event/redfish
@@ -57,7 +57,7 @@ github.com/redhat-cne/sdk-go/v1/pubsub
 # github.com/sirupsen/logrus v1.8.1
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.8.0
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
 # go.uber.org/atomic v1.5.0
@@ -178,8 +178,8 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.27.1
-## explicit; go 1.9
+# google.golang.org/protobuf v1.28.1
+## explicit; go 1.11
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
@@ -210,7 +210,7 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/yaml.v3 v3.0.0
+# gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
 # honnef.co/go/tools v0.0.1-2019.2.3

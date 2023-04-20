@@ -24,7 +24,7 @@ spec:
           args:
             - "--local-api-addr=localhost:9089"
             - "--api-path=/api/ocloudNotifications/v1/"
-            - "--api-addr=localhost:9085"
+            - "--api-addr=localhost:8089"
           env:
             - name: NODE_NAME
               valueFrom:
@@ -43,7 +43,7 @@ spec:
             - "--store-path=/store"
             - "--transport-host=$(TRANSPORT_PROTOCAL)://$(TRANSPORT_SERVICE).$(TRANSPORT_NAMESPACE).svc.cluster.local:$(TRANSPORT_PORT)"
             - "--http-event-publishers=hw-event-publisher-service.$(TRANSPORT_NAMESPACE).svc.cluster.local:$(TRANSPORT_PORT)"
-            - "--api-port=9085"
+            - "--api-port=8089"
           env:
             - name: NODE_NAME
               valueFrom:

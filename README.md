@@ -57,7 +57,7 @@ Response
   "id": "da42fb86-819e-47c5-84a3-5512d5a3c732",
   "resource": "/cluster/node/nodename/redfish/v1/Systems",
   "endpointUri": "http://localhost:9089/event",
-  "uriLocation": "http://localhost:9085/api/ocloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
+  "uriLocation": "http://localhost:8089/api/ocloudNotifications/v1/subscriptions/da42fb86-819e-47c5-84a3-5512d5a3c732"
 }
 ```
 
@@ -79,7 +79,7 @@ func main(){
     // channel for the transport handler subscribed to get and set events
     eventInCh := make(chan *channel.DataChan, 10)
     pubSubInstance = v1pubsub.GetAPIInstance(".")
-    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:9085", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
+    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:8089", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
 
     // create subscription
     pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
@@ -103,7 +103,7 @@ func main(){
     // channel for the transport handler subscribed to get and set events
     eventInCh := make(chan *channel.DataChan, 10)
     pubSubInstance = v1pubsub.GetAPIInstance(".")
-    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:9085", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
+    endpointURL := &types.URI{URL: url.URL{Scheme: "http", Host: "localhost:8089", Path: fmt.Sprintf("%s%s", apiPath, "dummy")}}
 
     // create subscription
     pub, err := pubSubInstance.CreateSubscription(v1pubsub.NewPubSub(endpointURL, resourceAddressHwEvent))
