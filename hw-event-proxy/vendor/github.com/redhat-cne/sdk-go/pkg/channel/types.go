@@ -14,7 +14,7 @@
 
 package channel
 
-//Status specifies status of the event
+// Status specifies status of the event
 type Status int
 
 const (
@@ -28,12 +28,12 @@ const (
 	FAILED
 )
 
-//String represent of status enum
+// String represent of status enum
 func (s Status) String() string {
 	return [...]string{"NEW", "SUCCESS", "DELETE", "FAILED"}[s]
 }
 
-//Type ... specifies type of the event
+// Type ... specifies type of the event
 type Type int
 
 const (
