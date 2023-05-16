@@ -1,3 +1,7 @@
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package analysis
 
 import (
@@ -42,6 +46,7 @@ type Analyzer struct {
 	// RunDespiteErrors allows the driver to invoke
 	// the Run method of this analyzer even on a
 	// package that contains parse or type errors.
+	// The Pass.TypeErrors field may consequently be non-empty.
 	RunDespiteErrors bool
 
 	// Requires is a set of analyzers that must run successfully
@@ -82,12 +87,14 @@ type Pass struct {
 	Analyzer *Analyzer // the identity of the current analyzer
 
 	// syntax and type information
-	Fset       *token.FileSet // file position information
-	Files      []*ast.File    // the abstract syntax tree of each file
-	OtherFiles []string       // names of non-Go files of this package
-	Pkg        *types.Package // type information about the package
-	TypesInfo  *types.Info    // type information about the syntax trees
-	TypesSizes types.Sizes    // function for computing sizes of types
+	Fset         *token.FileSet // file position information
+	Files        []*ast.File    // the abstract syntax tree of each file
+	OtherFiles   []string       // names of non-Go files of this package
+	IgnoredFiles []string       // names of ignored source files in this package
+	Pkg          *types.Package // type information about the package
+	TypesInfo    *types.Info    // type information about the syntax trees
+	TypesSizes   types.Sizes    // function for computing sizes of types
+	TypeErrors   []types.Error  // type errors (only if Analyzer.RunDespiteErrors)
 
 	// Report reports a Diagnostic, a finding about a specific location
 	// in the analyzed source code such as a potential mistake.
@@ -137,6 +144,9 @@ type Pass struct {
 	// in unspecified order.
 	// WARNING: This is an experimental API and may change in the future.
 	AllObjectFacts func() []ObjectFact
+
+	// typeErrors contains types.Errors that are associated with the pkg.
+	typeErrors []types.Error
 
 	/* Further fields may be added in future. */
 	// For example, suggested or applied refactorings.

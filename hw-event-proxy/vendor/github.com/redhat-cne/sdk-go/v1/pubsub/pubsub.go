@@ -17,7 +17,7 @@ package pubsub
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"sync"
 
@@ -296,7 +296,7 @@ func (p *API) GetSubscriptionsFromFile() ([]byte, error) {
 // deleteAllFromFile deletes  publisher and subscription information from the file system
 func deleteAllFromFile(filePath string) error {
 	//open file
-	if err := ioutil.WriteFile(filePath, []byte{}, 0666); err != nil {
+	if err := os.WriteFile(filePath, []byte{}, 0666); err != nil {
 		return err
 	}
 	return nil
@@ -311,7 +311,7 @@ func deleteFromFile(sub pubsub.PubSub, filePath string) error {
 	}
 	defer file.Close()
 	//read file and unmarshall json file to slice of users
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}
@@ -336,7 +336,7 @@ func deleteFromFile(sub pubsub.PubSub, filePath string) error {
 		log.Errorf("error deleting sub %v", err)
 		return err
 	}
-	if err := ioutil.WriteFile(filePath, newBytes, 0666); err != nil {
+	if err := os.WriteFile(filePath, newBytes, 0666); err != nil {
 		return err
 	}
 	return nil
@@ -351,7 +351,7 @@ func loadFromFile(filePath string) (b []byte, err error) {
 	}
 	defer file.Close()
 	//read file and unmarshall json file to slice of users
-	b, err = ioutil.ReadAll(file)
+	b, err = io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +369,7 @@ func writeToFile(sub pubsub.PubSub, filePath string) error {
 	}
 	defer file.Close()
 	//read file and unmarshall json file to slice of users
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}
@@ -386,7 +386,7 @@ func writeToFile(sub pubsub.PubSub, filePath string) error {
 		return err
 	}
 	log.Infof("persisting following contents %s to a file %s\n", string(newBytes), filePath)
-	if err := ioutil.WriteFile(filePath, newBytes, 0666); err != nil {
+	if err := os.WriteFile(filePath, newBytes, 0666); err != nil {
 		return err
 	}
 	return nil

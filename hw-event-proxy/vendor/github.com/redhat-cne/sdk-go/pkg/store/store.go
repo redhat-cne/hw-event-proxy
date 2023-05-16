@@ -24,7 +24,17 @@ import (
 type PubSubStore struct {
 	sync.RWMutex
 	// PublisherStore stores publishers in a map
-	Store map[string]*pubsub.PubSub
+	Store map[string]*pubsub.PubSub `json:"store" omit:"empty"`
+}
+
+// Get ...
+func (ps *PubSubStore) Get(subID string) pubsub.PubSub {
+	ps.Lock()
+	defer ps.Unlock()
+	if s, ok := ps.Store[subID]; ok {
+		return *s
+	}
+	return pubsub.PubSub{}
 }
 
 // Set is a wrapper for setting the value of a key in the underlying map
