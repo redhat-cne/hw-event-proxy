@@ -1,7 +1,6 @@
 package fasthttp
 
 import (
-	"fmt"
 	"net"
 	"sync"
 )
@@ -25,17 +24,16 @@ func (cc *perIPConnCounter) Register(ip uint32) int {
 
 func (cc *perIPConnCounter) Unregister(ip uint32) {
 	cc.lock.Lock()
+	defer cc.lock.Unlock()
 	if cc.m == nil {
-		cc.lock.Unlock()
+		// developer safeguard
 		panic("BUG: perIPConnCounter.Register() wasn't called")
 	}
 	n := cc.m[ip] - 1
 	if n < 0 {
-		cc.lock.Unlock()
-		panic(fmt.Sprintf("BUG: negative per-ip counter=%d for ip=%d", n, ip))
+		n = 0
 	}
 	cc.m[ip] = n
-	cc.lock.Unlock()
 }
 
 type perIPConn struct {
@@ -48,8 +46,10 @@ type perIPConn struct {
 func acquirePerIPConn(conn net.Conn, ip uint32, counter *perIPConnCounter) *perIPConn {
 	v := counter.pool.Get()
 	if v == nil {
-		v = &perIPConn{
+		return &perIPConn{
 			perIPConnCounter: counter,
+			Conn:             conn,
+			ip:               ip,
 		}
 	}
 	c := v.(*perIPConn)

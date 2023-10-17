@@ -37,6 +37,7 @@ import (
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/restclient"
 	"github.com/redhat-cne/hw-event-proxy/hw-event-proxy/util"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	v1event "github.com/redhat-cne/sdk-go/v1/event"
 	v1pubsub "github.com/redhat-cne/sdk-go/v1/pubsub"
@@ -156,7 +157,7 @@ func ackEvent(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func webhook(w http.ResponseWriter, r *http.Request) {
+func webhook(_ http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -210,7 +211,7 @@ func parseMessage(m redfish.EventRecord) (redfish.EventRecord, error) {
 	addr := fmt.Sprintf("localhost:%d", msgParserPort)
 	ctx, cancel := context.WithTimeout(context.Background(), msgParserTimeout)
 	defer cancel()
-	conn, err := grpc.DialContext(ctx, addr, grpc.WithBlock(), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		return redfish.EventRecord{}, err
