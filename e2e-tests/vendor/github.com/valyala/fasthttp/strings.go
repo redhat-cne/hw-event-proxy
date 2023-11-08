@@ -1,8 +1,8 @@
 package fasthttp
 
 var (
-	defaultServerName  = []byte("fasthttp")
-	defaultUserAgent   = []byte("fasthttp")
+	defaultServerName  = "fasthttp"
+	defaultUserAgent   = "fasthttp"
 	defaultContentType = []byte("text/plain; charset=utf-8")
 )
 
@@ -57,6 +57,7 @@ var (
 	strProxyAuthenticate  = []byte(HeaderProxyAuthenticate)
 	strProxyAuthorization = []byte(HeaderProxyAuthorization)
 	strWWWAuthenticate    = []byte(HeaderWWWAuthenticate)
+	strVary               = []byte(HeaderVary)
 
 	strCookieExpires        = []byte("expires")
 	strCookieDomain         = []byte("domain")

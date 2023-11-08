@@ -1,4 +1,4 @@
-FROM quay.io/redhat-cne/openshift-origin-release:golang-1.17
+FROM quay.io/redhat-cne/openshift-origin-release:rhel-8-golang-1.20-openshift-4.15
 
 WORKDIR /
 COPY . .

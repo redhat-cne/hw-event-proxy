@@ -44,7 +44,7 @@ var argsPool = &sync.Pool{
 //
 // Args instance MUST NOT be used from concurrently running goroutines.
 type Args struct {
-	noCopy noCopy //nolint:unused,structcheck
+	noCopy noCopy
 
 	args []argsKV
 	buf  []byte
@@ -63,7 +63,6 @@ func (a *Args) Reset() {
 
 // CopyTo copies all args to dst.
 func (a *Args) CopyTo(dst *Args) {
-	dst.Reset()
 	dst.args = copyArgs(dst.args, a.args)
 }
 
@@ -230,7 +229,7 @@ func (a *Args) SetBytesKV(key, value []byte) {
 
 // SetNoValue sets only 'key' as argument without the '='.
 //
-// Only key in argumemt, like key1&key2
+// Only key in argument, like key1&key2
 func (a *Args) SetNoValue(key string) {
 	a.args = setArg(a.args, key, "", argsNoValue)
 }
@@ -343,7 +342,7 @@ func (a *Args) GetUfloatOrZero(key string) float64 {
 // true is returned for "1", "t", "T", "true", "TRUE", "True", "y", "yes", "Y", "YES", "Yes",
 // otherwise false is returned.
 func (a *Args) GetBool(key string) bool {
-	switch b2s(a.Peek(key)) {
+	switch string(a.Peek(key)) {
 	// Support the same true cases as strconv.ParseBool
 	// See: https://github.com/golang/go/blob/4e1b11e2c9bdb0ddea1141eed487be1a626ff5be/src/strconv/atob.go#L12
 	// and Y and Yes versions.
@@ -371,9 +370,10 @@ func visitArgsKey(args []argsKV, f func(k []byte)) {
 func copyArgs(dst, src []argsKV) []argsKV {
 	if cap(dst) < len(src) {
 		tmp := make([]argsKV, len(src))
+		dstLen := len(dst)
 		dst = dst[:cap(dst)] // copy all of dst.
 		copy(tmp, dst)
-		for i := len(dst); i < len(tmp); i++ {
+		for i := dstLen; i < len(tmp); i++ {
 			// Make sure nothing is nil.
 			tmp[i].key = []byte{}
 			tmp[i].value = []byte{}
@@ -544,13 +544,28 @@ func (s *argsScanner) next(kv *argsKV) bool {
 }
 
 func decodeArgAppend(dst, src []byte) []byte {
-	if bytes.IndexByte(src, '%') < 0 && bytes.IndexByte(src, '+') < 0 {
+	idxPercent := bytes.IndexByte(src, '%')
+	idxPlus := bytes.IndexByte(src, '+')
+	if idxPercent == -1 && idxPlus == -1 {
 		// fast path: src doesn't contain encoded chars
 		return append(dst, src...)
 	}
 
+	idx := 0
+	if idxPercent == -1 {
+		idx = idxPlus
+	} else if idxPlus == -1 {
+		idx = idxPercent
+	} else if idxPercent > idxPlus {
+		idx = idxPlus
+	} else {
+		idx = idxPercent
+	}
+
+	dst = append(dst, src[:idx]...)
+
 	// slow path
-	for i := 0; i < len(src); i++ {
+	for i := idx; i < len(src); i++ {
 		c := src[i]
 		if c == '%' {
 			if i+2 >= len(src) {
@@ -579,13 +594,15 @@ func decodeArgAppend(dst, src []byte) []byte {
 // The function is copy-pasted from decodeArgAppend due to the performance
 // reasons only.
 func decodeArgAppendNoPlus(dst, src []byte) []byte {
-	if bytes.IndexByte(src, '%') < 0 {
+	idx := bytes.IndexByte(src, '%')
+	if idx < 0 {
 		// fast path: src doesn't contain encoded chars
 		return append(dst, src...)
 	}
+	dst = append(dst, src[:idx]...)
 
 	// slow path
-	for i := 0; i < len(src); i++ {
+	for i := idx; i < len(src); i++ {
 		c := src[i]
 		if c == '%' {
 			if i+2 >= len(src) {
@@ -602,6 +619,24 @@ func decodeArgAppendNoPlus(dst, src []byte) []byte {
 		} else {
 			dst = append(dst, c)
 		}
+	}
+	return dst
+}
+
+func peekAllArgBytesToDst(dst [][]byte, h []argsKV, k []byte) [][]byte {
+	for i, n := 0, len(h); i < n; i++ {
+		kv := &h[i]
+		if bytes.Equal(kv.key, k) {
+			dst = append(dst, kv.value)
+		}
+	}
+	return dst
+}
+
+func peekArgsKeys(dst [][]byte, h []argsKV) [][]byte {
+	for i, n := 0, len(h); i < n; i++ {
+		kv := &h[i]
+		dst = append(dst, kv.key)
 	}
 	return dst
 }

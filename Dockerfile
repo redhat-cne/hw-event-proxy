@@ -1,6 +1,6 @@
 # Changes to this file are not auto-propagated to the downstream build automation. We need to make the changes manually in the midstream repo located here:
 # https://gitlab.cee.redhat.com/cpaas-midstream/telco-5g-ran/baremetal-hardware-event-proxy/-/blob/rhaos-4.13-rhel-8/distgit/containers/baremetal-hardware-event-proxy/Dockerfile.in
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.19-openshift-4.14 AS go-builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.15 AS go-builder
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1
 ENV COMMON_GO_ARGS=-race
@@ -13,7 +13,7 @@ COPY ./hw-event-proxy ./hw-event-proxy
 RUN /scripts/build-go.sh
 
 # Install dependencies for message-parser
-FROM registry.access.redhat.com/ubi8/python-39
+FROM registry.access.redhat.com/ubi9/python-39
 COPY /scripts/entrypoint.sh /
 WORKDIR /message-parser
 COPY ./message-parser .
