@@ -20,7 +20,7 @@ protobuf==3.20.2
     # via -r requirements.in
 python-dateutil==2.8.2
     # via sushy
-requests==2.31.0
+requests==2.32.2
     # via sushy
 six==1.16.0
     # via python-dateutil
