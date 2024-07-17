@@ -10,7 +10,7 @@ charset-normalizer==2.0.12
     # via requests
 grpcio==1.53.0
     # via -r requirements.in
-idna==3.3
+idna==3.7
     # via requests
 pbr==5.8.1
     # via
