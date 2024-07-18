@@ -1,6 +1,6 @@
 # Changes to this file are not auto-propagated to the downstream build automation. We need to make the changes manually in the midstream repo located here:
 # https://gitlab.cee.redhat.com/cpaas-midstream/telco-5g-ran/baremetal-hardware-event-proxy/-/blob/rhaos-4.13-rhel-8/distgit/containers/baremetal-hardware-event-proxy/Dockerfile.in
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.15 AS go-builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.20-openshift-4.15 AS go-builder
 ENV GO111MODULE=off
 ENV CGO_ENABLED=1
 ENV COMMON_GO_ARGS=-race
