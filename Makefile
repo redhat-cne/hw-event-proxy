@@ -4,8 +4,8 @@
 VERSION ?=latest
 
 PROXY_IMG ?= quay.io/redhat-cne/hw-event-proxy:$(VERSION)
-SIDECAR_IMG ?= quay.io/redhat-cne/cloud-event-proxy:${VERSION}
-CONSUMER_IMG ?= quay.io/redhat-cne/cloud-event-consumer:$(VERSION)
+SIDECAR_IMG ?= quay.io/redhat-cne/cloud-event-proxy:release-4.14
+CONSUMER_IMG ?= quay.io/redhat-cne/cloud-event-consumer:release-4.14
 
 # For performance test with HTTP transport
 NUM_CONSUMER ?=20
@@ -22,6 +22,8 @@ ifeq (,$(shell go env GOBIN))
 else
   GOBIN=$(shell go env GOBIN)
 endif
+
+OS := $(shell uname -s)
 
 kustomize:
 ifeq (, $(shell which kustomize))
@@ -47,9 +49,15 @@ check-env:
 
 # Configure redfish credentials and BMC ip from environment variables
 redfish-config:
+ifeq ($(OS), Darwin)
+	@sed -i "" -e "s/username=.*/username=${REDFISH_USERNAME}/" ./manifests/proxy/kustomization.yaml
+	@sed -i "" -e "s/password=.*/password=${REDFISH_PASSWORD}/" ./manifests/proxy/kustomization.yaml
+	@sed -i "" -e "s/hostaddr=.*/hostaddr=${REDFISH_HOSTADDR}/" ./manifests/proxy/kustomization.yaml
+else
 	@sed -i -e "s/username=.*/username=${REDFISH_USERNAME}/" ./manifests/proxy/kustomization.yaml
 	@sed -i -e "s/password=.*/password=${REDFISH_PASSWORD}/" ./manifests/proxy/kustomization.yaml
 	@sed -i -e "s/hostaddr=.*/hostaddr=${REDFISH_HOSTADDR}/" ./manifests/proxy/kustomization.yaml
+endif
 
 # label the first Ready worker node as local
 label-node:

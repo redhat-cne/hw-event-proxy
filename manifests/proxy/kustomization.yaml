@@ -12,15 +12,16 @@ replicas:
   name: hw-event-proxy
 secretGenerator:
 - literals:
+  # replace these with real info from your baremetal device
   - username=root
   - password=calvin
-  - hostaddr=10.16.230.6
+  - hostaddr=192.0.2.1
   name: redfish-basic-auth
   type: Opaque
 images:
 - name: cloud-event-sidecar
   newName: quay.io/redhat-cne/cloud-event-proxy
-  newTag: latest
+  newTag: release-4.14
 - name: hw-event-proxy
   newName: quay.io/redhat-cne/hw-event-proxy
   newTag: latest
