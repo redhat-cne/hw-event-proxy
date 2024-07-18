@@ -227,14 +227,16 @@ fi
 
 # number of additional consumers need to deploy/undeploy
 NUM_OF_CONSUMER=`expr $n_consumer - 1`
-for i in `seq $NUM_OF_CONSUMER`
-do
-  wait_for_resource deployment/consumer-$i available 60s >/dev/null 2>&1
-  if [[ $job_result -eq 1 ]]; then
-      echo "Consumer-$i pod is not available"
-      exit 1
-  fi
-done
+if [[ $NUM_OF_CONSUMER -gt 0 ]]; then
+  for i in `seq $NUM_OF_CONSUMER`
+  do
+    wait_for_resource deployment/consumer-$i available 60s >/dev/null 2>&1
+    if [[ $job_result -eq 1 ]]; then
+        echo "Consumer-$i pod is not available"
+        exit 1
+    fi
+  done
+fi
 
 # uncomment this when debugging image issues in a ci job
 # check_images

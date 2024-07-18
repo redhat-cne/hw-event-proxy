@@ -9,7 +9,7 @@ resources:
 images:
 - name: cloud-event-consumer
   newName: quay.io/redhat-cne/cloud-event-consumer
-  newTag: latest
+  newTag: release-4.14
 - name: cloud-event-sidecar
   newName: quay.io/redhat-cne/cloud-event-proxy
-  newTag: latest
+  newTag: release-4.14
