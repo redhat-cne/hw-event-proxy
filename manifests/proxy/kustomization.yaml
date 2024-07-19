@@ -10,9 +10,9 @@ resources:
 replicas:
 - count: 1
   name: hw-event-proxy
+  # replace these with real info from your baremetal device
 secretGenerator:
 - literals:
-  # replace these with real info from your baremetal device
   - username=root
   - password=calvin
   - hostaddr=192.0.2.1
@@ -21,7 +21,7 @@ secretGenerator:
 images:
 - name: cloud-event-sidecar
   newName: quay.io/redhat-cne/cloud-event-proxy
-  newTag: release-4.14
+  newTag: release-4.15
 - name: hw-event-proxy
   newName: quay.io/redhat-cne/hw-event-proxy
   newTag: latest

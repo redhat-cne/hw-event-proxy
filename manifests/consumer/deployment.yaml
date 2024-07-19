@@ -25,11 +25,16 @@ spec:
             - "--local-api-addr=localhost:9089"
             - "--api-path=/api/ocloudNotifications/v1/"
             - "--api-addr=localhost:8089"
+            - "--http-event-publishers=hw-event-publisher-service.$(TRANSPORT_NAMESPACE).svc.cluster.local:$(TRANSPORT_PORT)"
           env:
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: TRANSPORT_NAMESPACE
+              value: "openshift-bare-metal-events"
+            - name: TRANSPORT_PORT
+              value: "9043"
             - name: CONSUMER_TYPE
               value: "HW"
             - name: LOG_LEVEL

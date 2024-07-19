@@ -4,8 +4,8 @@
 VERSION ?=latest
 
 PROXY_IMG ?= quay.io/redhat-cne/hw-event-proxy:$(VERSION)
-SIDECAR_IMG ?= quay.io/redhat-cne/cloud-event-proxy:release-4.14
-CONSUMER_IMG ?= quay.io/redhat-cne/cloud-event-consumer:release-4.14
+SIDECAR_IMG ?= quay.io/redhat-cne/cloud-event-proxy:release-4.15
+CONSUMER_IMG ?= quay.io/redhat-cne/cloud-event-consumer:release-4.15
 
 # For performance test with HTTP transport
 NUM_CONSUMER ?=20
